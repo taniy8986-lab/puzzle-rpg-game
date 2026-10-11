@@ -1,0 +1,5 @@
+# 受け取ったキャラクター画像から作った素材と、書き出し結果（公開リポジトリには置かない）
+assets/chara/
+assets/chara_o/
+build/
+__pycache__/
