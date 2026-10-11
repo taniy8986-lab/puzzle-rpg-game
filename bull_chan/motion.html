@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ブルちゃん モーショングラフィックス</title>
+<style>
+  @font-face { font-family: "Zen"; src: url(assets/fonts/ZenMaruGothic-700.ttf); font-weight: 700; }
+  @font-face { font-family: "Zen"; src: url(assets/fonts/ZenMaruGothic-900.ttf); font-weight: 900; }
+  @font-face { font-family: "MRound"; src: url(assets/fonts/MPLUSRounded1c-500.ttf); font-weight: 500; }
+  @font-face { font-family: "MRound"; src: url(assets/fonts/MPLUSRounded1c-800.ttf); font-weight: 800; }
+
+  :root {
+    --navy: #1d3766;
+    --navy-deep: #122650;
+    --teal: #27b4c2;
+    --paper: #f4f8fc;
+  }
+  html, body { margin: 0; background: #000; }
+  #stage {
+    position: relative; width: 1920px; height: 1080px; overflow: hidden;
+    font-family: "MRound", sans-serif; font-weight: 800; color: var(--navy);
+    background: var(--paper);
+  }
+  #stage div, #stage img, #stage span, #stage svg { box-sizing: border-box; }
+  .scene { position: absolute; inset: 0; overflow: hidden; display: none; }
+  .a { position: absolute; transform-origin: 50% 50%; will-change: transform, opacity; }
+  .zen { font-family: "Zen", sans-serif; }
+  .mask { overflow: hidden; white-space: nowrap; }
+  .ch { display: inline-block; will-change: transform, opacity; }
+  .sticker {
+    filter: drop-shadow(5px 0 0 #fff) drop-shadow(-5px 0 0 #fff)
+            drop-shadow(0 5px 0 #fff) drop-shadow(0 -5px 0 #fff)
+            drop-shadow(0 22px 26px rgba(8, 20, 48, .35));
+  }
+  .pill {
+    display: inline-block; background: var(--navy); color: #fff; border-radius: 999px;
+    font-family: "Zen"; font-weight: 700; white-space: nowrap;
+  }
+  .card {
+    background: #fff; border-radius: 22px;
+    box-shadow: 0 14px 34px rgba(29, 55, 102, .16), 0 2px 6px rgba(29, 55, 102, .08);
+  }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+/* ---------- 共通ユーティリティ ---------- */
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, k) => a + (b - a) * k;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const ease = {
+  out: k => 1 - Math.pow(1 - k, 3),
+  quint: k => 1 - Math.pow(1 - k, 5),
+  inOut: k => (k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2),
+  in: k => k * k * k,
+  back: k => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2); },
+  backSoft: k => { const c1 = 1.1, c3 = c1 + 1; return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2); },
+};
+const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const mixColor = (a, b, k) => {
+  const A = hex(a), B = hex(b);
+  return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], k))).join(',')})`;
+};
+
+const stage = document.getElementById('stage');
+function mk(parent, style = {}, cls = 'a', html = '') {
+  const e = document.createElement('div');
+  if (cls) e.className = cls;
+  Object.assign(e.style, style);
+  if (html) e.innerHTML = html;
+  parent.appendChild(e);
+  return e;
+}
+function pic(parent, src, style = {}, cls = 'a') {
+  const e = document.createElement('img');
+  e.src = src; e.className = cls; e.decoding = 'sync';
+  Object.assign(e.style, style);
+  parent.appendChild(e);
+  return e;
+}
+function T(e, { x = 0, y = 0, s = 1, sx = null, sy = null, r = 0, o = 1 } = {}) {
+  e.style.transform = `translate(${x}px,${y}px) rotate(${r}deg) scale(${sx ?? s},${sy ?? s})`;
+  e.style.opacity = o;
+}
+// 1 文字ずつ動かせるテキスト
+function chars(parent, text, style = {}, cls = 'a mask') {
+  const box = mk(parent, style, cls);
+  const spans = [...text].map(c => {
+    const s = document.createElement('span');
+    s.className = 'ch'; s.textContent = c;
+    box.appendChild(s);
+    return s;
+  });
+  return { box, spans };
+}
+const TRI = (color, sw = 11) =>
+  `<svg viewBox="0 0 100 100" width="100%" height="100%"><path d="M13 20 L87 20 L50 85 Z" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/></svg>`;
+const IMG = n => `assets/chara/${n}.png`;
+
+/* ---------- タイムライン ---------- */
+// シーン i は CUT[i]〜CUT[i+1]。切り替えはストライプのワイプで隠す
+const CUT = [0, 3, 7, 10, 14.5, 17, 20];
+const WIPE = 0.9;
+const scenes = CUT.slice(0, -1).map((_, i) => mk(stage, {}, 'scene'));
+scenes.forEach((s, i) => (s.id = `s${i + 1}`));
+const [S1, S2, S3, S4, S5, S6] = scenes;
+
+/* ======== シーン 1：タイトル ======== */
+S1.style.background = 'radial-gradient(circle at 72% 42%, #2b4f8c 0%, #1d3766 46%, #10224a 100%)';
+mk(S1, { inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,.07) 2px, transparent 2.6px)', backgroundSize: '38px 38px' });
+
+function stripePair(parent, top, color = '#fff', w = 3200, h = 18, gap = 20) {
+  const g = mk(parent, { left: '-640px', top: `${top}px`, width: `${w}px`, height: `${h * 2 + gap}px` });
+  mk(g, { left: 0, top: 0, width: '100%', height: `${h}px`, background: color, borderRadius: `${h}px` });
+  mk(g, { left: 0, top: `${h + gap}px`, width: '100%', height: `${h}px`, background: color, borderRadius: `${h}px` });
+  return g;
+}
+const s1StripeA = stripePair(S1, 880);
+const s1StripeB = stripePair(S1, 120, 'rgba(255,255,255,.35)', 3200, 10, 14);
+
+const s1Glow = mk(S1, { left: '1180px', top: '170px', width: '760px', height: '760px', borderRadius: '50%',
+  background: 'radial-gradient(circle, rgba(39,180,194,.38) 0%, rgba(39,180,194,0) 68%)' });
+const s1Ring = mk(S1, { left: '1290px', top: '210px', width: '540px', height: '540px', borderRadius: '50%',
+  border: '6px solid rgba(39,180,194,.55)' });
+
+const FLOATERS = [
+  { x: 120, y: 120, s: 90, c: '#27b4c2', r: 10, d: .30, sp: 18 },
+  { x: 960, y: 90, s: 60, c: '#ffffff', r: -20, d: .42, sp: -26 },
+  { x: 1120, y: 760, s: 110, c: '#27b4c2', r: 25, d: .50, sp: 14 },
+  { x: 1760, y: 140, s: 70, c: '#ffffff', r: 5, d: .38, sp: -20 },
+  { x: 1790, y: 820, s: 96, c: '#27b4c2', r: -15, d: .55, sp: 22 },
+  { x: 640, y: 860, s: 54, c: '#ffffff', r: 40, d: .60, sp: -30 },
+  { x: 80, y: 690, s: 64, c: '#ffffff', r: -30, d: .47, sp: 24 },
+  { x: 1000, y: 470, s: 44, c: '#27b4c2', r: 15, d: .66, sp: -36 },
+];
+function makeFloaters(parent, list) {
+  return list.map(f => ({ ...f, el: mk(parent, { left: `${f.x}px`, top: `${f.y}px`, width: `${f.s}px`, height: `${f.s}px` }, 'a', TRI(f.c, 9)) }));
+}
+function drawFloaters(arr, t, t0) {
+  arr.forEach((f, i) => {
+    const k = ease.back(prog(t, t0 + f.d, t0 + f.d + .6));
+    const drift = Math.sin((t + i) * 1.3) * 10;
+    T(f.el, { y: drift - (t - t0) * 12, s: k, r: f.r + (t - t0) * f.sp, o: clamp(k) * .9 });
+  });
+}
+const s1Floaters = makeFloaters(S1, FLOATERS);
+
+const s1Front = pic(S1, IMG('front'), { left: '1420px', top: '150px', height: '880px' }, 'a sticker');
+
+const s1En = mk(S1, { left: '166px', top: '258px', fontSize: '26px', letterSpacing: '.5em', color: '#27b4c2', whiteSpace: 'nowrap' }, 'a', 'CHARACTER&nbsp;EMOTION&nbsp;SHEET');
+const s1Title = chars(S1, 'ブルちゃん', {
+  left: '140px', top: '300px', fontSize: '232px', lineHeight: '1.25', color: '#fff', fontWeight: 900,
+  textShadow: '0 12px 0 #27b4c2', padding: '0 20px 30px', overflow: 'visible',
+}, 'a zen');
+const s1Ticks = [0, 1, 2].map(i => mk(S1, {
+  left: '150px', top: '360px', width: '14px', height: '64px', borderRadius: '8px', background: '#27b4c2', transformOrigin: '50% 160%',
+}));
+const s1Ticks2 = [0, 1, 2].map(i => mk(S1, {
+  left: '1110px', top: '360px', width: '14px', height: '64px', borderRadius: '8px', background: '#27b4c2', transformOrigin: '50% 160%',
+}));
+const s1SubMask = mk(S1, { left: '166px', top: '628px', height: '86px', width: '1000px' }, 'a mask');
+const s1Sub = mk(s1SubMask, { left: 0, top: 0, fontSize: '60px', color: '#fff', fontWeight: 700, whiteSpace: 'nowrap' }, 'a zen', '着ぐるみを着る前・感情追加版');
+const s1Line = mk(S1, { left: '166px', top: '722px', width: '830px', height: '7px', borderRadius: '4px', background: '#27b4c2', transformOrigin: '0 50%' });
+
+function drawS1(t) {
+  // ストライプがスッと走る
+  const a = ease.quint(prog(t, .05, 1.0));
+  T(s1StripeA, { x: lerp(-3000, 0, a), y: 0, r: -8 });
+  const b = ease.quint(prog(t, .25, 1.2));
+  T(s1StripeB, { x: lerp(3000, 0, b), r: -8, o: .9 });
+  drawFloaters(s1Floaters, t, 0);
+
+  const g = ease.out(prog(t, .5, 1.4));
+  T(s1Glow, { s: lerp(.4, 1, g) + Math.sin(t * 2) * .02, o: g });
+  T(s1Ring, { s: lerp(.6, 1, ease.back(prog(t, .7, 1.4))), r: t * 20, o: g });
+  const f = ease.quint(prog(t, .8, 1.7));
+  T(s1Front, { y: lerp(380, 0, f) + Math.sin(t * 2.4) * 6, o: clamp(f * 2) });
+
+  const e = ease.out(prog(t, .35, 1.0));
+  T(s1En, { x: lerp(-40, 0, e), o: e });
+  s1Title.spans.forEach((sp, i) => {
+    const k = prog(t, .55 + i * .08, 1.15 + i * .08);
+    T(sp, { y: lerp(-140, 0, ease.back(k)), s: lerp(.3, 1, ease.back(k)), r: lerp(-18, 0, ease.out(k)), o: clamp(k * 3) });
+  });
+  const tk = ease.back(prog(t, 1.25, 1.65));
+  s1Ticks.forEach((el, i) => T(el, { x: -50 + i * 6, y: -10 + i * 30, r: -55 + i * 35, sy: tk, sx: 1, o: clamp(tk * 2) }));
+  s1Ticks2.forEach((el, i) => T(el, { x: 30 - i * 6, y: -10 + i * 30, r: 55 - i * 35, sy: tk, sx: 1, o: clamp(tk * 2) }));
+  const sub = ease.quint(prog(t, 1.3, 1.9));
+  T(s1Sub, { y: lerp(90, 0, sub) });
+  T(s1Line, { sx: ease.inOut(prog(t, 1.45, 2.1)), sy: 1 });
+}
+
+/* ======== シーン 2：三面図 ======== */
+S2.style.background = '#f4f8fc';
+mk(S2, { inset: 0, backgroundImage: 'linear-gradient(rgba(29,55,102,.06) 2px, transparent 2px), linear-gradient(90deg, rgba(29,55,102,.06) 2px, transparent 2px)', backgroundSize: '60px 60px' });
+const s2Big = mk(S2, { left: '980px', top: '760px', fontSize: '300px', fontWeight: 900, color: 'rgba(29,55,102,.05)', whiteSpace: 'nowrap', lineHeight: 1 }, 'a zen', 'PROFILE');
+const s2Chip = mk(S2, { left: '110px', top: '66px', fontSize: '34px', padding: '8px 30px' }, 'a pill', '全身・三面図');
+const s2Head = mk(S2, { left: '112px', top: '124px', fontSize: '58px', fontWeight: 900, letterSpacing: '.06em', whiteSpace: 'nowrap' }, 'a zen', 'TURNAROUND');
+const s2Bar = mk(S2, { left: '0', top: '0', width: '22px', height: '100%', background: '#27b4c2', transformOrigin: '50% 0' });
+
+const FIG = [
+  { n: 'front', label: '正面', cx: 340 },
+  { n: 'side', label: '横', cx: 660 },
+  { n: 'back', label: '後ろ', cx: 980 },
+];
+const FIG_H = 730, FIG_TOP = 236;
+const s2Figs = FIG.map((f, i) => {
+  const w = { front: 435, side: 336, back: 480 }[f.n] / 1401 * FIG_H;
+  const floor = mk(S2, { left: `${f.cx - 150}px`, top: `${FIG_TOP + FIG_H - 26}px`, width: '300px', height: '46px', borderRadius: '50%',
+    background: 'radial-gradient(ellipse, rgba(29,55,102,.22) 0%, rgba(29,55,102,0) 70%)' });
+  const img = pic(S2, IMG(f.n), { left: `${f.cx - w / 2}px`, top: `${FIG_TOP}px`, height: `${FIG_H}px`, transformOrigin: '50% 100%' });
+  const lab = mk(S2, { left: `${f.cx - 70}px`, top: `${FIG_TOP + FIG_H + 34}px`, width: '140px', textAlign: 'center', fontSize: '30px', padding: '6px 0' }, 'a pill', f.label);
+  return { floor, img, lab };
+});
+// 回転を示す矢印
+const s2Arrow = mk(S2, { left: '330px', top: '205px', width: '660px', height: '40px' }, 'a',
+  `<svg viewBox="0 0 660 40" width="660" height="40"><path id="arw" d="M10 30 Q330 -12 640 30" fill="none" stroke="#27b4c2" stroke-width="5" stroke-linecap="round" stroke-dasharray="720" stroke-dashoffset="720"/><path id="arwh" d="M622 14 L644 31 L618 38" fill="none" stroke="#27b4c2" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0"/></svg>`);
+
+const s2Card = mk(S2, { left: '1210px', top: '214px', width: '620px', height: '760px', transformOrigin: '50% 0' }, 'a card');
+mk(s2Card, { left: '44px', top: '40px', fontSize: '24px', letterSpacing: '.4em', color: '#27b4c2' }, 'a', 'PROFILE&nbsp;DATA');
+mk(s2Card, { left: '44px', top: '84px', width: '532px', height: '3px', background: '#e3ecf6' });
+const ROWS = [
+  ['髪型', 'ふんわりショートボブ', '#dbe9fb'],
+  ['チャーム', '三角のヘアピン', '#c9f0ee'],
+  ['服装', '紺のジャージ上下', '#dbe2f5'],
+  ['足元', '白いスニーカー', '#eef1f6'],
+  ['いま', '着ぐるみを着る前', '#ffd6e2'],
+];
+const s2Rows = ROWS.map(([k, v, c], i) => {
+  const row = mk(s2Card, { left: '44px', top: `${120 + i * 124}px`, width: '540px', height: '108px' });
+  mk(row, { left: 0, top: '10px', width: '34px', height: '34px' }, 'a', TRI('#27b4c2', 13));
+  mk(row, { left: '50px', top: '6px', fontSize: '22px', padding: '4px 16px', borderRadius: '999px', background: c, color: '#1d3766', whiteSpace: 'nowrap' }, 'a', k);
+  mk(row, { left: '50px', top: '48px', fontSize: '40px', fontWeight: 700, whiteSpace: 'nowrap' }, 'a zen', v);
+  return row;
+});
+
+function drawS2(t) {
+  const L = t - CUT[1];
+  const cam = lerp(1, 1.035, ease.inOut(prog(L, 0, 4.2)));
+  S2.style.transform = `scale(${cam})`;
+  T(s2Big, { x: -L * 40, o: 1 });
+  T(s2Bar, { sy: ease.quint(prog(L, .15, .8)) });
+  const h = ease.quint(prog(L, .25, .85));
+  T(s2Chip, { x: lerp(-60, 0, h), o: h });
+  T(s2Head, { x: lerp(-60, 0, ease.quint(prog(L, .33, .95))), o: ease.out(prog(L, .33, .95)) });
+
+  s2Figs.forEach((f, i) => {
+    const k = prog(L, .35 + i * .16, 1.15 + i * .16);
+    const bob = Math.sin(t * 2.2 + i * 1.3) * 4;
+    T(f.img, { y: lerp(160, 0, ease.quint(k)) + bob, sy: lerp(.85, 1, ease.backSoft(k)), sx: 1, o: clamp(k * 2.5) });
+    T(f.floor, { s: lerp(.2, 1, ease.out(k)) * (1 - bob * .01), o: ease.out(k) });
+    const lk = ease.back(prog(L, .8 + i * .16, 1.3 + i * .16));
+    T(f.lab, { s: lk, o: clamp(lk * 2) });
+  });
+  const ak = ease.inOut(prog(L, 1.3, 2.1));
+  document.getElementById('arw').setAttribute('stroke-dashoffset', 720 * (1 - ak));
+  document.getElementById('arwh').setAttribute('opacity', prog(L, 2.0, 2.2));
+
+  const c = ease.quint(prog(L, .45, 1.1));
+  T(s2Card, { y: lerp(40, 0, c), sy: lerp(.6, 1, c), sx: 1, o: c });
+  s2Rows.forEach((r, i) => {
+    const k = ease.quint(prog(L, .9 + i * .12, 1.5 + i * .12));
+    T(r, { x: lerp(90, 0, k), o: k });
+  });
+}
+
+/* ======== シーン 3：12 表情 ======== */
+S3.style.background = 'linear-gradient(160deg, #f6fafd 0%, #e8f1fa 100%)';
+mk(S3, { inset: 0, backgroundImage: 'repeating-linear-gradient(-35deg, rgba(29,55,102,.035) 0 26px, transparent 26px 60px)' });
+const s3Chip = mk(S3, { left: '104px', top: '58px', fontSize: '34px', padding: '8px 30px' }, 'a pill', '表情');
+const s3Head = mk(S3, { left: '106px', top: '116px', fontSize: '58px', fontWeight: 900, letterSpacing: '.06em', whiteSpace: 'nowrap' }, 'a zen', '12 EXPRESSIONS');
+const s3Count = mk(S3, { left: '1500px', top: '60px', width: '316px', textAlign: 'right', fontSize: '150px', fontWeight: 900, color: 'rgba(39,180,194,.22)', lineHeight: 1 }, 'a zen', '12');
+
+const FACES = [
+  ['normal', 'ふつう', '#dbe9fb'], ['smile', '笑顔', '#ffe9a8'], ['shy', '照れ', '#ffd6e2'], ['resolve', '決意', '#c9f0ee'],
+  ['anxious', '不安', '#dbe2f5'], ['holdback', '泣くのを我慢', '#d6e6fa'], ['tears', '涙', '#cfe3fb'], ['wail', '号泣', '#ffd2dc'],
+  ['despair', '絶望', '#e2d9f5'], ['dazed', '呆然', '#e1ecf7'], ['scared', '怯え', '#d9e6f7'], ['frustrated', '悔し涙', '#e6d8f2'],
+];
+const CW = 262, CH = 350, GAP = 28, GX = (1920 - (CW * 6 + GAP * 5)) / 2, GY = 232;
+const s3Cards = FACES.map(([n, label, col], i) => {
+  const cx = GX + (i % 6) * (CW + GAP), cy = GY + Math.floor(i / 6) * (CH + 32);
+  const card = mk(S3, { left: `${cx}px`, top: `${cy}px`, width: `${CW}px`, height: `${CH}px`, overflow: 'hidden' }, 'a card');
+  const im = pic(card, IMG(`face_${n}`), { left: '10px', top: '10px', width: `${CW - 20}px`, height: `${(CW - 20) * 222 / 202}px`, borderRadius: '14px' });
+  mk(card, { left: 0, top: `${CH - 64}px`, width: '100%', textAlign: 'center' }, 'a',
+    `<span style="display:inline-block;background:${col};border-radius:999px;padding:4px 22px;font-size:26px;font-family:Zen;font-weight:700;white-space:nowrap">${label}</span>`);
+  const shine = mk(card, { left: '-60%', top: '-20%', width: '22%', height: '140%', background: 'linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.5), rgba(255,255,255,0))' });
+  return { card, shine };
+});
+
+function drawS3(t) {
+  const L = t - CUT[2];
+  S3.style.transform = `scale(${lerp(1, 1.03, ease.inOut(prog(L, 0, 3)))})`;
+  const h = ease.quint(prog(L, .2, .8));
+  T(s3Chip, { x: lerp(-60, 0, h), o: h });
+  T(s3Head, { x: lerp(-60, 0, ease.quint(prog(L, .28, .88))), o: ease.out(prog(L, .28, .88)) });
+  T(s3Count, { y: lerp(40, 0, ease.quint(prog(L, .4, 1))), o: ease.out(prog(L, .4, 1)) });
+  s3Cards.forEach(({ card, shine }, i) => {
+    // 対角線順にポンポン出す
+    const order = (i % 6) + Math.floor(i / 6) * 1.5;
+    const k = prog(L, .3 + order * .085, .85 + order * .085);
+    const wave = Math.sin(Math.PI * prog(L, 1.75 + order * .06, 2.15 + order * .06)) * 16;
+    T(card, { y: lerp(120, 0, ease.quint(k)) - wave, s: lerp(.6, 1, ease.back(k)), r: lerp(i % 2 ? 9 : -9, 0, ease.out(k)), o: clamp(k * 2.5) });
+    const sh = prog(L, 1.8 + order * .06, 2.35 + order * .06);
+    T(shine, { x: lerp(0, CW * 2.4, ease.inOut(sh)), r: 18, o: Math.sin(Math.PI * sh) });
+  });
+}
+
+/* ======== シーン 4：こころの移り変わり ======== */
+const FLOW = [
+  { n: 'smile', jp: '笑顔', en: 'SMILE', line: 'いつもの、とびきりの笑顔。', bg: '#fff3d2', acc: '#f4b53f' },
+  { n: 'anxious', jp: '不安', en: 'ANXIETY', line: 'ちょっとだけ、胸がざわざわ。', bg: '#e6ecf8', acc: '#7d93c4' },
+  { n: 'holdback', jp: '泣くのを我慢', en: 'HOLDING BACK', line: 'ぐっと、こらえて。', bg: '#dbe7f6', acc: '#5b86c4' },
+  { n: 'wail', jp: '号泣', en: 'CRYING', line: 'こらえきれずに、あふれ出す。', bg: '#d4ddf0', acc: '#e0708d' },
+  { n: 'frustrated', jp: '悔し涙', en: 'FRUSTRATION', line: 'くやしくて、くやしくて。', bg: '#e3dbf2', acc: '#8f6cc4' },
+  { n: 'resolve', jp: '決意', en: 'RESOLVE', line: '――でも、もう一回。', bg: '#d4f2ef', acc: '#1fa3b2' },
+];
+const FS = [10.0, 10.9, 11.62, 12.34, 13.06, 13.78];
+const s4Blob = mk(S4, { left: '150px', top: '120px', width: '820px', height: '820px', borderRadius: '50%' });
+const s4Tri = mk(S4, { left: '200px', top: '170px', width: '720px', height: '720px', opacity: .5 }, 'a', TRI('#ffffff', 5));
+const s4Chip = mk(S4, { left: '104px', top: '58px', fontSize: '30px', padding: '8px 28px' }, 'a pill', 'こころの移り変わり');
+const s4Counter = mk(S4, { left: '1500px', top: '62px', width: '320px', textAlign: 'right', fontSize: '44px', letterSpacing: '.1em', whiteSpace: 'nowrap' }, 'a', '');
+const s4Cards = FLOW.map(f => {
+  const card = mk(S4, { left: '310px', top: '196px', width: '500px', height: '560px', padding: '16px', overflow: 'hidden' }, 'a card');
+  pic(card, IMG(`face_${f.n}`), { left: '16px', top: '16px', width: '468px', height: `${468 * 222 / 202}px`, borderRadius: '14px' });
+  return card;
+});
+const s4Texts = FLOW.map(f => {
+  const g = mk(S4, { left: '1000px', top: '0', width: '880px', height: '1080px' });
+  const en = mk(g, { left: '6px', top: '312px', fontSize: '30px', letterSpacing: '.45em', color: f.acc, whiteSpace: 'nowrap' }, 'a', f.en);
+  const big = chars(g, f.jp, { left: 0, top: '352px', fontSize: f.jp.length > 3 ? '124px' : '170px', fontWeight: 900, lineHeight: '1.3', color: '#1d3766', paddingRight: '20px' }, 'a zen mask');
+  const bar = mk(g, { left: '6px', top: '600px', width: '120px', height: '10px', borderRadius: '5px', background: f.acc, transformOrigin: '0 50%' });
+  const lm = mk(g, { left: '6px', top: '640px', width: '880px', height: '72px' }, 'a mask');
+  const line = mk(lm, { left: 0, top: 0, fontSize: '46px', fontWeight: 700, whiteSpace: 'nowrap' }, 'a zen', f.line);
+  return { g, en, big, bar, line };
+});
+// 下の進行バー
+const NODE_X = FLOW.map((_, i) => 380 + i * 232);
+const s4Track = mk(S4, { left: `${NODE_X[0]}px`, top: '983px', width: `${NODE_X[5] - NODE_X[0]}px`, height: '6px', borderRadius: '3px', background: 'rgba(29,55,102,.15)' });
+const s4Fill = mk(S4, { left: `${NODE_X[0]}px`, top: '983px', width: `${NODE_X[5] - NODE_X[0]}px`, height: '6px', borderRadius: '3px', background: '#1d3766', transformOrigin: '0 50%' });
+const s4Nodes = FLOW.map((f, i) => {
+  const n = mk(S4, { left: `${NODE_X[i] - 13}px`, top: '973px', width: '26px', height: '26px', borderRadius: '50%', border: '5px solid #1d3766', background: '#fff' });
+  const l = mk(S4, { left: `${NODE_X[i] - 110}px`, top: '1012px', width: '220px', textAlign: 'center', fontSize: '22px', fontFamily: 'Zen', fontWeight: 700, whiteSpace: 'nowrap' }, 'a', f.jp);
+  return { n, l };
+});
+
+function drawS4(t) {
+  // 背景色は感情ごとにゆっくり移る
+  let idx = 0;
+  FS.forEach((s, i) => { if (t >= s) idx = i; });
+  const ck = ease.inOut(prog(t, FS[idx], FS[idx] + .45));
+  const prev = FLOW[Math.max(0, idx - 1)];
+  S4.style.background = mixColor(prev.bg, FLOW[idx].bg, ck);
+  s4Blob.style.background = `radial-gradient(circle, ${mixColor(prev.acc, FLOW[idx].acc, ck)} 0%, rgba(255,255,255,0) 66%)`;
+  T(s4Blob, { s: 1 + Math.sin(t * 2.5) * .03, o: .35 });
+  T(s4Tri, { r: t * 14, s: 1 + Math.sin(t * 1.7) * .03, o: .55 });
+  const h = ease.quint(prog(t, 10.25, 10.85));
+  T(s4Chip, { x: lerp(-60, 0, h), o: h });
+  s4Counter.textContent = `0${idx + 1} / 06`;
+  T(s4Counter, { o: h });
+
+  FLOW.forEach((f, i) => {
+    const start = i === 0 ? 10.2 : FS[i];
+    const next = FS[i + 1] ?? 99;
+    const u = ease.quint(prog(t, start - .05, start + .5));
+    const v = ease.inOut(prog(t, next - .05, next + .4));
+    const card = s4Cards[i];
+    const drift = Math.sin(t * 2 + i) * 5;
+    T(card, {
+      x: lerp(820, 0, u) + lerp(0, -880, v),
+      y: drift,
+      r: lerp(14, -2 + (i % 2) * 4, u) + lerp(0, -14, v),
+      s: lerp(1, .86, v),
+      o: clamp(u * 2.5) * (1 - v),
+    });
+    card.style.zIndex = 10 + i;
+
+    const tx = s4Texts[i];
+    const a = prog(t, start, start + .55);
+    const out = ease.inOut(prog(t, next - .12, next + .2));
+    T(tx.g, { y: lerp(0, -40, out), o: 1 - out });
+    T(tx.en, { x: lerp(-30, 0, ease.quint(a)), o: ease.out(a) });
+    tx.big.spans.forEach((sp, j) => {
+      const k = ease.quint(prog(t, start + .04 + j * .05, start + .5 + j * .05));
+      T(sp, { y: lerp(200, 0, k) });
+    });
+    T(tx.bar, { sx: ease.quint(prog(t, start + .15, start + .6)), sy: 1 });
+    T(tx.line, { y: lerp(80, 0, ease.quint(prog(t, start + .2, start + .7))) });
+  });
+
+  const fillTo = lerp(NODE_X[Math.max(0, idx - 1)], NODE_X[idx], ease.inOut(prog(t, FS[idx], FS[idx] + .4))) - NODE_X[0];
+  T(s4Fill, { sx: fillTo / (NODE_X[5] - NODE_X[0]), sy: 1 });
+  s4Nodes.forEach(({ n, l }, i) => {
+    const on = i < idx ? 1 : i === idx ? ease.back(prog(t, FS[i], FS[i] + .35)) : 0;
+    n.style.background = on > .5 ? FLOW[i].acc : '#fff';
+    T(n, { s: 1 + .45 * (i === idx ? on : 0) });
+    T(l, { o: .35 + .65 * clamp(on) });
+  });
+}
+
+/* ======== シーン 5：ひとりで泣く ======== */
+S5.style.background = 'linear-gradient(180deg, #9db0d0 0%, #c8d5ea 60%, #dfe7f3 100%)';
+const s5Rain = Array.from({ length: 70 }, (_, i) => {
+  const r = (Math.sin(i * 91.7) + 1) / 2, q = (Math.sin(i * 37.3) + 1) / 2;
+  return { x: r * 2200 - 140, off: q * 1400, sp: 900 + q * 700, len: 50 + r * 70,
+    el: mk(S5, { left: '0', top: '0', width: '3px', height: `${50 + r * 70}px`, borderRadius: '2px', background: 'rgba(255,255,255,.55)' }) };
+});
+const s5Cap = chars(S5, '泣いて、泣いて――', { left: '0', top: '86px', width: '1920px', textAlign: 'center', fontSize: '92px', fontWeight: 900, color: '#fff', textShadow: '0 6px 0 rgba(29,55,102,.55)', paddingBottom: '16px' }, 'a zen');
+const POSES = [
+  { n: 'collapse', label: '崩れ落ちる', x: 270 },
+  { n: 'alone', label: 'ひとりで泣く', x: 1050 },
+];
+const s5Poses = POSES.map(p => {
+  const shadow = mk(S5, { left: `${p.x + 60}px`, top: '890px', width: '480px', height: '60px', borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(29,55,102,.35) 0%, rgba(29,55,102,0) 70%)' });
+  const img = pic(S5, IMG(p.n), { left: `${p.x}px`, top: '300px', height: '640px', transformOrigin: '50% 100%' }, 'a sticker');
+  const lab = mk(S5, { left: `${p.x + 300 - 130}px`, top: '960px', width: '260px', textAlign: 'center', fontSize: '32px', padding: '6px 0' }, 'a pill', p.label);
+  return { shadow, img, lab };
+});
+const s5Vignette = mk(S5, { inset: 0, background: 'radial-gradient(ellipse at 50% 55%, rgba(0,0,0,0) 55%, rgba(18,38,80,.35) 100%)' });
+
+function drawS5(t) {
+  const L = t - CUT[4];
+  S5.style.transform = `scale(${lerp(1.0, 1.05, ease.inOut(prog(L, 0, 2.6)))})`;
+  s5Rain.forEach(d => {
+    const y = ((t * d.sp + d.off) % 1500) - 200;
+    T(d.el, { x: d.x - y * .2, y, r: 11, o: .7 });
+  });
+  s5Cap.spans.forEach((sp, i) => {
+    const k = prog(L, .45 + i * .07, 1.0 + i * .07);
+    T(sp, { y: lerp(-30, 0, ease.out(k)), o: ease.out(k) });
+  });
+  s5Poses.forEach((p, i) => {
+    const k = prog(L, .25 + i * .3, 1.05 + i * .3);
+    const sob = Math.sin(t * 9 + i) * .006;
+    T(p.img, { y: lerp(80, 0, ease.quint(k)), sy: 1 + sob, sx: 1 - sob * .5, o: clamp(k * 2) });
+    T(p.shadow, { s: lerp(.4, 1, ease.out(k)), o: ease.out(k) });
+    const lk = ease.back(prog(L, .75 + i * .3, 1.25 + i * .3));
+    T(p.lab, { s: lk, o: clamp(lk * 2) });
+  });
+}
+
+/* ======== シーン 6：エンディング ======== */
+S6.style.background = 'radial-gradient(circle at 30% 50%, #2b4f8c 0%, #1d3766 45%, #10224a 100%)';
+mk(S6, { inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,.07) 2px, transparent 2.6px)', backgroundSize: '38px 38px' });
+const s6Stripe = stripePair(S6, 1040);
+// 右下の文字にかぶるものは外す
+const s6Floaters = makeFloaters(S6, FLOATERS.filter(f => f.y < 800 || f.x > 900).map(f => ({ ...f, x: 1920 - f.x - f.s, d: f.d * .8 })));
+const s6Glow = mk(S6, { left: '200px', top: '120px', width: '840px', height: '840px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(39,180,194,.45) 0%, rgba(39,180,194,0) 66%)' });
+const s6Circle = mk(S6, { left: '370px', top: '290px', width: '500px', height: '500px', borderRadius: '50%', overflow: 'hidden', border: '12px solid #fff', background: '#fff', boxShadow: '0 30px 60px rgba(0,0,0,.35)' });
+pic(s6Circle, IMG('face_resolve'), { left: '-30px', top: '-36px', width: '540px', height: `${540 * 222 / 202}px` });
+const s6Ring = mk(S6, { left: '320px', top: '240px', width: '600px', height: '600px' }, 'a',
+  `<svg viewBox="0 0 600 600" width="600" height="600"><circle id="ring" cx="300" cy="300" r="290" fill="none" stroke="#27b4c2" stroke-width="8" stroke-linecap="round" stroke-dasharray="1822" stroke-dashoffset="1822" transform="rotate(-90 300 300)"/></svg>`);
+const s6Clip = mk(S6, { left: '780px', top: '250px', width: '120px', height: '120px' }, 'a', TRI('#27b4c2', 12));
+const s6Pre = mk(S6, { left: '1010px', top: '300px', fontSize: '64px', fontWeight: 700, color: 'rgba(255,255,255,.85)', whiteSpace: 'nowrap' }, 'a zen', 'それでも、');
+const s6Main = chars(S6, '前を向く。', { left: '1000px', top: '370px', fontSize: '158px', fontWeight: 900, color: '#fff', lineHeight: '1.3', textShadow: '0 10px 0 #27b4c2', padding: '0 20px 26px 0', overflow: 'visible' }, 'a zen');
+const s6Line = mk(S6, { left: '1010px', top: '660px', width: '720px', height: '4px', background: 'rgba(255,255,255,.35)', transformOrigin: '0 50%' });
+const s6Logo = mk(S6, { left: '1010px', top: '690px', fontSize: '96px', fontWeight: 900, color: '#27b4c2', whiteSpace: 'nowrap', lineHeight: 1.2 }, 'a zen', 'ブルちゃん');
+const s6Sub = mk(S6, { left: '1014px', top: '820px', fontSize: '34px', fontWeight: 700, color: '#fff', letterSpacing: '.05em', whiteSpace: 'nowrap' }, 'a zen', '着ぐるみを着る前・感情追加版');
+const s6Fade = mk(S6, { inset: 0, background: '#0a1631', opacity: 0 });
+
+function drawS6(t) {
+  const L = t - CUT[5];
+  T(s6Stripe, { x: lerp(3000, 0, ease.quint(prog(L, .1, 1.0))), r: -8 });
+  drawFloaters(s6Floaters, t, CUT[5]);
+  const c = prog(L, .3, 1.0);
+  T(s6Glow, { s: lerp(.5, 1, ease.out(c)) + Math.sin(t * 2) * .02, o: ease.out(c) });
+  T(s6Circle, { s: lerp(.2, 1, ease.back(c)) + Math.sin(t * 2.2) * .006, o: clamp(c * 3) });
+  document.getElementById('ring').setAttribute('stroke-dashoffset', 1822 * (1 - ease.inOut(prog(L, .55, 1.35))));
+  T(s6Ring, { r: L * 12, o: 1 });
+  const cl = ease.back(prog(L, 1.1, 1.5));
+  T(s6Clip, { s: cl, r: lerp(-90, 12, ease.out(prog(L, 1.1, 1.5))) + Math.sin(t * 3) * 4, o: clamp(cl * 2) });
+
+  const p = ease.quint(prog(L, .8, 1.3));
+  T(s6Pre, { x: lerp(-40, 0, p), o: p });
+  s6Main.spans.forEach((sp, i) => {
+    const k = prog(L, 1.05 + i * .08, 1.6 + i * .08);
+    T(sp, { y: lerp(-120, 0, ease.back(k)), s: lerp(.4, 1, ease.back(k)), o: clamp(k * 3) });
+  });
+  T(s6Line, { sx: ease.inOut(prog(L, 1.55, 2.1)), sy: 1 });
+  const lg = ease.quint(prog(L, 1.7, 2.2));
+  T(s6Logo, { y: lerp(40, 0, lg), o: lg });
+  T(s6Sub, { y: lerp(30, 0, ease.quint(prog(L, 1.85, 2.35))), o: ease.out(prog(L, 1.85, 2.35)) });
+  S6.style.transform = `scale(${lerp(1, 1.025, ease.inOut(prog(L, 1.5, 3)))})`;
+  T(s6Fade, { o: ease.in(prog(L, 2.6, 3.0)) });
+}
+
+/* ======== シーン切り替えのワイプ ======== */
+const wipe = mk(stage, { inset: 0, zIndex: 100, pointerEvents: 'none' }, 'a');
+// 左端（入り）と右端（抜け）を別々に動かす。入りは青緑→白→紺、抜けは紺→白→青緑
+const WB = [
+  { c: '#27b4c2', lagIn: -.1, lagOut: .1 },
+  { c: '#ffffff', lagIn: -.05, lagOut: .05 },
+  { c: '#1d3766', lagIn: 0, lagOut: 0 },
+].map(b => ({ ...b, el: mk(wipe, { left: 0, top: '-100px', width: '10px', height: '1280px', background: b.c, transform: 'skewX(-20deg)' }) }));
+const wipeIcon = mk(wipe, { left: '885px', top: '465px', width: '150px', height: '150px' }, 'a', TRI('#27b4c2', 12));
+
+function drawWipe(t) {
+  let cut = null;
+  for (let i = 1; i < CUT.length - 1; i++) if (Math.abs(t - CUT[i]) < WIPE) cut = CUT[i];
+  if (cut === null) { wipe.style.display = 'none'; return; }
+  wipe.style.display = 'block';
+  WB.forEach(b => {
+    // 紺の帯はカットの瞬間に必ず全面を覆う（斜め分 ±200px の余裕込み）
+    const left = lerp(2250, -360, ease.inOut(prog(t, cut - .38 + b.lagIn, cut + b.lagIn)));
+    const right = lerp(2300, -360, ease.inOut(prog(t, cut + b.lagOut, cut + .38 + b.lagOut)));
+    b.el.style.left = `${left}px`;
+    b.el.style.width = `${Math.max(0, right - left)}px`;
+  });
+  const u = prog(t, cut - .2, cut + .2);
+  T(wipeIcon, { s: Math.sin(Math.PI * u), r: lerp(-120, 120, u), o: Math.sin(Math.PI * u) });
+}
+
+/* ======== 1 フレーム描画 ======== */
+const DRAW = [drawS1, drawS2, drawS3, drawS4, drawS5, drawS6];
+window.DURATION = CUT[CUT.length - 1];
+window.renderFrame = t => {
+  scenes.forEach((s, i) => {
+    const on = t >= CUT[i] && t < CUT[i + 1] || (i === scenes.length - 1 && t >= CUT[i]);
+    s.style.display = on ? 'block' : 'none';
+    if (on) DRAW[i](t);
+  });
+  drawWipe(t);
+};
+window.ready = (async () => {
+  await document.fonts.load('900 100px Zen'); await document.fonts.load('700 100px Zen');
+  await document.fonts.load('800 100px MRound'); await document.fonts.load('500 100px MRound');
+  await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
+  await document.fonts.ready;
+  // 右の飾り線はタイトルの実際の幅に合わせる
+  S1.style.display = 'block';
+  const right = s1Title.spans[s1Title.spans.length - 1].getBoundingClientRect().right;
+  s1Ticks2.forEach(el => (el.style.left = `${right + 6}px`));
+  return true;
+})();
+renderFrame(0);
+</script>
+</body>
+</html>
