@@ -185,6 +185,78 @@ const P = (() => {
     return n;
   };
 
+  /* ================================================================ 図解の部品 */
+  // 会社のビル
+  P.building = (parent, { x, y, w = 300, h = 380, label = '', color = '#3c4a66' } = {}) => {
+    let win = '';
+    for (let r = 0; r < 5; r++) for (let c = 0; c < 3; c++) win += `<rect x="${48 + c * 72}" y="${70 + r * 56}" width="44" height="34" rx="4" fill="#ffe7a8" opacity="${.55 + ((r * 3 + c) % 3) * .15}"/>`;
+    const n = E.div(parent, { left: x, top: y, width: w, height: h + 70 });
+    E.svg(n, { left: 0, top: 0, width: w, height: h }, '0 0 300 380',
+      `<rect x="20" y="30" width="260" height="350" rx="10" fill="${color}"/><rect x="0" y="16" width="300" height="26" rx="8" fill="#26324a"/>${win}
+       <rect x="118" y="318" width="64" height="62" rx="6" fill="#26324a"/>`);
+    if (label) E.div(n, { left: -100, top: h + 10, width: w + 200, textAlign: 'center', font: '900 40px/1.2 Zen', color: '#fff', textShadow: '0 3px 8px rgba(0,0,0,.4)', whiteSpace: 'nowrap' }, label);
+    return n;
+  };
+  // 人のアイコン（委員会など）
+  const PERSON = (c) => `<circle cx="50" cy="32" r="22" fill="${c}"/><path d="M10 112 Q12 62 50 60 Q88 62 90 112Z" fill="${c}"/>`;
+  P.committee = (parent, { x, y, w = 420, h = 300, label = '第三者委員会', sub = '会社の外の専門家', color = '#f3e6c8' } = {}) => {
+    const n = E.div(parent, { left: x, top: y, width: w, height: h, borderRadius: 26, background: 'rgba(255,255,255,.1)', border: `4px solid ${color}` });
+    n.people = [0, 1, 2].map(i => E.svg(n, { left: w / 2 - 150 + i * 100, top: 40, width: 100, height: 112 }, '0 0 100 112', PERSON(color)));
+    E.div(n, { left: 0, top: 170, width: w, textAlign: 'center', font: '900 40px/1.2 Zen', color }, label);
+    if (sub) E.div(n, { left: 0, top: 222, width: w, textAlign: 'center', font: '800 26px/1.3 Round', color: 'rgba(243,230,200,.8)' }, sub);
+    return n;
+  };
+  // 虫めがね
+  P.magnifier = (parent, { x, y, size = 160, color = '#f3e6c8' } = {}) => E.svg(parent, { left: x - size / 2, top: y - size / 2, width: size, height: size }, '0 0 100 100',
+    `<circle cx="40" cy="40" r="28" fill="rgba(200,230,255,.25)" stroke="${color}" stroke-width="9"/><path d="M61 61 L90 90" stroke="${color}" stroke-width="13" stroke-linecap="round"/>`);
+  // 一時停止のマーク
+  P.pauseMark = (parent, { x, y, size = 300, color = '#e0353f', label = '' } = {}) => {
+    const n = E.div(parent, { left: x - size / 2, top: y - size / 2, width: size, height: size + (label ? 80 : 0) }).ini({ o: 0 });
+    E.svg(n, { left: 0, top: 0, width: size, height: size }, '0 0 100 100',
+      `<circle cx="50" cy="50" r="44" fill="rgba(255,255,255,.95)" stroke="${color}" stroke-width="7"/><rect x="34" y="28" width="11" height="44" rx="3" fill="${color}"/><rect x="55" y="28" width="11" height="44" rx="3" fill="${color}"/>`);
+    if (label) E.div(n, { left: -100, top: size + 6, width: size + 200, textAlign: 'center', font: '900 52px/1.2 Zen', color: '#fff', textShadow: '0 4px 10px rgba(0,0,0,.5)' }, label);
+    return n;
+  };
+  // 銘柄カードと赤い札
+  P.stockCard = (parent, { x, y, w = 640, name = 'エスポア', code = '3260 ｜ 名証' } = {}) => {
+    const n = E.div(parent, { left: x, top: y, width: w, height: 190, borderRadius: 24, background: '#fffdf8', boxShadow: '0 20px 40px rgba(0,0,0,.35)' });
+    E.div(n, { left: 36, top: 30, font: '900 70px/1.2 Zen', color: '#262230', whiteSpace: 'nowrap' }, name);
+    E.div(n, { left: 40, top: 126, font: '800 30px/1.2 Round', color: '#8a8070', whiteSpace: 'nowrap' }, code);
+    return n;
+  };
+  P.tag = (parent, text, { x, y, rot = -4, color = '#c62828', size = 34 } = {}) => {
+    const n = E.div(parent, {
+      left: x, top: y, padding: `${size * .25}px ${size * .6}px ${size * .3}px ${size * .9}px`, borderRadius: 10, background: color, color: '#fff',
+      font: `900 ${size}px/1.25 Zen`, whiteSpace: 'nowrap', boxShadow: '0 8px 16px rgba(0,0,0,.3)',
+    }, text).ini({ o: 0, r: rot });
+    E.div(n, { left: size * .3, top: '50%', width: size * .34, height: size * .34, borderRadius: '50%', background: '#fff', marginTop: -size * .17 });
+    return n;
+  };
+  // 矢印（描き進める）
+  P.arrow = (parent, { x1, y1, x2, y2, color = '#f3e6c8', sw = 10, head = 30, bend = 0 } = {}) => {
+    const left = Math.min(x1, x2) - head - 20, top = Math.min(y1, y2) - head - 20 - Math.abs(bend);
+    const w = Math.abs(x2 - x1) + (head + 20) * 2, h = Math.abs(y2 - y1) + (head + 20) * 2 + Math.abs(bend) * 2;
+    const ax = x1 - left, ay = y1 - top, bx = x2 - left, by = y2 - top;
+    const pts = [];
+    for (let i = 0; i <= 24; i++) {
+      const k = i / 24, mx = lerp(ax, bx, k), my = lerp(ay, by, k);
+      const nx = -(by - ay), ny = bx - ax, L = Math.hypot(nx, ny) || 1;
+      const b = Math.sin(k * Math.PI) * bend;
+      pts.push([mx + nx / L * b, my + ny / L * b]);
+    }
+    const n = E.polyline(parent, pts, { left, top, width: w, height: h, color, sw });
+    const ang = Math.atan2(pts[24][1] - pts[22][1], pts[24][0] - pts[22][0]) * 180 / Math.PI;
+    const hd = E.svg(parent, { left: x2 - head, top: y2 - head, width: head * 2, height: head * 2 }, '-50 -50 100 100',
+      `<path d="M50 0 L-30 -38 L-12 0 L-30 38Z" fill="${color}"/>`).ini({ r: ang, o: 0 });
+    n.ini({ draw: 0 });
+    n.head = hd;
+    return n;
+  };
+  P.drawArrow = (a, dur = .5, delay = 0) => {
+    E.tw(a, dur, { draw: [0, 1] }, 'out', delay);
+    E.tw(a.head, .15, { o: [0, 1], s: [.4, 1] }, 'back', delay + dur * .85);
+  };
+
   /* ================================================================ 背景・演出 */
   // 放射状の集中背景（驚き・喜びのアップ用）
   P.burst = (parent, { cx = W / 2, cy = H / 2, n = 26, c1 = '#fff1de', c2 = '#ffd9b3', spin = 5 } = {}) => {
