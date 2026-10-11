@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ブルちゃん証券 株価の向こう側</title>
+<link rel="stylesheet" href="engine/engine.css">
+</head>
+<body>
+<div id="stage"></div>
+<script src="engine/engine.js"></script>
+<script src="engine/parts.js"></script>
+<script>
+  // ?ch=01 の章を読み込む（render.js が撮影する）。?play を付けるとブラウザでそのまま再生
+  (() => {
+    const q = new URLSearchParams(location.search);
+    const ch = q.get('ch') || '01';
+    const s = document.createElement('script');
+    s.src = `chapters/ch${ch}.js`;
+    s.onload = () => {
+      if (!q.has('play')) return;
+      window.ready.then(() => {
+        const stage = document.getElementById('stage');
+        const fit = () => { const k = Math.min(innerWidth / 1920, innerHeight / 1080); stage.style.transform = `scale(${k})`; stage.style.transformOrigin = '0 0'; };
+        fit(); addEventListener('resize', fit);
+        const t0 = performance.now() - Number(q.get('t') || 0) * 1000;
+        const loop = () => { window.renderFrame(Math.min(window.DURATION - .001, (performance.now() - t0) / 1000)); requestAnimationFrame(loop); };
+        loop();
+      });
+    };
+    // 声の長さ（tools/make_voice.py が書き出す）を先に読む。無ければ見積もりで組み立てる
+    if (q.has('novoice')) { document.body.appendChild(s); return; }
+    const v = document.createElement('script');
+    v.src = `build/ch${ch}_voice.js`;
+    v.onload = v.onerror = () => document.body.appendChild(s);
+    document.body.appendChild(v);
+  })();
+</script>
+</body>
+</html>
