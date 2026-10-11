@@ -183,7 +183,7 @@ E.chapter('04');
   E.scene({ name: 'impact' }, sc => {
     const g = sc.cam;
     P.slate(g);
-    P.note(g, TRIAL_NOTE, { x: 1180, y: 816, size: 22, dark: true });
+    P.note(g, TRIAL_NOTE, { x: 1180, y: 236, size: 22, dark: true });
     // 式
     const eq = [
       ['取引①', '1億1,000万円', '#c62828'], ['＋', '', null], ['取引③', '2,000万円', '#d9822b'], ['＝', '', null], ['修正の影響', '1億3,000万円', '#ffd84a'],
@@ -200,6 +200,7 @@ E.chapter('04');
     });
     // 純資産の棒
     const zeroY = 470;
+    // 下の注意書きと金額が重ならないよう、この場面は注意書きを右上に置く
     E.div(g, { left: 360, top: zeroY - 3, width: 1200, height: 6, borderRadius: 3, background: '#f3e6c8' });
     E.div(g, { left: 250, top: zeroY - 22, font: '800 32px/1.2 Round', color: '#f3e6c8' }, '0');
     E.div(g, { left: 560, top: zeroY - 64, width: 260, font: '800 32px/1.4 Round', color: '#f3e6c8', whiteSpace: 'nowrap' }, '連結純資産');
