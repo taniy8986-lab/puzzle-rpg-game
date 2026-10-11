@@ -171,6 +171,29 @@
     });
   };
 
+  /* ---------- 表（見出し行＋行）。rows[i].el を 1 行ずつ出す ---------- */
+  P.table = (parent, head, rows, { x = 160, y = 200, colW = [640, 300, 660], rowH = 120, font = 40, title = '' } = {}) => {
+    const { mk } = E();
+    const w = colW.reduce((a, b) => a + b, 0);
+    const el = mk(parent, { left: `${x}px`, top: `${y}px`, width: `${w}px` }, 'a');
+    const mkRow = (cells, top, h, isHead, i) => {
+      const r = mk(el, { left: 0, top: `${top}px`, width: '100%', height: `${h}px`, background: isHead ? '#1f4a57' : (i % 2 ? '#eef5f6' : '#fff'),
+        borderRadius: isHead ? '16px 16px 0 0' : '0', borderBottom: isHead ? 'none' : '2px solid #d8e2e6', boxShadow: isHead ? 'none' : '0 6px 14px rgba(40,30,20,.08)' }, 'a');
+      let cx = 0;
+      cells.forEach((c, j) => {
+        const cell = mk(r, { left: `${cx + 26}px`, top: 0, width: `${colW[j] - 40}px`, height: '100%', display: 'flex', alignItems: 'center',
+          fontSize: `${isHead ? font * .8 : font}px`, color: isHead ? '#fff' : '#1d2a33', lineHeight: 1.25, whiteSpace: 'pre-line' }, 'a noto', c);
+        cell.style.fontWeight = isHead || j === 0 ? 900 : 700;
+        cx += colW[j];
+      });
+      return r;
+    };
+    const headEl = mkRow(head, 0, rowH * .7, true, 0);
+    const rowEls = rows.map((r, i) => mkRow(r, rowH * .7 + i * rowH, rowH, false, i));
+    const titleEl = title ? P.label(parent, title, '', { x: x + w / 2, y: y - 130, size: 40 }) : null;
+    return { el, head: headEl, rows: rowEls, title: titleEl };
+  };
+
   /* ---------- 下書き（screen の文から） ---------- */
   const split = s => String(s).split(/[／\n]|(?:\s*\/\s*)/).map(x => x.trim()).filter(Boolean);
   P.fallback = (type, screen) => {
@@ -235,6 +258,28 @@
         return { cal, st };
       },
       update(t, ctx, st) { W_.fade(st.cal.el, ctx.k(t, 0, .4, -.2)); W_.pop(st.st, ctx.k(t, 0, .5, .3)); },
+    };
+    if (type === 'table') return {
+      build(box) {
+        const rows = String(screen).split(/[／\n]/).map(r => r.split(/[｜|]/).map(c => c.trim())).filter(r => r.length > 1);
+        const head = rows.shift() || [];
+        const n = head.length || 3;
+        const colW = n === 3 ? [640, 300, 660] : Array(n).fill(Math.floor(1600 / n));
+        return { tb: P.table(box, head, rows, { colW }) };
+      },
+      update(t, ctx, st) {
+        const D = ctx.cut.end - ctx.cut.start;
+        W_.fade(st.tb.head, ctx.k(t, 0, .4, -.1));
+        st.tb.rows.forEach((r, i) => W_.slide(r, prog(t, ctx.cut.start + .4 + i * D * .25, ctx.cut.start + .8 + i * D * .25), -60, 0));
+      },
+    };
+    if (type === 'imagine') return {
+      build(box) {
+        const { mk } = E();
+        const txt = mk(box, { left: '160px', top: '140px', width: '1600px', fontSize: '44px', color: '#dfe8ff', whiteSpace: 'pre-wrap', lineHeight: 1.5 }, 'a zen', String(screen));
+        return { txt };
+      },
+      update(t, ctx, st) { W_.fade(st.txt, ctx.k(t, 0, .5)); },
     };
     if (type === 'phone') return {
       build(box) {

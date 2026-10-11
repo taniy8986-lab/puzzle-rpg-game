@@ -7,6 +7,8 @@
   const hash = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
 
   function layer(parent, inner, extra = '') {
+    const u = parent.dataset.uid || '';
+    inner = inner.replace(/id="([\w-]+)"/g, `id="$1_${u}"`).replace(/url\(#([\w-]+)\)/g, `url(#$1_${u})`);
     const d = document.createElement('div');
     d.className = 'a';
     d.style.left = '-160px'; d.style.top = '-60px';
@@ -15,8 +17,10 @@
     parent.appendChild(d);
     return d;
   }
+  let uidN = 0;
   function base(parent) {
     const el = document.createElement('div');
+    el.dataset.uid = `bg${++uidN}`;
     el.className = 'layer';
     el.style.overflow = 'hidden';
     parent.appendChild(el);
@@ -164,7 +168,7 @@
   }
 
   /* ---------- 喫茶「押し目」 ---------- */
-  function cafe(parent, night) {
+  function cafe(parent, night, fest = false) {
     const el = base(parent);
     const far = layer(el, `
       <defs>
@@ -176,6 +180,10 @@
       <!-- 窓 -->
       <rect x="-60" y="120" width="420" height="420" rx="12" fill="${night ? '#1a2142' : '#bfe6ff'}"/>
       ${night ? Array.from({ length: 20 }, (_, i) => `<circle cx="${-40 + hash(i) * 380}" cy="${140 + hash(i + 9) * 200}" r="2" fill="#fff" opacity=".7"/>`).join('') : '<ellipse cx="120" cy="250" rx="110" ry="30" fill="#fff" opacity=".85"/>'}
+      ${fest ? `<rect x="-60" y="120" width="420" height="420" fill="${night ? '#14183a' : '#e9a07a'}" opacity=".85"/>
+        <path d="M-60 230 Q40 270 140 230 Q250 270 360 230" stroke="#3a2a1a" stroke-width="3" fill="none"/>
+        ${[-20, 70, 160, 250, 330].map((x, i) => `<circle cx="${x}" cy="${262 + (i % 2) * 8}" r="40" fill="rgba(255,170,80,.25)"/><ellipse cx="${x}" cy="${262 + (i % 2) * 8}" rx="17" ry="22" fill="${i % 2 ? '#ffd24a' : '#ff6b3d'}" stroke="#7a2a12" stroke-width="2"/>`).join('')}
+        ${[0, 1, 2, 3, 4, 5].map(i => `<circle cx="${-20 + i * 70}" cy="${470 + (i % 2) * 14}" r="22" fill="#2a2440"/><rect x="${-38 + i * 70}" y="${486 + (i % 2) * 14}" width="36" height="60" rx="14" fill="#2a2440"/>`).join('')}` : ''}
       <rect x="-60" y="120" width="420" height="420" rx="12" fill="none" stroke="#3a2418" stroke-width="18"/>
       <rect x="142" y="120" width="14" height="420" fill="#3a2418"/>
       <!-- 棚とカップ -->
@@ -266,7 +274,54 @@
     return { el, layers: { far, mid, near }, floor: 1000, scale: 1.0, update() {} };
   }
 
+  function festival(parent) {
+    const b = street(parent);
+    // 夜の色
+    b.el.style.filter = '';
+    const night = layer(b.el, `<rect x="-160" y="-60" width="${W + 320}" height="${H + 120}" fill="rgba(20,18,60,.55)"/>`);
+    b.el.insertBefore(night, b.layers.near);
+    const ropes = [150, 260];
+    const lan = ropes.map((y, r) => {
+      let g = `<path d="M-160 ${y} ${Array.from({ length: 12 }, (_, i) => `Q ${-60 + i * 200} ${y + 40} ${40 + i * 200} ${y}`).join(' ')}" stroke="#3a2a1a" stroke-width="4" fill="none"/>`;
+      for (let i = 0; i < 12; i++) {
+        const x = -60 + i * 200 + (r ? 100 : 0), yy = y + 26;
+        g += `<circle cx="${x}" cy="${yy + 30}" r="70" fill="rgba(255,170,80,.18)"/>
+          <ellipse cx="${x}" cy="${yy + 30}" rx="26" ry="34" fill="${(i + r) % 3 ? '#ff6b3d' : '#ffd24a'}" stroke="#7a2a12" stroke-width="3"/>
+          <rect x="${x - 10}" y="${yy - 8}" width="20" height="8" fill="#333"/><rect x="${x - 10}" y="${yy + 62}" width="20" height="8" fill="#333"/>`;
+      }
+      return g;
+    }).join('');
+    const stalls = [200, 900, 1560].map((x, i) => `
+      <rect x="${x}" y="650" width="300" height="200" fill="#5b3a26"/>
+      <path d="M${x - 20} 650 L${x + 320} 650 L${x + 290} 590 L${x + 10} 590 Z" fill="${['#d62839', '#2f5ea8', '#e8a33a'][i]}"/>
+      ${Array.from({ length: 6 }, (_, j) => `<path d="M${x - 20 + j * 57} 650 q28 22 57 0" fill="${j % 2 ? '#fff' : ['#d62839', '#2f5ea8', '#e8a33a'][i]}"/>`).join('')}
+      <text x="${x + 150}" y="636" font-family="Zen" font-weight="900" font-size="40" fill="#fff" text-anchor="middle">${['たこ焼き', 'かき氷', 'りんご飴'][i]}</text>
+      <rect x="${x + 20}" y="700" width="260" height="20" fill="#ffd88a" opacity=".7"/>`).join('');
+    const fest = layer(b.el, stalls + lan);
+    b.el.insertBefore(fest, b.layers.near);
+    const near = b.layers.near;
+    near.style.filter = 'brightness(.55)';
+    const walkers = layer(b.el, Array.from({ length: 9 }, (_, i) => `<g class="wk">
+        <circle cx="0" cy="-118" r="16" fill="#2a2440"/><rect x="-18" y="-100" width="36" height="70" rx="14" fill="#2a2440"/>
+        <line x1="18" y1="-80" x2="34" y2="-120" stroke="#2a2440" stroke-width="5"/>
+        <circle cx="38" cy="-112" r="30" fill="rgba(255,170,80,.3)"/>
+        <ellipse cx="38" cy="-110" rx="12" ry="16" fill="${i % 3 ? '#ff6b3d' : '#ffd24a'}" stroke="#7a2a12" stroke-width="2"/></g>`).join(''));
+    b.el.insertBefore(walkers, near);
+    const wks = [...walkers.querySelectorAll('.wk')];
+    const baseUpdate = b.update;
+    b.update = t => {
+      baseUpdate(t);
+      wks.forEach((g, i) => {
+        const x = ((t * 70 + i * 230) % (W + 400)) - 200;
+        const y = 840 + Math.abs(Math.sin(t * 6 + i)) * -6;
+        g.setAttribute('transform', `translate(${x} ${y})`);
+      });
+    };
+    return b;
+  }
+
   window.BACKGROUNDS = {
+    festival,
     wall: p => wall(p, 'light'),
     wall_dark: p => wall(p, 'dark'),
     wall_sepia: p => wall(p, 'sepia'),
@@ -277,6 +332,8 @@
     park_dusk: park,
     cafe: p => cafe(p, 0),
     cafe_night: p => cafe(p, 1),
+    cafe_fest: p => cafe(p, 0, true),
+    cafe_fest_night: p => cafe(p, 1, true),
     imagine,
   };
 })();

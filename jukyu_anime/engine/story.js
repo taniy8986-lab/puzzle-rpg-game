@@ -125,6 +125,8 @@
   const stage = document.getElementById('stage');
   const EP = window.EP;
   const LINES = EP.lines;
+  // 章ごとの content.js から、カットの指定を上書きできる（例：{ '01_05': { type: 'imagine' } }）
+  Object.entries(window.EP_SHOT || {}).forEach(([id, o]) => { const l = LINES.find(x => x.id === id); if (l) l.shot = Object.assign({}, l.shot, o); });
   const SCENES = EP.scenes;
   const lineEnd = l => l.start + l.dur;
   const SFX = [];
@@ -276,8 +278,9 @@
   function placeBg(place) {
     const p = place || '';
     if (/部屋/.test(p)) return /朝/.test(p) ? 'room_morning' : 'room_night';
-    if (/喫茶|押し目|カウンター|テーブル/.test(p)) return /夜/.test(p) ? 'cafe_night' : 'cafe';
+    if (/喫茶|押し目|カウンター|テーブル/.test(p)) return (/夜/.test(p) ? 'cafe_night' : 'cafe').replace('cafe', /祭/.test(p) ? 'cafe_fest' : 'cafe');
     if (/公園/.test(p)) return 'park_dusk';
+    if (/祭/.test(p)) return 'festival';
     if (/商店街|駅|街/.test(p)) return 'street';
     if (/回想|余白/.test(p)) return 'wall';
     return null;
@@ -319,7 +322,7 @@
   const notebookPage = mk(notebook, { inset: 0 }, 'layer');
   const imagineHost = mk(deviceLayer, {}, 'layer');
   const propHost = mk(shotRoot, {}, 'layer');
-  const PROP_TYPES = ['memo', 'calendar', 'boxes', 'compare', 'cards', 'sticky', 'memory'];
+  const PROP_TYPES = ['memo', 'calendar', 'boxes', 'compare', 'cards', 'sticky', 'memory', 'table'];
   const DEVICE_HOST = { phone: phoneScreen, tablet: tabletScreen, notebook: notebookPage, imagine: imagineHost };
   PROP_TYPES.forEach(k => { DEVICE_HOST[k] = propHost; });
 
@@ -330,7 +333,25 @@
     return `<path d="M${W / 2} ${H / 2} L${W / 2 + Math.cos(a) * 1600} ${H / 2 + Math.sin(a) * 1600} L${W / 2 + Math.cos(a2) * 1600} ${H / 2 + Math.sin(a2) * 1600} Z" fill="rgba(255,255,255,.35)"/>`;
   }).join(''), { left: 0, top: 0 });
   chibiRays.className = 'a';
-  const chibiImg = pic(chibiLayer, '', { left: `${W / 2}px`, bottom: '40px', height: '700px', transform: 'translateX(-50%)' }, 'a sticker');
+  const chibiImg = pic(chibiLayer, '', { left: `${W / 2}px`, bottom: '170px', height: '660px', transform: 'translateX(-50%)' }, 'a sticker');
+  const FOOD_SVG = {
+    takoyaki: `<svg viewBox="0 0 120 120" width="120" height="120"><path d="M10 70 L110 70 L96 98 L24 98 Z" fill="#d9b27a" stroke="#8a6a3a" stroke-width="4"/>
+      ${[[30, 58], [52, 52], [74, 52], [96, 58], [41, 40], [63, 36], [85, 40]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="15" fill="#c98a3a" stroke="#7a4a1a" stroke-width="3"/><path d="M${x - 9} ${y - 3} q9 -8 18 0" stroke="#5a2a10" stroke-width="5" fill="none"/>`).join('')}
+      <path d="M30 45 q30 -14 60 0" stroke="#7bc47b" stroke-width="3" fill="none" stroke-dasharray="3 5"/></svg>`,
+    ringoame: `<svg viewBox="0 0 120 120" width="120" height="120"><rect x="56" y="70" width="8" height="46" rx="3" fill="#e8d3a8"/>
+      <circle cx="60" cy="50" r="34" fill="#e0233a"/><path d="M60 16 q6 -10 14 -6" stroke="#6b3a1a" stroke-width="4" fill="none"/>
+      <ellipse cx="46" cy="38" rx="9" ry="14" fill="#fff" opacity=".55" transform="rotate(-25 46 38)"/></svg>`,
+    yakisoba: `<svg viewBox="0 0 120 120" width="120" height="120"><path d="M10 60 L110 60 L100 100 L20 100 Z" fill="#f2f2f2" stroke="#999" stroke-width="3"/>
+      <path d="M16 62 q10 -20 20 -4 q10 -20 20 -4 q10 -20 20 -4 q10 -20 20 -4 q6 -10 10 0" stroke="#b5651d" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <circle cx="40" cy="56" r="5" fill="#e33"/><circle cx="76" cy="52" r="5" fill="#3a3"/></svg>`,
+  };
+  const FOODS = [[/たこ焼/, FOOD_SVG.takoyaki], [/りんご飴/, FOOD_SVG.ringoame], [/焼きそば/, FOOD_SVG.yakisoba], [/ハンバーガー/, '🍔'], [/かき氷/, '🍧'], [/パフェ/, '🍨'], [/ナポリタン/, '🍝']];
+  const dream = mk(chibiLayer, { left: '1180px', top: '90px', width: '620px', height: '360px' }, 'a');
+  const dreamCloud = svg(dream, 620, 360, `<g fill="#fff" stroke="#e7b3c3" stroke-width="6">
+      <circle cx="-60" cy="420" r="22"/><circle cx="-10" cy="360" r="34"/>
+      <ellipse cx="310" cy="180" rx="290" ry="160"/></g>`, { left: 0, top: 0 });
+  dreamCloud.className = 'a';
+  const dreamItems = mk(dream, { left: '60px', top: '110px', width: '500px', display: 'flex', justifyContent: 'center', gap: '30px', fontSize: '110px' }, 'a');
 
   /* ---------- 文字カード ---------- */
   titleLayer.style.background = 'radial-gradient(circle at 50% 45%, #2b4f8c 0%, #1d3766 55%, #0d1b44 100%)';
@@ -348,7 +369,7 @@
     if (s.type === 'chibi') o.who = s.who || l.speaker;
     if (s.type === 'cutin') o.id = l.id;
     if (s.type === 'title') o.text = s.screen || l.text;
-    if (['imagine', 'phone', 'tablet', 'notebook', 'memo', 'calendar', 'boxes', 'compare', 'cards', 'sticky'].includes(s.type)) {
+    if (['imagine', 'phone', 'tablet', 'notebook', 'memo', 'calendar', 'boxes', 'compare', 'cards', 'sticky', 'table'].includes(s.type)) {
       // 中身の担当（content.js）が切り替えを指定していれば新しいカット
       if (CONTENT[l.id] && CONTENT[l.id].newCut !== false) o.id = l.id;
     }
@@ -368,10 +389,14 @@
     c.end = next ? next.start : SCENES[c.scene].end;
     if (next && next.scene !== c.scene) c.end = SCENES[c.scene].end;
     const sceneBg = placeBg(SCENES[c.scene].place);
-    c.bg = bgId(c.shot.bg || sceneBg || (CUTS[i - 1] && CUTS[i - 1].bg) || 'cafe');
-    if (!c.shot.bg && !sceneBg) {
+    let shotBg = c.shot.bg;
+    const fest = /祭/.test(SCENES[c.scene].place || '') || /祭/.test(c.shot.screen || '');
+    if (shotBg && fest && /^cafe/.test(shotBg) && !/fest/.test(shotBg)) shotBg = shotBg.replace('cafe', 'cafe_fest');
+    if (shotBg === 'street' && fest) shotBg = 'festival';
+    c.bg = bgId(shotBg || sceneBg || (CUTS[i - 1] && CUTS[i - 1].bg) || 'cafe');
+    if (!shotBg && !sceneBg) {
       // bg が無いカット（端末など）は同じシーンの直前の場所を使う
-      for (let j = i - 1; j >= 0 && CUTS[j].scene === c.scene; j--) if (CUTS[j].shot.bg) { c.bg = bgId(CUTS[j].shot.bg); break; }
+      for (let j = i - 1; j >= 0 && CUTS[j].scene === c.scene; j--) if (CUTS[j].shot.bg) { c.bg = CUTS[j].bg; break; }
     }
     c.content = null;
     const owner = c.lines.find(l => CONTENT[l.id]);
@@ -483,7 +508,7 @@
       if (name === 'gloom') T(e, { x: 0, y: lerp(-700, 0, ease.out(k)), o: .9 });
       else if (name === 'rain') T(e, { x: (u * 300) % 120 - 60, y: (u * 900) % 160 - 80, o: k });
       else if (name === 'wind') T(e, { x: (u * 600) % 400 - 200, y: 0, o: k * .8 });
-      else if (name === 'shock') T(e, { x: hx - 180, y: hy - 230, sy: ease.out(k), o: k });
+      else if (name === 'shock') T(e, { x: hx - 180, y: hy - 430, sy: ease.out(k), o: k });
       else if (name === 'sweat') T(e, { x: hx + 110, y: hy - 40 + u * 18, s: ease.back(k), o: k });
       else if (name === 'sparkle') T(e, { x: hx + 90 + i * 10, y: hy - 160, r: Math.sin(u * 4) * 8, s: ease.back(k) * (1 + Math.sin(u * 6) * .06), o: k });
       else if (name === 'question') T(e, { x: hx + 120, y: hy - 180 + Math.sin(u * 4) * 8, r: Math.sin(u * 3) * 8, s: ease.back(k), o: k });
@@ -617,7 +642,7 @@
     const h = (who === 'oji' ? 1180 : 1300) + push;
     const im = busts[0].b;
     const aspect = im.naturalWidth ? im.naturalWidth / im.naturalHeight : 0.8;
-    const fw = Math.round(Math.min(1180, h * aspect * 0.93));
+    const fw = Math.round(Math.min(1180, h * aspect * ({ mina: .84, bull: .82, oji: .9 }[who] || .9)));
     const off = (SIDE[who] ?? 0) * 120;
     const fx = Math.round(W / 2 + off - fw / 2);
     frameWin.style.left = `${fx}px`; frameWin.style.width = `${fw}px`;
@@ -655,7 +680,7 @@
     show(propHost, isProp);
     [phone, tablet, notebook, imagineHost, shoulder].forEach(e => show(e, false));
     if (isProp) {
-      const def = { memo: 'desk', calendar: 'wall', boxes: 'wall', compare: 'wall', cards: 'wall', sticky: 'wall', memory: 'wall' }[type];
+      const def = { memo: 'desk', calendar: 'wall', boxes: 'wall', compare: 'wall', cards: 'wall', sticky: 'wall', memory: 'wall', table: 'wall' }[type];
       showBg(cut.shot.bg ? cut.bg : def, t, {});
       show(dim, false);
       if (cut.content) {
@@ -677,6 +702,7 @@
     if (type === 'tablet') T(tablet, { y: lerp(200, 0, enter) + Math.sin(t * 1.1) * 4, s: lerp(.92, 1, enter) });
     if (type === 'notebook') T(notebook, { y: lerp(160, 0, enter), r: lerp(-4, -1.2, enter) });
     if (type === 'imagine') {
+      veil.style.opacity = 0;
       Object.values(BG).forEach(b => show(b.el, false));
       const b = BG.imagine;
       show(b.el, true);
@@ -735,6 +761,16 @@
     const talk = talkLevel(who, t);
     T(chibiImg, { x: -chibiImg.width / 2 || 0, y: -Math.abs(Math.sin(u * 7)) * 30 - talk * 10, s: ease.back(k), r: Math.sin(u * 5) * 4 });
     chibiImg.style.transform = `translateX(-50%) translateY(${-Math.abs(Math.sin(u * 7)) * 30 - talk * 10}px) rotate(${Math.sin(u * 5) * 4}deg) scale(${ease.back(k)})`;
+    const foods = FOODS.filter(([re]) => re.test(cut.shot.screen || '') || re.test(cut.lines[0].text)).map(f => f[1]).slice(0, 3);
+    show(dream, foods.length > 0);
+    if (foods.length) {
+      if (dreamItems.dataset.k !== foods.join('')) {
+        dreamItems.innerHTML = foods.map(f => `<span style="display:inline-block">${f}</span>`).join('');
+        dreamItems.dataset.k = foods.join('');
+      }
+      W_.pop(dream, prog(u, .3, .7));
+      [...dreamItems.children].forEach((e, i) => { e.style.transform = `translateY(${Math.sin(u * 4 + i * 1.3) * 10}px) scale(${ease.back(prog(u, .5 + i * .25, .8 + i * .25))})`; });
+    }
     return w => [W / 2, H - 560];
   }
   function drawTitle(cut, t) {
@@ -781,9 +817,18 @@
     const ak = ease.quint(prog(u, .05, .55));
     T(cutArt, { x: lerp(-420, 0, ak) + u * 10, y: Math.sin(t * 3) * 4, s: 1 + u * .012 });
     const quoted = (cut.shot.screen || '').match(/『(.+?)』/);
-    cutText.textContent = quoted ? quoted[1] : cut.lines[0].text;
-    const len = cutText.textContent.length;
-    cutText.style.fontSize = `${len > 24 ? 70 : len > 14 ? 84 : 100}px`;
+    let ct = quoted ? quoted[1] : cut.lines[0].text;
+    // 長い時は、真ん中に近い読点で 2 行に分ける。文字の大きさは一番長い行が枠に収まるように
+    if ([...ct].length > 12 && !ct.includes('\n')) {
+      const chars = [...ct], mid = chars.length / 2;
+      let best = -1;
+      chars.forEach((c, i) => { if ('、，'.includes(c) && i < chars.length - 3 && (best < 0 || Math.abs(i + 1 - mid) < Math.abs(best - mid))) best = i + 1; });
+      if (best < 0) chars.forEach((c, i) => { if ('はがをにでとも'.includes(c) && i > 3 && i < chars.length - 4 && (best < 0 || Math.abs(i + 1 - mid) < Math.abs(best - mid))) best = i + 1; });
+      if (best > 0) ct = chars.slice(0, best).join('') + '\n' + chars.slice(best).join('');
+    }
+    cutText.textContent = ct;
+    const longest = Math.max(...ct.split('\n').map(x => [...x].length));
+    cutText.style.fontSize = `${Math.min(110, Math.floor(1060 / longest))}px`;
     const tk = ease.back(prog(u, .2, .6));
     T(cutText, { s: lerp(1.6, 1, tk), o: clamp(tk * 2), y: Math.sin(u * 9) * Math.max(0, 1 - u * 2) * 6 });
     cutBandText.textContent = NAME[who] || '';
@@ -817,7 +862,28 @@
       subText.innerHTML = '';
       subSpans = [];
       let inQ = 0;
-      [...l.text].forEach(ch => {
+      const chars = [...l.text];
+      const n0 = chars.length;
+      const fsz = n0 > 34 ? 44 : n0 > 26 ? 48 : 54;
+      const cap = Math.floor(1460 / fsz);
+      let brk = -1;
+      if (n0 > cap) {
+        const mid = n0 / 2;
+        const pick = set => {
+          let b = -1;
+          chars.forEach((c, i) => {
+            const at = i + 1;
+            if (!set.includes(c) || at < 4 || n0 - at < 3 || at > cap || n0 - at > cap) return;
+            if (chars[i + 1] === c || chars[i + 1] === '」' || chars[i + 1] === '』') return;   // ——、……、閉じかっこの前では切らない
+            if (b < 0 || Math.abs(at - mid) < Math.abs(b - mid)) b = at;
+          });
+          return b;
+        };
+        brk = pick('、。！？…—');
+        if (brk < 0) brk = pick('はがをにでとものへやか');
+      }
+      chars.forEach((ch, idx) => {
+        if (idx === brk) subText.appendChild(document.createElement('br'));
         const s = document.createElement('span');
         s.textContent = ch;
         if (ch === '「' || ch === '『') inQ++;
@@ -826,8 +892,7 @@
         subText.appendChild(s);
         subSpans.push(s);
       });
-      const n = [...l.text].length;
-      subText.style.fontSize = n > 34 ? '44px' : n > 26 ? '48px' : '54px';
+      subText.style.fontSize = `${fsz}px`;
       subText.style.textAlign = 'center';
       subText.style.maxWidth = '1460px';
       subLineId = l.id;
