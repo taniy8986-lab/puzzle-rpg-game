@@ -467,6 +467,8 @@ const E = (() => {
     node.hook(p => {
       const dr = clamp(p.draw);
       if (node.c.dr === dr) return; node.c.dr = dr;
+      // 丸い線端は長さ 0 でも点が残るので、描き始める前は隠す
+      ln.style.visibility = dr > .001 ? '' : 'hidden';
       if (!dash) ln.setAttribute('stroke-dashoffset', ((1 - dr) * (len + 1)).toFixed(2));
       if (area) area.setAttribute('width', (dr * width).toFixed(1));
     });

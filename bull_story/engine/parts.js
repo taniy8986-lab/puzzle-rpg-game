@@ -199,9 +199,9 @@ const P = (() => {
   };
   // 人のアイコン（委員会など）
   const PERSON = (c) => `<circle cx="50" cy="32" r="22" fill="${c}"/><path d="M10 112 Q12 62 50 60 Q88 62 90 112Z" fill="${c}"/>`;
-  P.committee = (parent, { x, y, w = 420, h = 300, label = '第三者委員会', sub = '会社の外の専門家', color = '#f3e6c8' } = {}) => {
+  P.committee = (parent, { x, y, w = 420, h = 300, label = '第三者委員会', sub = '会社の外の専門家', color = '#f3e6c8', n: count = 3 } = {}) => {
     const n = E.div(parent, { left: x, top: y, width: w, height: h, borderRadius: 26, background: 'rgba(255,255,255,.1)', border: `4px solid ${color}` });
-    n.people = [0, 1, 2].map(i => E.svg(n, { left: w / 2 - 150 + i * 100, top: 40, width: 100, height: 112 }, '0 0 100 112', PERSON(color)));
+    n.people = Array.from({ length: count }, (_, i) => E.svg(n, { left: w / 2 - count * 50 + i * 100, top: 40, width: 100, height: 112 }, '0 0 100 112', PERSON(color)));
     E.div(n, { left: 0, top: 170, width: w, textAlign: 'center', font: '900 40px/1.2 Zen', color }, label);
     if (sub) E.div(n, { left: 0, top: 222, width: w, textAlign: 'center', font: '800 26px/1.3 Round', color: 'rgba(243,230,200,.8)' }, sub);
     return n;
@@ -255,6 +255,106 @@ const P = (() => {
   P.drawArrow = (a, dur = .5, delay = 0) => {
     E.tw(a, dur, { draw: [0, 1] }, 'out', delay);
     E.tw(a.head, .15, { o: [0, 1], s: [.4, 1] }, 'back', delay + dur * .85);
+  };
+
+  /* ================================================================ SNS・チャット・注文画面 */
+  // スマホのタイムライン（投稿は要約したイメージ。アカウントは架空）
+  P.sns = (ph, posts, { y = 84, title = 'タイムライン' } = {}) => {
+    const sw = ph.sw;
+    E.div(ph.screen, { left: 0, top: 0, width: sw, height: 1000, background: '#f6f7f9' });
+    E.div(ph.screen, { left: 0, top: 54, width: sw, height: 64, background: '#fff', borderBottom: '2px solid #e6e8ec' },
+      `<div style="position:absolute;left:0;top:0;width:100%;text-align:center;font:900 26px/64px Zen;color:#2a2d33">${title}</div>`);
+    let yy = y + 50;
+    return posts.map(p => {
+      const n = E.div(ph.screen, { left: 12, top: yy, width: sw - 24, borderRadius: 18, background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,.08)', padding: '16px 18px 14px' },
+        `<div style="display:flex;align-items:center;gap:10px">
+           <span style="flex:none;width:44px;height:44px;border-radius:50%;background:${p.color || '#7aa7d9'};color:#fff;font:900 22px/44px Zen;text-align:center">${p.icon || p.name[0]}</span>
+           <span style="font:900 21px/1.2 Zen;color:#22252b;white-space:nowrap">${p.name}</span>
+           <span style="font:800 17px/1.2 Round;color:#8b919c;white-space:nowrap">${p.handle || ''}</span></div>
+         <div style="margin-top:10px;font:800 23px/1.5 Round;color:#2b2f36">${p.text}</div>
+         <div style="margin-top:8px;font:800 18px/1 Round;color:#e0457b">♥ <span style="color:#8b919c">${p.likes || ''}</span></div>`).ini({ o: 0 });
+      yy += p.h || 210;
+      return n;
+    });
+  };
+  // チャットの窓（大きめのパネル）
+  P.chat = (parent, { x = 360, y = 60, w = 1200, h = 760, title = 'オープンチャット' } = {}) => {
+    const n = E.div(parent, { left: x, top: y, width: w, height: h, borderRadius: 30, background: '#c9d6e6', overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,.45)' });
+    E.div(n, { left: 0, top: 0, width: w, height: 76, background: '#2f3a4c' },
+      `<div style="position:absolute;left:0;top:0;width:100%;text-align:center;font:900 30px/76px Zen;color:#fff">${title}</div>`);
+    n.w = w;
+    return n;
+  };
+  P.chatMsg = (win, { name, text, y, color = '#8aa1c2', icon = null, w = 860, size = 34 } = {}) => {
+    const n = E.div(win, { left: 30, top: y, width: win.w - 60 },
+      `<div style="display:flex;gap:18px;align-items:flex-start">
+         <span style="flex:none;width:70px;height:70px;border-radius:50%;background:${color};color:#fff;font:900 34px/70px Zen;text-align:center">${icon || name[0]}</span>
+         <div><div style="font:800 24px/1.2 Round;color:#3d4757;margin:2px 0 8px 6px">${name}</div>
+           <div style="display:inline-block;max-width:${w}px;background:#fff;border-radius:6px 28px 28px 28px;padding:18px 26px;font:800 ${size}px/1.5 Round;color:#222833;box-shadow:0 4px 10px rgba(0,0,0,.1)">${text}</div></div>
+       </div>`).ini({ o: 0 });
+    return n;
+  };
+  // 注文が成立した画面
+  P.order = (ph, { name = 'エスポア（3260）', side = '買い' } = {}) => {
+    const sw = ph.sw;
+    const n = E.div(ph.screen, { left: 0, top: 0, width: sw, height: 1000, background: '#f4f6f9' }).ini({ o: 0 });
+    E.svg(n, { left: sw / 2 - 70, top: 200, width: 140, height: 140 }, '0 0 100 100', '<circle cx="50" cy="50" r="44" fill="#17915a"/><path d="M28 52 L44 67 L73 36" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>');
+    E.div(n, { left: 0, top: 370, width: sw, textAlign: 'center', font: '900 32px/1.4 Zen', color: '#22252b' }, '注文が成立しました');
+    E.div(n, { left: 30, top: 450, width: sw - 60, borderRadius: 18, background: '#fff', padding: '22px 24px', font: '800 26px/1.7 Round', color: '#2b2f36', boxShadow: '0 4px 12px rgba(0,0,0,.08)' },
+      `${name}<br><span style="color:#d22d68;font:900 30px Zen">${side}</span>　<span style="color:#8b919c;font-size:22px">（追加）</span>`);
+    return n;
+  };
+
+  /* ================================================================ チェックリスト・シーソー */
+  P.checklist = (parent, items, { x, y, w = 1000, rowH = 110, size = 40 } = {}) => items.map((t, i) => {
+    const n = E.div(parent, { left: x, top: y + i * rowH, width: w, height: rowH - 18, borderRadius: 18, background: 'rgba(255,255,255,.96)', boxShadow: '0 8px 18px rgba(0,0,0,.25)', display: 'flex', alignItems: 'center', paddingLeft: 30, font: `900 ${size}px/1.2 Zen`, color: '#262236', whiteSpace: 'nowrap' },
+      `<span style="flex:none;display:inline-block;width:${size}px;height:${size}px;border-radius:8px;border:5px solid #8a8070;margin-right:24px"></span>${t}`).ini({ o: 0 });
+    n.q = E.div(n, { left: w - 100, top: 0, width: 80, height: rowH - 18, display: 'flex', alignItems: 'center', justifyContent: 'center', font: `900 ${size * 1.5}px/1 Zen`, color: '#e0353f' }, '？').ini({ o: 0 });
+    return n;
+  });
+  // シーソー。beam を回すと左右の箱も一緒に傾く
+  P.seesaw = (parent, { x = 960, y = 640, w = 1300, left = '', right = '', lc = '#e0457b', rc = '#b3122b' } = {}) => {
+    E.svg(parent, { left: x - 90, top: y, width: 180, height: 150 }, '0 0 180 150', '<path d="M90 0 L176 150 L4 150Z" fill="#c9a24a"/>');
+    const beam = E.div(parent, { left: x - w / 2, top: y - 26, width: w, height: 26, borderRadius: 13, background: '#e8dcc0', boxShadow: '0 6px 14px rgba(0,0,0,.3)' });
+    beam.el.style.transformOrigin = '50% 100%';
+    const box = (bx, text, c, bw) => E.div(beam, { left: bx, top: -200, width: bw, height: 200, borderRadius: 22, background: c, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', font: '900 40px/1.35 Zen', color: '#fff', boxShadow: '0 12px 24px rgba(0,0,0,.3)' }, `<div>${text}</div>`).ini({ o: 0 });
+    beam.l = box(40, left, lc, 420);
+    beam.r = box(w - 560, right, rc, 520);
+    return beam;
+  };
+
+  /* ================================================================ 場面の型（章をまたいで使う） */
+  // 解説用の黒板っぽい背景と見出し
+  P.slate = g => {
+    E.div(g, { left: -400, top: -200, width: W + 800, height: H + 400, background: 'radial-gradient(ellipse at 50% 40%, #2d3e5e 0%, #1d2942 65%, #121a2c 100%)' });
+    E.div(g, { left: -400, top: -200, width: W + 800, height: H + 400, backgroundImage: 'linear-gradient(rgba(255,255,255,.035) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,.035) 2px, transparent 2px)', backgroundSize: '60px 60px' });
+  };
+  P.heading = (g, text, y = 60) => E.div(g, { left: 0, top: y, width: W, textAlign: 'center', font: '900 58px/1.2 Zen', color: '#f3e6c8', textShadow: '0 4px 10px rgba(0,0,0,.4)' }, text).ini({ o: 0 });
+  P.nightBg = g => E.div(g, { left: -400, top: -200, width: W + 800, height: H + 400, background: 'radial-gradient(ellipse at 50% 40%, #26305a 0%, #141a36 70%, #0b0f22 100%)' });
+  // アジトの中の白いボード（左にハット、右にイブの通話）
+  P.boardScene = (g, faces = ['normal', 'smile', 'surprise', 'anxious']) => {
+    E.div(g, { left: -400, top: -200, width: W + 800, height: H + 400, background: 'radial-gradient(ellipse at 50% 35%, #3d1b22 0%, #200d10 70%, #140707 100%)' });
+    const hat = E.actor(g, 'hat', { x: 230, y: 1100, h: 640, pose: 'front' });
+    E.breathe(hat, .01, 1.9);
+    const call = P.call(g, { x: 1530, y: 560, w: 360, h: 290, faces });
+    const bd = E.div(g, { left: 450, top: 50, width: 1020, height: 760, borderRadius: 20, background: '#fbf9f4', boxShadow: '0 24px 60px rgba(0,0,0,.55)' });
+    E.from(bd, { y: 50, s: .97 }, .5, 0, 'quint');
+    return { hat, call, bd };
+  };
+  // ぼかした部屋の前のスマホ。fill(ph) で画面の中身を作る（通知なら P.lock＋P.notice）
+  P.phoneScene = (fill, { name = 'phone', zoom = true, wait = 3.9 } = {}) => {
+    E.scene({ name }, sc => {
+      const g = sc.cam;
+      const back = E.div(g, { left: 0, top: 0, width: W, height: H }).ini({ blur: 12, bright: .85 });
+      const R = P.room(back);
+      P.watchlist(R.screen, [['エスポア', '3260 ｜ 名証']], { hi: 0 });
+      const ph = P.phone(g, { x: 750, y: 110, w: 420, h: 850 });
+      E.from(ph, { y: 760 }, .6, 0, 'quint');
+      E.sfx('whoosh');
+      if (zoom) P.look(sc.cam, { s: 1.18, cx: 960, cy: 430, dur: 3.4, delay: 1.4 });
+      fill(ph, sc);
+      E.wait(wait);
+    });
   };
 
   /* ================================================================ 背景・演出 */
