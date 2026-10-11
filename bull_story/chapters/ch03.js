@@ -85,7 +85,7 @@ E.chapter('03');
       { name: '株クラ・すずらん', handle: '@suzuran', icon: 'す', color: '#7cc29a', text: '延期は残念。でも、それだけ丁寧に調べてるってことだよね', likes: 86, h: 230 },
       { name: 'ロケット待ち', handle: '@rocket', icon: 'ロ', color: '#f0a04a', text: '待てる人だけが、ロケットに乗れるのかも🚀', likes: 152, h: 200 },
     ]);
-    const nb = P.note(sc.cam, IMAGE_NOTE, { x: 1330, y: 30, size: 22 });
+    const nb = P.note(sc.root, IMAGE_NOTE, { x: 1330, y: 30, size: 22 });
     posts.forEach((p, i) => { E.tw(p, .45, { o: [0, 1], y: [40, 0] }, 'back', .8 + i * 1.2); E.sfx('pop', { delay: .8 + i * 1.2 }); });
     P.look(sc.cam, { s: 1.45, cx: 960, cy: 440, dur: 1.4, delay: .5 });
     E.wait(1.2);
@@ -272,7 +272,7 @@ E.chapter('03');
     const posts = P.sns(ph, [
       { name: 'ホールド太郎', handle: '@hold', icon: 'ホ', color: '#8e7cc3', text: '再延期にはガッカリ……。<br>でも、失望売りは天からの<br>買い増しチャンスかも', likes: 64, h: 260 },
     ]);
-    P.note(sc.cam, IMAGE_NOTE, { x: 1330, y: 30, size: 22 });
+    P.note(sc.root, IMAGE_NOTE, { x: 1330, y: 30, size: 22 });
     E.tw(posts[0], .45, { o: [0, 1], y: [40, 0] }, 'back', .8); E.sfx('pop', { delay: .8 });
     P.look(sc.cam, { s: 1.5, cx: 960, cy: 400, dur: 1.4, delay: .5 });
     E.wait(1.3);
