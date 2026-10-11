@@ -1,0 +1,7 @@
+build/
+__pycache__/
+*.blend1
+# 受け取ったキャラクター画像を含む試作（公開リポジトリには置かない）
+out/flag_buruchan_2d.png
+out/flag2d_in_video.png
+out/flag_compare.jpg
