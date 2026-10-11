@@ -107,7 +107,7 @@ E.chapter('02');
   });
 
   /* ============================================================ S3 6月30日の通知 */
-  phoneScene({ date: '6月30日', week: '火曜日', title: 'エスポア（3260）', body: '第三者委員会による調査の<span style="color:#d42a2a">一時中断</span>に関するお知らせ', cx: 236, cy: 476, cw: 130, ch: 54 });
+  phoneScene({ date: '6月30日', week: '火曜日', title: 'エスポア（3260）', body: '第三者委員会による調査の<br><span style="color:#d42a2a">一時中断</span>に関するお知らせ', cx: 92, cy: 495, cw: 122, ch: 48 });
 
   E.scene({ name: 'bull_surprise' }, sc => {
     const g = sc.cam;
@@ -197,7 +197,7 @@ E.chapter('02');
     E.pop(q, .5, .6, .85); E.sfx('pop', { delay: .6 });
     E.wait(1.2);
     const L = E.say('hat', '調べる側が、本当に中立なのか。そこに疑問が出たのさ。', { talk: hat, talkAmp: 2, wait: false, yomi: '調べるがわが、本当に中立なのか。そこに疑問が出たのさ。' });
-    P.underline(bd, { x: 230, y: 395, w: 560, delay: L.dur * .35 });
+    P.circle(bd, { x: 487, y: 396, w: 440, h: 76, delay: L.dur * .35, dur: .5 });
     E.at(L.end + .3);
   });
 
