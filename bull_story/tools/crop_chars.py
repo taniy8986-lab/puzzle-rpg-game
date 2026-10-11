@@ -193,9 +193,10 @@ def main():
                 eyes_only(img).save(OUT / "baron_eyes.png")
         if who == "baron":
             # 師匠の写真立て用（男爵の高笑いの顔をセピアにして、昔の笑顔の写真に見せる）
-            face = sheet.crop((462, 1046, 596, 1172)).resize((268, 252), Image.LANCZOS)
+            face = sheet.crop((462, 1046, 596, 1172)).resize((536, 504), Image.LANCZOS).filter(ImageFilter.UnsharpMask(radius=2, percent=70, threshold=2))
             sep = ImageOps.colorize(ImageOps.grayscale(face), (52, 34, 20), (250, 228, 190), mid=(170, 128, 86))
             sep.save(OUT / "mentor_photo.png")
+            face.save(OUT / "mentor_photo_color.png")   # 正体を明かす場面で、セピアから色が戻る
 
     for who, g in GRIDS.items():
         sheet = Image.open(getattr(args, who)).convert("RGB")

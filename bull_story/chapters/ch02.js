@@ -336,7 +336,7 @@ E.chapter('02');
     E.wait(.9);
     E.tw(rows[2], .4, { o: [0, 1], x: [60, 0] }, 'back');
     E.sfx('alarm', { gain: .35 });
-    const red = E.div(L.screen, { left: 0, top: 180, width: 840, height: 60, background: 'rgba(230,60,60,.2)' }).ini({ o: 0 });
+    const red = E.div(L.screen, { left: 0, top: 54 + 2 * 46, width: 840, height: 46, background: 'rgba(230,60,60,.2)' }).ini({ o: 0 });
     E.fn(2.6, (k, t) => { red.p.o = .5 + .5 * Math.sin(t * 9); }, 0, true);
     E.set(L.call, { face: 'surprise' }, .6);
     E.wait(2.6);

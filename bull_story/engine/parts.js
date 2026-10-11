@@ -142,6 +142,12 @@ const P = (() => {
       font: `900 ${60 * size}px/${86 * size}px Zen`, letterSpacing: '.08em', boxShadow: '0 8px 18px rgba(0,0,0,.2)',
     }, k.label).ini({ o: 0, r: rot });
   };
+  // 好きな文字と色のハンコ（判定など）
+  P.mark = (parent, label, { x, y, color = '#c62828', size = 1, rot = -9, w = 210 } = {}) => E.div(parent, {
+    left: x, top: y, minWidth: w * size, height: 104 * size, padding: `0 ${22 * size}px`, borderRadius: 20 * size,
+    border: `${9 * size}px solid ${color}`, color, background: 'rgba(255,255,255,.9)', textAlign: 'center', whiteSpace: 'nowrap',
+    font: `900 ${56 * size}px/${86 * size}px Zen`, letterSpacing: '.04em', boxShadow: '0 8px 18px rgba(0,0,0,.2)',
+  }, label).ini({ o: 0, r: rot });
   P.stampIn = (n, delay = 0) => {
     E.tw(n, .26, { o: [0, 1], s: [2.3, 1] }, 'in2', delay);
     E.shake(n, .28, 7, delay + .26);
@@ -342,19 +348,73 @@ const P = (() => {
     return { hat, call, bd };
   };
   // ぼかした部屋の前のスマホ。fill(ph) で画面の中身を作る（通知なら P.lock＋P.notice）
-  P.phoneScene = (fill, { name = 'phone', zoom = true, wait = 3.9 } = {}) => {
+  P.phoneScene = (fill, { name = 'phone', zoom = true, wait = 3.9, night = false, bg = null } = {}) => {
     E.scene({ name }, sc => {
       const g = sc.cam;
-      const back = E.div(g, { left: 0, top: 0, width: W, height: H }).ini({ blur: 12, bright: .85 });
-      const R = P.room(back);
+      const back = E.div(g, { left: 0, top: 0, width: W, height: H }).ini({ blur: 12, bright: night ? .7 : .85 });
+      const R = P.room(back, { night });
       P.watchlist(R.screen, [['エスポア', '3260 ｜ 名証']], { hi: 0 });
-      const ph = P.phone(g, { x: 750, y: 110, w: 420, h: 850 });
+      const ph = P.phone(g, { x: 750, y: 110, w: 420, h: 850, bg: bg || (night ? 'linear-gradient(180deg,#1d2650,#0e1430)' : undefined) });
       E.from(ph, { y: 760 }, .6, 0, 'quint');
       E.sfx('whoosh');
       if (zoom) P.look(sc.cam, { s: 1.18, cx: 960, cy: 430, dur: 3.4, delay: 1.4 });
       fill(ph, sc);
       E.wait(wait);
     });
+  };
+
+  /* ================================================================ 第4章の図解 */
+  // 画面のひび割れ（中心から放射状に伸びる線）。P.crackIn で一気に走らせる
+  P.crack = (parent, { cx = W / 2, cy = H / 2, n = 11, len = 900, color = 'rgba(255,255,255,.9)', sw = 4, seed = 5 } = {}) => {
+    const lines = [];
+    for (let i = 0; i < n; i++) {
+      const a0 = (i / n) * Math.PI * 2 + rnd(i + seed) * .4;
+      const pts = [[0, 0]];
+      let x = 0, y = 0, a = a0;
+      const L = len * (.55 + rnd(i * 3 + seed) * .6), steps = 7;
+      for (let k = 1; k <= steps; k++) {
+        a += (rnd(i * 11 + k + seed) - .5) * .7;
+        x += Math.cos(a) * L / steps; y += Math.sin(a) * L / steps;
+        pts.push([x, y]);
+      }
+      const minx = Math.min(...pts.map(p => p[0])) - 10, miny = Math.min(...pts.map(p => p[1])) - 10;
+      const maxx = Math.max(...pts.map(p => p[0])) + 10, maxy = Math.max(...pts.map(p => p[1])) + 10;
+      const ln = E.polyline(parent, pts.map(p => [p[0] - minx, p[1] - miny]), { left: cx + minx, top: cy + miny, width: maxx - minx, height: maxy - miny, color, sw: sw * (.6 + rnd(i) * .8), glow: 6 }).ini({ draw: 0 });
+      lines.push(ln);
+    }
+    return lines;
+  };
+  P.crackIn = (lines, delay = 0, dur = .22) => {
+    lines.forEach((ln, i) => E.tw(ln, dur, { draw: [0, 1] }, 'out', delay + i * .012));
+    E.sfx('shatter', { delay, gain: .8 });
+  };
+  // 万円の数を「1億868.2万円」「2,131.8万円」の形に
+  const manFmt = v => {
+    const a = Math.abs(v), sign = v < -.05 ? '▲' : (v > .05 ? '+' : '');
+    const oku = Math.floor(a / 10000), rest = a - oku * 10000;
+    const restS = rest.toFixed(1).replace(/\B(?=(\d{3})+(?!\d))/, ',');
+    return sign + (oku ? `${oku}億${rest.toFixed(1)}` : restS) + '万円';
+  };
+  P.manFmt = manFmt;
+  // 純資産の棒（p.v を動かす。単位は万円）。ゼロの線をまたぐと赤になる
+  P.netBar = (parent, { x, y0, w = 220, scale = .03, label = '' } = {}) => {
+    const bar = E.div(parent, { left: x, top: y0, width: w, height: 0, borderRadius: 10 });
+    const val = E.div(parent, { left: x - 200, top: y0, width: w + 400, textAlign: 'center', font: '900 54px/1.2 Noto', whiteSpace: 'nowrap' });
+    bar.ini({ v: 0 });
+    bar.hook(p => {
+      const v = p.v, h = Math.abs(v) * scale, neg = v < 0;
+      const key = v.toFixed(1);
+      if (bar.c.key === key) return; bar.c.key = key;
+      const st = bar.el.style;
+      st.top = (neg ? y0 : y0 - h) + 'px'; st.height = h + 'px';
+      st.background = neg ? 'linear-gradient(180deg,#e04848,#b3122b)' : 'linear-gradient(180deg,#2ec27e,#17915a)';
+      st.borderRadius = neg ? '0 0 10px 10px' : '10px 10px 0 0';
+      val.el.textContent = manFmt(v);
+      val.el.style.color = neg ? '#c62828' : '#17915a';
+      val.el.style.top = (neg ? y0 + h + 16 : y0 - h - 74) + 'px';
+    });
+    bar.val = val;
+    return bar;
   };
 
   /* ================================================================ 背景・演出 */
@@ -499,10 +559,18 @@ const P = (() => {
     n.screen = scr; n.sw = w - 32; n.sh = h - 32;
     return n;
   };
-  P.lock = (ph, { date = '', week = '' } = {}) => {
+  // time を渡すと時計を大きく、日付を小さく出す（夜は白い文字）。戻り値の time は E.set(..., { line: E.line('1:15') }) で変えられる
+  P.lock = (ph, { date = '', week = '', time = null, night = false } = {}) => {
     const s = ph.screen, sw = ph.sw;
-    E.div(s, { left: 0, top: 96, width: sw, textAlign: 'center', font: '800 28px/1.2 Round', color: 'rgba(60,40,40,.75)' }, week);
-    E.div(s, { left: 0, top: 136, width: sw, textAlign: 'center', font: '900 96px/1.1 Noto', color: 'rgba(50,32,32,.88)', letterSpacing: '-.02em' }, date);
+    const ink = night ? 'rgba(235,240,255,.92)' : 'rgba(50,32,32,.88)', sub = night ? 'rgba(220,228,255,.75)' : 'rgba(60,40,40,.75)';
+    if (time == null) {
+      E.div(s, { left: 0, top: 96, width: sw, textAlign: 'center', font: '800 28px/1.2 Round', color: sub }, week);
+      E.div(s, { left: 0, top: 136, width: sw, textAlign: 'center', font: '900 96px/1.1 Noto', color: ink, letterSpacing: '-.02em' }, date);
+      return {};
+    }
+    E.div(s, { left: 0, top: 92, width: sw, textAlign: 'center', font: '800 28px/1.2 Round', color: sub }, `${date}　${week}`);
+    const tm = E.text(s, { left: 0, top: 128, width: sw, textAlign: 'center', font: '900 120px/1.1 Noto', color: ink, letterSpacing: '-.02em' }, time);
+    return { time: tm };
   };
   // 通知カード（最初は隠れている。P.notifyIn で出す）
   P.notice = (ph, { app = '適時開示アラート', title = '', body = '', y = 300, icon = '開', iconBg = '#e04848' } = {}) => {
@@ -599,13 +667,15 @@ const P = (() => {
     return R;
   };
 
-  // 大画面に出す「適時開示」の一覧（玉座に隠れないよう上の方に小さめに並べる）
+  // 大画面に出す「適時開示」の一覧（玉座に隠れないよう上の方に並べる。3 行以上は詰めて小さく）
   P.board = (screen, title, rows) => {
-    E.div(screen, { left: 0, top: 0, width: 840, height: 60, background: '#ebe6dc', borderBottom: '2px solid #d8d0c2' },
-      `<div style="position:absolute;left:26px;top:0;font:900 30px/60px Zen;color:#3a3236">${title}</div>`);
-    return rows.map((r, i) => E.div(screen, { left: 0, top: 60 + i * 60, width: 840, height: 60, borderBottom: '2px solid #ece7de' },
-      `<div style="position:absolute;left:26px;top:0;font:800 26px/60px Round;color:#8a8070">${r[0]}</div>
-       <div style="position:absolute;left:118px;top:0;width:700px;font:900 28px/60px Zen;color:${r[2] || '#2c2630'};white-space:nowrap">${r[1]}</div>`).ini({ o: 0 }));
+    const compact = rows.length >= 3, hh = compact ? 54 : 60, rh = compact ? 46 : 60;
+    const fd = compact ? 23 : 26, ft = compact ? 25 : 28;
+    E.div(screen, { left: 0, top: 0, width: 840, height: hh, background: '#ebe6dc', borderBottom: '2px solid #d8d0c2' },
+      `<div style="position:absolute;left:26px;top:0;font:900 ${compact ? 28 : 30}px/${hh}px Zen;color:#3a3236">${title}</div>`);
+    return rows.map((r, i) => E.div(screen, { left: 0, top: hh + i * rh, width: 840, height: rh, borderBottom: '2px solid #ece7de' },
+      `<div style="position:absolute;left:26px;top:0;font:800 ${fd}px/${rh}px Round;color:#8a8070">${r[0]}</div>
+       <div style="position:absolute;left:118px;top:0;width:700px;font:900 ${ft}px/${rh}px Zen;color:${r[2] || '#2c2630'};white-space:nowrap">${r[1]}</div>`).ini({ o: 0 }));
   };
 
   /* ================================================================ 回想（セピア） */

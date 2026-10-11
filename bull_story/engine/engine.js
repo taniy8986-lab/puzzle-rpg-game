@@ -539,7 +539,7 @@ const E = (() => {
   subBand.el.id = 'subband';
   const SUB = reg(new Node(mkEl('div', E.ui, {}, 'a')));
   SUB.el.id = 'sub';
-  const subHTML = (who, src) => {
+  const subHTML = (who, src, chipText, chipColor) => {
     const c = CAST[who] || CAST.narr;
     const L = E.line(src);
     let f = '', o = '';
@@ -549,14 +549,15 @@ const E = (() => {
       f += sg.cls ? `<span class="s${sg.cls}">${tx}</span>` : tx;
       o += tx;
     }
-    const chip = c.chip ? `<span class="chip" style="background:${c.color}">${esc(c.chip)}</span>` : '';
+    const label = chipText != null ? chipText : c.chip;
+    const chip = label ? `<span class="chip" style="background:${chipColor || c.color}">${esc(label)}</span>` : '';
     return `<div class="row">${chip}<span class="st"><span class="o">${o}</span><span class="f">${f}</span></span></div>`;
   };
   SUB.hook(p => {
     const L = p.line;
     const key = L ? L.key : null;
     if (SUB.c.key !== key) {
-      SUB.el.innerHTML = L ? subHTML(L.who, L.text) : '';
+      SUB.el.innerHTML = L ? subHTML(L.who, L.text, L.chip, L.chipColor) : '';
       SUB.c.key = key;
       // 1 行に収まらない時は文字を小さくする（折り返さない）
       const row = SUB.el.firstChild;
@@ -577,7 +578,8 @@ const E = (() => {
     const V = window.VOICE || {};
     const dur = V[id] != null ? V[id] : estimate(o.yomi || src);
     const t0 = E.T + (o.delay || 0);
-    act(t0, t0, () => { SUB.p.line = { who, text: src, key: id }; }, false, G);
+    // o.chip / o.chipColor で名前チップだけ差し替えられる（正体を隠す「？？？」など。声は who のまま）
+    act(t0, t0, () => { SUB.p.line = { who, text: src, key: id, chip: o.chip, chipColor: o.chipColor }; }, false, G);
     act(t0, t0 + .16, k => { SUB.p.o = Math.min(SUB.p.o, EASE.out(k)); SUB.p.y += (1 - EASE.out(k)) * 10; }, true, G);
     CUES.voices.push({ t: +t0.toFixed(4), id, who });
     if (o.talk) {
