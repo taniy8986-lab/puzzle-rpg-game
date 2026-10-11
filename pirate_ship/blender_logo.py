@@ -126,7 +126,7 @@ def build():
     sc = reset()
     sc.frame_start = F0
     sc.frame_end = F1 - 1
-    sc.eevee.taa_render_samples = 24      # 軽いシーンなので本編より多め（陰のざらつき対策）
+    sc.eevee.taa_render_samples = 8
     bm, hm = bone_mat(), hair_mat()
     black = principled("LogoBlack", (0.01, 0.01, 0.012), 0.15)
     white_e, _ = emission_mat("LogoShine", (1, 1, 1), 6.0)
@@ -160,9 +160,6 @@ def build():
     sol = hair.modifiers.new("solid", "SOLIDIFY")
     sol.thickness = 0.09
     sol.offset = 0.0
-    sub = hair.modifiers.new("sub", "SUBSURF")
-    sub.levels = 1
-    sub.render_levels = 1
     # 三角のヘアピン（向かって左）
     def on_hair(x, z, out=0.09):
         rr = math.sqrt(max(1.14 ** 2 - (z - 0.08) ** 2, 0.01)) if z > 0.08 else 1.14
@@ -237,8 +234,9 @@ def build():
     socket_key(halo_strength, F0 + 20, 0.45)
     socket_key(halo_strength, F1, 0.35)
 
-    def area(name, loc, energy, color, size, target=(0, 0, 0)):
+    def area(name, loc, energy, color, size, target=(0, 0, 0), shadow=False):
         L2 = bpy.data.lights.new(name, "AREA")
+        L2.use_shadow = shadow          # 影は主光源だけ（描画時間のため）
         L2.energy = energy
         L2.color = color
         L2.size = size
@@ -248,7 +246,7 @@ def build():
         o.rotation_euler = d.to_track_quat("-Z", "Y").to_euler()
         return o
 
-    area("Key", (-4, -6, 4), 900, (1.0, 0.86, 0.7), 4)
+    area("Key", (-4, -6, 4), 900, (1.0, 0.86, 0.7), 4, shadow=True)
     area("Fill", (5, -5, -1), 250, (0.6, 0.75, 1.0), 5)
     area("RimL", (-4, 4, 2), 700, (1.0, 0.55, 0.25), 3)
     area("RimR", (4, 4, 2), 600, (0.3, 0.8, 0.85), 3)
