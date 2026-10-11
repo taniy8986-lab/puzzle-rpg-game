@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>EVE & JIJI 速報 横型パッケージ</title>
+<style>
+  @font-face { font-family: "Dela"; src: url(assets/fonts/DelaGothicOne.ttf); }
+  @font-face { font-family: "Noto"; src: url(assets/fonts/NotoSansJP-700.ttf); font-weight: 700; }
+  @font-face { font-family: "Noto"; src: url(assets/fonts/NotoSansJP-900.ttf); font-weight: 900; }
+  @font-face { font-family: "Anton"; src: url(assets/fonts/Anton.ttf); }
+
+  html, body { margin: 0; background: #000; }
+  #stage {
+    position: relative; width: 1920px; height: 1080px; overflow: hidden;
+    font-family: "Noto", sans-serif; font-weight: 900; color: #fff; background: #0d1230;
+  }
+  #stage div, #stage img, #stage span { box-sizing: border-box; }
+  .a { position: absolute; transform-origin: 50% 50%; will-change: transform, opacity; }
+  .layer { position: absolute; inset: 0; overflow: hidden; }
+  .dela { font-family: "Dela", sans-serif; font-weight: 400; }
+  .anton { font-family: "Anton", sans-serif; font-weight: 400; }
+  .nowrap { white-space: nowrap; }
+  .mask { overflow: hidden; white-space: nowrap; }
+  .ch { display: inline-block; will-change: transform, opacity; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+/* ---------- 共通ユーティリティ ---------- */
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, k) => a + (b - a) * k;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const bell = k => Math.sin(Math.PI * clamp(k));
+const ease = {
+  out: k => 1 - Math.pow(1 - k, 3),
+  quint: k => 1 - Math.pow(1 - k, 5),
+  inOut: k => (k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2),
+  in: k => k * k * k,
+  back: k => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2); },
+};
+const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const mix = (a, b, k) => { const A = hex(a), B = hex(b); return A.map((v, i) => Math.round(lerp(v, B[i], k))); };
+const rgba = (c, a = 1) => `rgba(${c.join(',')},${a})`;
+// 決まった乱数（毎回同じ絵にするため）
+const rnd = i => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+const stage = document.getElementById('stage');
+function mk(parent, style = {}, cls = 'a', html = '') {
+  const e = document.createElement('div');
+  if (cls) e.className = cls;
+  Object.assign(e.style, style);
+  if (html) e.innerHTML = html;
+  parent.appendChild(e);
+  return e;
+}
+function pic(parent, src, style = {}, cls = 'a') {
+  const e = document.createElement('img');
+  if (src) e.src = src;
+  e.className = cls;
+  Object.assign(e.style, style);
+  parent.appendChild(e);
+  return e;
+}
+function T(e, { x = 0, y = 0, s = 1, sx = null, sy = null, r = 0, o = 1 } = {}) {
+  e.style.transform = `translate(${x}px,${y}px) rotate(${r}deg) scale(${sx ?? s},${sy ?? s})`;
+  e.style.opacity = o;
+}
+function chars(parent, text, style = {}, cls = 'a mask') {
+  const box = mk(parent, style, cls);
+  const spans = [...text].map(c => {
+    const s = document.createElement('span');
+    s.className = 'ch'; s.textContent = c === ' ' ? ' ' : c;
+    box.appendChild(s);
+    return s;
+  });
+  return { box, spans };
+}
+const show = (e, on) => (e.style.display = on ? 'block' : 'none');
+
+/* ---------- タイムライン ----------
+   元トレーラー（縦 37.7 秒）を OFFSET 秒うしろにずらして流す。
+   音も同じだけずらすので、映像・音・グラフィックがそろう。 */
+const OFFSET = 1.2;
+const DURATION = 40;
+const FPS_SRC = 30, SRC_FRAMES = 1131;
+const at = o => o + OFFSET;            // 元トレーラーの時刻 → この動画の時刻
+const T_SPLIT1 = at(3.6);              // 速報 → 分割レイアウト
+const T_LOGO = at(15.0), T_LOGO_END = at(18.3);
+const T_END = at(35.9);                // エンドカード
+
+const RED = '#e8192c', NAVY = '#0d1230', YELLOW = '#ffd23f', PINK = '#ff4fa3';
+
+// 右パネルに出す区切り（o は元トレーラーの時刻）
+const SEGS = [
+  { o: 3.6, big: 'NEWS', chip: '', title: '帰ってきた!!', en: 'THE DUO IS BACK', quote: 'あのコンビが', col: '#ff3b5c' },
+  { o: 5.8, big: '#04', chip: '#04', title: 'ビーチ', en: 'BEACH', quote: 'わーい！', col: '#29b6f6' },
+  { o: 6.7, big: '♪', chip: '', title: 'ダンス', en: 'DANCE TIME', quote: 'ダンスタイム♪', col: '#ff7ab8' },
+  { o: 7.4, big: '#05', chip: '#05', title: '原宿', en: 'HARAJUKU', quote: 'HYPER POP!', col: PINK },
+  { o: 8.8, big: '#02', chip: '#02', title: '焼肉', en: 'YAKINIKU', quote: 'キラーン☆', col: '#ff9f1c' },
+  { o: 10.9, big: '★', chip: '★', title: 'じぃじ', en: 'JIJI', quote: '登場！', col: YELLOW },
+  { o: 11.9, big: '#07', chip: '#07', title: '万華鏡', en: 'KALEIDOSCOPE', quote: 'くるくる〜', col: '#b388ff' },
+  { o: 12.9, big: '#04', chip: '#04', title: 'ビーチ', en: 'BEACH', quote: 'また遊ぼう！', col: '#29b6f6' },
+  { o: 18.3, big: '#02', chip: '#02', title: '焼肉', en: 'YAKINIKU', quote: 'おいしい！', col: '#ff9f1c' },
+  { o: 19.0, big: '★', chip: '★', title: 'じぃじ降臨', en: 'JIJI DESCENDS', quote: 'じぃじ、降臨!!', col: '#e040fb' },
+  { o: 21.3, big: '#03', chip: '#03', title: 'ラーメン', en: 'RAMEN', quote: 'ドーン！', col: '#ff7043' },
+  { o: 22.4, big: '#04', chip: '#04', title: 'サメ', en: 'SHARK', quote: 'ガブッ！', col: '#29b6f6' },
+  { o: 23.4, big: '#02', chip: '#02', title: '焼肉', en: 'YAKINIKU', quote: 'いただきます！', col: '#ff9f1c' },
+  { o: 24.4, big: '#05', chip: '#05', title: '原宿', en: 'HARAJUKU', quote: 'かわいい♡', col: PINK },
+  { o: 25.5, big: '★', chip: '★', title: 'じぃじビーム', en: 'JIJI BEAM', quote: 'ズバッ！', col: '#7c4dff' },
+  { o: 26.4, big: '★', chip: '★', title: 'じぃじ最強', en: 'STRONGEST JIJI', quote: 'じぃじ、最強！', col: PINK },
+  { o: 27.5, big: '#01', chip: '#01', title: '楽屋', en: 'DRESSING ROOM', quote: 'おつかれさま！', col: '#26c6da' },
+  { o: 33.8, big: 'BYE', chip: '#01', title: 'また遊ぼう', en: 'SEE YOU AGAIN', quote: 'また遊ぼう！', col: '#ff3b5c' },
+].map((s, i, a) => ({ ...s, t0: at(s.o), t1: i + 1 < a.length ? at(a[i + 1].o) : T_END }));
+// ロゴ区間の手前で切る
+SEGS.forEach(s => { if (s.t0 < T_LOGO && s.t1 > T_LOGO) s.t1 = T_LOGO; });
+
+const CHIPS = [['#01', '楽屋'], ['#02', '焼肉'], ['#03', 'ラーメン'], ['#04', 'ビーチ'], ['#05', '原宿'], ['#07', '万華鏡'], ['★', 'じぃじ']];
+
+function segAt(t) {
+  let cur = null;
+  SEGS.forEach(s => { if (t >= s.t0) cur = s; });
+  return cur;
+}
+
+/* ======== 背景（ぼかした元映像） ======== */
+const bgLayer = mk(stage, {}, 'layer');
+const bgImg = pic(bgLayer, '', { left: '-20px', top: '-20px', width: '1960px', height: '1120px', objectFit: 'cover' });
+const bgShade = mk(bgLayer, { inset: 0 });
+const bgStripes = mk(bgLayer, { inset: 0, backgroundImage: 'repeating-linear-gradient(-55deg, rgba(255,255,255,.035) 0 3px, transparent 3px 22px)' });
+const bgWord = mk(bgLayer, { left: 0, top: '300px', fontSize: '420px', lineHeight: 1, color: 'transparent', WebkitTextStroke: '3px rgba(255,255,255,.09)', whiteSpace: 'nowrap' }, 'a anton');
+
+/* ======== 分割レイアウト ======== */
+const split = mk(stage, {}, 'layer');
+// 縦型の映像フレーム
+const FR = { x: 180, y: 58, w: 520, h: 924 };
+const frameGlow = mk(stage, { zIndex: 6, left: `${FR.x - 40}px`, top: `${FR.y - 40}px`, width: `${FR.w + 80}px`, height: `${FR.h + 80}px`, borderRadius: '70px' });
+const frame = mk(stage, { zIndex: 7, left: `${FR.x}px`, top: `${FR.y}px`, width: `${FR.w}px`, height: `${FR.h}px`, borderRadius: '34px', overflow: 'hidden',
+  border: '6px solid #fff', boxShadow: '0 30px 70px rgba(0,0,0,.55)', background: '#000' });
+const fgImg = pic(frame, '', { left: 0, top: 0, width: '100%', height: '100%', objectFit: 'cover' });
+const frameFlash = mk(frame, { inset: 0, background: '#fff', opacity: 0 });
+const frameTag = mk(stage, { zIndex: 8, left: `${FR.x + 22}px`, top: `${FR.y + 22}px`, padding: '4px 14px', borderRadius: '8px', background: RED, fontSize: '22px', letterSpacing: '.12em' }, 'a anton nowrap', '● REC');
+
+// ヘッダー
+const header = mk(split, { left: '790px', top: '44px', width: '1060px', height: '60px' });
+mk(header, { left: 0, top: 0, padding: '2px 16px', background: RED, fontSize: '34px', lineHeight: '52px', borderRadius: '6px' }, 'a dela nowrap', '速報');
+mk(header, { left: '110px', top: '0', fontSize: '44px', lineHeight: '56px', letterSpacing: '.04em' }, 'a anton nowrap', 'EVE&nbsp;&amp;&nbsp;JIJI&nbsp;NEWS');
+const live = mk(header, { left: '900px', top: '6px', padding: '4px 18px', border: '3px solid #fff', borderRadius: '30px', fontSize: '28px', letterSpacing: '.15em' }, 'a anton nowrap', '<span id="dot" style="color:#ff3b5c">●</span>&nbsp;LIVE');
+
+// チャプターの札
+const chipEls = CHIPS.map(([k, label], i) => {
+  const el = mk(split, { left: `${790 + i * 150}px`, top: '130px', width: '138px', height: '74px', borderRadius: '14px', border: '2px solid rgba(255,255,255,.35)', background: 'rgba(10,14,40,.45)' });
+  mk(el, { left: 0, top: '6px', width: '100%', textAlign: 'center', fontSize: '24px', letterSpacing: '.05em' }, 'a anton nowrap', k);
+  mk(el, { left: 0, top: '36px', width: '100%', textAlign: 'center', fontSize: '22px' }, 'a nowrap', label);
+  return { k, el };
+});
+
+// 区切りごとのタイトル群
+const segEls = SEGS.map(s => {
+  const g = mk(split, { left: '790px', top: '0', width: '1060px', height: '1080px' });
+  const big = mk(g, { left: '-4px', top: '210px', fontSize: '210px', lineHeight: 1, color: 'transparent', WebkitTextStroke: `4px ${s.col}`, letterSpacing: '.02em' }, 'a anton nowrap', s.big);
+  const len = [...s.title].length;
+  const fs = len <= 3 ? 176 : len <= 5 ? 138 : 112;
+  const title = chars(g, s.title, { left: 0, top: `${470 - fs * .55}px`, fontSize: `${fs}px`, lineHeight: 1.3, paddingRight: '30px', textShadow: '0 8px 0 rgba(0,0,0,.35)' }, 'a dela mask');
+  const bar = mk(g, { left: '4px', top: '610px', width: '150px', height: '12px', borderRadius: '6px', background: s.col, transformOrigin: '0 50%' });
+  const en = mk(g, { left: '180px', top: '594px', fontSize: '42px', letterSpacing: '.2em', color: s.col }, 'a anton nowrap', s.en);
+  const bub = mk(g, { left: '0', top: '690px', padding: '14px 36px 18px', borderRadius: '26px', background: '#fff', color: NAVY, fontSize: '62px', transformOrigin: '0% 100%', boxShadow: `8px 8px 0 ${s.col}` }, 'a dela nowrap', s.quote);
+  mk(bub, { left: '40px', bottom: '-22px', width: 0, height: 0, borderLeft: '16px solid transparent', borderRight: '16px solid transparent', borderTop: '26px solid #fff' });
+  return { s, g, big, title, bar, en, bub };
+});
+
+// 進行バー
+const prog0 = mk(split, { left: '790px', top: '904px', width: '1050px', height: '60px' });
+mk(prog0, { left: 0, top: 0, fontSize: '26px', letterSpacing: '.15em', color: 'rgba(255,255,255,.8)' }, 'a anton nowrap', 'ON&nbsp;AIR');
+const timeTxt = mk(prog0, { left: '890px', top: 0, width: '160px', textAlign: 'right', fontSize: '26px', letterSpacing: '.08em' }, 'a anton nowrap', '');
+mk(prog0, { left: 0, top: '46px', width: '1050px', height: '8px', borderRadius: '4px', background: 'rgba(255,255,255,.2)' });
+const progFill = mk(prog0, { left: 0, top: '46px', width: '1050px', height: '8px', borderRadius: '4px', background: '#fff', transformOrigin: '0 50%' });
+const progMarks = SEGS.map(s => mk(prog0, { left: `${s.t0 / DURATION * 1050 - 2}px`, top: '42px', width: '4px', height: '16px', borderRadius: '2px', background: 'rgba(255,255,255,.55)' }));
+
+/* ======== テロップ帯（下） ======== */
+const ticker = mk(stage, { left: 0, top: '1004px', width: '1920px', height: '62px', zIndex: 20 });
+const tickBand = mk(ticker, { left: 0, top: 0, width: '1920px', height: '62px', background: '#fff', overflow: 'hidden' });
+const tickText = mk(tickBand, { left: '0', top: '6px', fontSize: '34px', color: NAVY, whiteSpace: 'nowrap' }, 'a');
+const TICK = '【速報】あのコンビが帰ってきた！　◆　じぃじ、ついに降臨　◆　焼肉・ラーメン・ビーチ・原宿…思い出を一挙公開　◆　#じぃじまた遊ぼう　#EVEandJIJI　◆　';
+tickText.textContent = TICK.repeat(4);
+const tickLabel = mk(ticker, { left: 0, top: 0, width: '200px', height: '62px', background: RED, fontSize: '36px', lineHeight: '62px', textAlign: 'center' }, 'a dela nowrap', '速報');
+
+/* ======== 冒頭の速報 ======== */
+const intro = mk(stage, { zIndex: 30 }, 'layer');
+intro.style.background = 'radial-gradient(ellipse at 50% 50%, #5a0a14 0%, #2a0309 55%, #0b0103 100%)';
+const inScan = mk(intro, { inset: 0, backgroundImage: 'repeating-linear-gradient(0deg, rgba(0,0,0,.25) 0 2px, transparent 2px 5px)' });
+const inStreak = mk(intro, { left: 0, top: '536px', width: '1920px', height: '8px', background: 'linear-gradient(90deg, transparent, #fff 30%, #fff 70%, transparent)', boxShadow: '0 0 30px 8px rgba(255,80,90,.8)' });
+const inBars = [0, 1, 2, 3].map(i => mk(intro, { left: '-200px', top: `${[150, 210, 820, 880][i]}px`, width: '2400px', height: `${[26, 10, 10, 26][i]}px`, background: i % 3 === 0 ? RED : 'rgba(255,255,255,.6)' }));
+const inLogo = mk(intro, { left: 0, top: '96px', width: '1920px', textAlign: 'center', fontSize: '40px', letterSpacing: '.3em' }, 'a anton nowrap', 'EVE&nbsp;&amp;&nbsp;JIJI&nbsp;NEWS');
+const inBand = mk(intro, { left: 0, top: '400px', width: '1920px', height: '280px', background: `linear-gradient(180deg, #ff2a3d, ${RED} 50%, #b00f1f)`, borderTop: '6px solid #fff', borderBottom: '6px solid #fff' });
+const inBN = mk(intro, { left: 0, top: '316px', width: '1920px', textAlign: 'center', fontSize: '64px', letterSpacing: '.35em', color: YELLOW }, 'a anton nowrap', 'BREAKING&nbsp;NEWS');
+const inSokuho = [['#00e5ff', 'screen'], ['#ff2bd6', 'screen'], ['#fff', 'normal']].map(([c, m]) =>
+  mk(intro, { left: 0, top: '398px', width: '1920px', textAlign: 'center', fontSize: '236px', lineHeight: '280px', color: c, mixBlendMode: m, textShadow: c === '#fff' ? '0 10px 0 rgba(80,0,10,.6)' : 'none' }, 'a dela nowrap', '速報'));
+const inTick = mk(intro, { left: 0, top: '930px', width: '1920px', height: '64px', background: 'rgba(0,0,0,.55)', borderTop: `4px solid ${RED}` });
+const inTickTxt = mk(inTick, { left: '0', top: '8px', fontSize: '36px', color: '#fff', whiteSpace: 'nowrap' }, 'a', 'あの名コンビに大きな動きがあった模様です　――　詳細が入り次第お伝えします　――　あの名コンビに大きな動きがあった模様です');
+const inLine = chars(intro, 'あのコンビが', { left: 0, top: '470px', width: '1920px', textAlign: 'center', fontSize: '104px', lineHeight: 1.3, letterSpacing: '.08em' }, 'a mask');
+
+const inDash = document.createElement('span');
+inDash.className = 'ch';
+Object.assign(inDash.style, { width: '190px', height: '9px', marginLeft: '24px', background: '#fff', verticalAlign: 'middle', transformOrigin: '0 50%' });
+inLine.box.appendChild(inDash);
+
+/* ======== ロゴ区間 ======== */
+const logo = mk(stage, { zIndex: 5 }, 'layer');
+logo.style.background = 'radial-gradient(circle at 36% 50%, #ff7cc4 0%, #e0287f 35%, #5a0d4a 75%, #1d0626 100%)';
+const lgRays = mk(logo, { left: '-700px', top: '-1000px', width: '3080px', height: '3080px', borderRadius: '50%',
+  background: 'repeating-conic-gradient(from 0deg, rgba(255,255,255,.12) 0deg 7deg, rgba(255,255,255,0) 7deg 18deg)' });
+const lgRings = [0, 1, 2, 3].map(i => mk(logo, { left: '690px', top: '540px', width: '20px', height: '20px', borderRadius: '50%', border: '6px solid rgba(255,255,255,.7)', marginLeft: '-10px', marginTop: '-10px' }));
+const lgTop = mk(logo, { left: '120px', top: '262px', fontSize: '54px', letterSpacing: '.35em', color: YELLOW }, 'a anton nowrap', 'THE&nbsp;DUO&nbsp;IS&nbsp;BACK');
+const lgWord = chars(logo, 'EVE & JIJI', { left: '100px', top: '320px', fontSize: '250px', lineHeight: 1.15, color: '#fff', textShadow: `0 14px 0 ${NAVY}, 0 0 60px rgba(255,255,255,.5)`, padding: '0 30px 30px 10px', overflow: 'visible' }, 'a anton');
+const lgSub = mk(logo, { left: '124px', top: '676px', fontSize: '60px' }, 'a nowrap', 'あのコンビが、帰ってきた!!');
+const STICK = [
+  { w: 'FLY!', x: 140, y: 120, r: -10, c: '#29b6f6', o: 15.4 },
+  { w: 'UP!', x: 820, y: 140, r: 8, c: YELLOW, o: 15.9 },
+  { w: 'JUMP!', x: 900, y: 790, r: -6, c: '#7c4dff', o: 16.4 },
+];
+const lgStick = STICK.map(s => ({ ...s, el: mk(logo, { left: `${s.x}px`, top: `${s.y}px`, padding: '6px 30px', borderRadius: '20px', background: s.c, color: s.c === YELLOW ? NAVY : '#fff', fontSize: '84px', boxShadow: '0 10px 0 rgba(0,0,0,.25)', border: '5px solid #fff' }, 'a anton nowrap', s.w) }));
+const LOGO_FRAME = { cx: 1500, cy: 520, s: .82, r: 6 };
+
+/* ======== エンドカード ======== */
+const endL = mk(stage, { zIndex: 40 }, 'layer');
+endL.style.background = 'radial-gradient(ellipse at 50% 45%, #3a1460 0%, #170a33 55%, #07041a 100%)';
+const endStars = Array.from({ length: 70 }, (_, i) => mk(endL, {
+  left: `${rnd(i) * 1920}px`, top: `${rnd(i + 99) * 1080}px`, width: `${4 + rnd(i + 7) * 8}px`, height: `${4 + rnd(i + 7) * 8}px`, borderRadius: '50%',
+  background: i % 3 ? '#fff' : '#ffb3dc', boxShadow: '0 0 12px rgba(255,255,255,.9)' }));
+const POLA = [
+  { f: 300, x: 70, y: 110, r: -8 }, { f: 420, x: 120, y: 560, r: 6 },
+  { f: 810, x: 1600, y: 90, r: 7 }, { f: 1040, x: 1560, y: 560, r: -6 },
+];
+const endPola = POLA.map((p, i) => {
+  const el = mk(endL, { left: `${p.x}px`, top: `${p.y}px`, width: '250px', height: '400px', background: '#fff', padding: '12px 12px 44px', borderRadius: '6px', boxShadow: '0 20px 40px rgba(0,0,0,.45)' });
+  pic(el, `assets/frames/fg/${String(p.f).padStart(4, '0')}.jpg`, { left: '12px', top: '12px', width: '226px', height: '344px', objectFit: 'cover' });
+  return { ...p, el };
+});
+const endSee = mk(endL, { left: 0, top: '250px', width: '1920px', textAlign: 'center', fontSize: '40px', letterSpacing: '.5em', color: YELLOW }, 'a anton nowrap', 'SEE&nbsp;YOU&nbsp;NEXT&nbsp;TIME');
+const endLogo = chars(endL, 'EVE & JIJI', { left: 0, top: '300px', width: '1920px', textAlign: 'center', fontSize: '230px', lineHeight: 1.15, textShadow: `0 12px 0 ${PINK}`, paddingBottom: '20px', overflow: 'visible' }, 'a anton');
+const endSub = chars(endL, 'じぃじ、また遊ぼう', { left: 0, top: '620px', width: '1920px', textAlign: 'center', fontSize: '84px', lineHeight: 1.35 }, 'a dela mask');
+const endTags = mk(endL, { left: 0, top: '780px', width: '1920px', textAlign: 'center', fontSize: '38px', color: 'rgba(255,255,255,.8)', letterSpacing: '.06em' }, 'a nowrap', '#じぃじまた遊ぼう　#EVEandJIJI');
+const endFade = mk(endL, { inset: 0, background: '#000', opacity: 0 });
+
+/* ======== ワイプ ======== */
+const wipe = mk(stage, { zIndex: 60, display: 'none' }, 'layer');
+const WB = [
+  { c: RED, lagIn: -.1, lagOut: .1 },
+  { c: '#ffffff', lagIn: -.05, lagOut: .05 },
+  { c: NAVY, lagIn: 0, lagOut: 0 },
+].map(b => ({ ...b, el: mk(wipe, { left: 0, top: '-100px', width: '10px', height: '1280px', background: b.c, transform: 'skewX(-20deg)' }) }));
+const wipeMark = mk(wipe, { left: 0, top: '470px', width: '1920px', textAlign: 'center', fontSize: '110px', lineHeight: '140px' }, 'a dela nowrap', '速報');
+const WIPES = [T_SPLIT1, T_END];
+function drawWipe(t) {
+  const cut = WIPES.find(c => Math.abs(t - c) < .6);
+  if (cut === undefined) { show(wipe, false); return; }
+  show(wipe, true);
+  WB.forEach(b => {
+    const left = lerp(2250, -360, ease.inOut(prog(t, cut - .38 + b.lagIn, cut + b.lagIn)));
+    const right = lerp(2300, -360, ease.inOut(prog(t, cut + b.lagOut, cut + .38 + b.lagOut)));
+    b.el.style.left = `${left}px`;
+    b.el.style.width = `${Math.max(0, right - left)}px`;
+  });
+  const u = prog(t, cut - .2, cut + .2);
+  T(wipeMark, { s: lerp(.7, 1.1, u), o: bell(u) });
+}
+
+/* ======== 1 フレーム描画 ======== */
+const srcFrame = t => clamp(Math.floor((t - OFFSET) * FPS_SRC) + 1, 1, SRC_FRAMES);
+const fmt = s => `00:${String(Math.floor(s)).padStart(2, '0')}`;
+
+function drawBackground(t, seg) {
+  const k = seg ? ease.out(prog(t, seg.t0, seg.t0 + .3)) : 1;
+  const prev = seg ? SEGS[Math.max(0, SEGS.indexOf(seg) - 1)] : null;
+  const col = seg ? mix(prev.col, seg.col, k) : hex(RED);
+  bgShade.style.background = `radial-gradient(ellipse at 72% 45%, ${rgba(col, .38)} 0%, rgba(8,10,30,.62) 55%, rgba(5,6,20,.86) 100%)`;
+  T(bgImg, { s: 1.04 + Math.sin(t * .4) * .02 });
+  bgWord.textContent = seg ? `${seg.en}  ${seg.en}  ${seg.en}` : '';
+  T(bgWord, { x: -((t * 90) % 1400), y: 0 });
+  return col;
+}
+
+function drawSplit(t, seg, col, presence) {
+  // presence: 0 = 隠れている, 1 = 全部出ている（ロゴ区間との行き来に使う）
+  T(header, { y: lerp(-80, 0, presence), o: presence });
+  document.getElementById('dot').style.opacity = (Math.floor(t * 2) % 2) ? .25 : 1;
+  chipEls.forEach(({ k, el }, i) => {
+    const on = seg && seg.chip === k;
+    const seen = SEGS.some(s => s.chip === k && s.t0 <= t);
+    el.style.background = on ? rgba(col, .95) : seen ? 'rgba(255,255,255,.16)' : 'rgba(10,14,40,.45)';
+    el.style.borderColor = on ? '#fff' : 'rgba(255,255,255,.35)';
+    const pop = on ? ease.back(prog(t, seg.t0, seg.t0 + .3)) : 0;
+    const enter = ease.quint(prog(presence, .1 + i * .08, .6 + i * .08));
+    T(el, { y: lerp(-40, 0, enter) - pop * 8, s: 1 + pop * .08, o: enter });
+  });
+  segEls.forEach(({ s, g, big, title, bar, en, bub }) => {
+    const live = t >= s.t0 - .05 && t < s.t1 + .25;
+    show(g, live && presence > 0);
+    if (!live) return;
+    const a = t - s.t0 - .05;
+    // 出ていく側は素早く消し、入ってくる側は少し遅らせて重なりを減らす
+    const out = ease.out(prog(t, s.t1 - .03, s.t1 + .1));
+    T(g, { y: lerp(0, -70, out), o: (1 - out) * presence });
+    T(big, { x: lerp(120, 0, ease.quint(prog(a, 0, .45))) + a * 14, o: ease.out(prog(a, 0, .3)) * .9 });
+    title.spans.forEach((sp, j) => {
+      const k = ease.quint(prog(a, .03 + j * .035, .38 + j * .035));
+      T(sp, { y: lerp(220, 0, k) });
+    });
+    T(bar, { sx: ease.quint(prog(a, .1, .45)), sy: 1 });
+    T(en, { x: lerp(-30, 0, ease.quint(prog(a, .12, .45))), o: ease.out(prog(a, .12, .45)) });
+    const b = prog(a, .16, .5);
+    T(bub, { s: lerp(.2, 1, ease.back(b)), r: lerp(-14, -2, ease.out(b)) + Math.sin(t * 5) * .8, o: clamp(b * 3) });
+  });
+  T(prog0, { y: lerp(60, 0, presence), o: presence });
+  T(progFill, { sx: t / DURATION, sy: 1 });
+  timeTxt.textContent = `${fmt(t)} / 00:40`;
+}
+
+function drawFrame(t, seg, col, logoK) {
+  // 分割レイアウトの位置 ↔ ロゴ区間の位置を補間
+  const baseCx = FR.x + FR.w / 2, baseCy = FR.y + FR.h / 2;
+  const k = ease.inOut(logoK);
+  const punch = seg ? bell(prog(t, seg.t0, seg.t0 + .25)) * .025 : 0;
+  const bob = Math.sin(t * 1.6) * 4;
+  const x = lerp(0, LOGO_FRAME.cx - baseCx, k), y = lerp(0, LOGO_FRAME.cy - baseCy, k) + bob;
+  const s = lerp(1, LOGO_FRAME.s, k) + punch, r = lerp(0, LOGO_FRAME.r, k);
+  T(frame, { x, y, s, r });
+  T(frameGlow, { x, y, s, r, o: .9 });
+  frameGlow.style.background = `radial-gradient(ellipse, ${rgba(col, .75)} 0%, ${rgba(col, 0)} 70%)`;
+  T(frameTag, { x: x + lerp(0, -40, k), y: y + lerp(0, -60, k), r, o: (Math.floor(t * 2) % 2 ? .55 : 1) * (1 - k) });
+  // 元映像の大きなカットに合わせて白く光らせる
+  T(frameFlash, { o: seg ? (1 - prog(t, seg.t0, seg.t0 + .18)) * .55 : 0 });
+}
+
+function drawIntro(t) {
+  const on = t < T_SPLIT1;
+  show(intro, on);
+  if (!on) return;
+  const st = prog(t, .05, .55);
+  T(inStreak, { sx: ease.quint(st), sy: lerp(1, .2, prog(t, .5, 1.1)), o: 1 - prog(t, .9, 1.3) });
+  inBars.forEach((b, i) => {
+    const k = ease.quint(prog(t, .25 + i * .07, 1.0 + i * .07));
+    T(b, { x: (i % 2 ? 1 : -1) * lerp(2400, 0, k) + (i % 2 ? -1 : 1) * t * 30, r: -4, o: 1 - prog(t, at(2.4), at(2.7)) });
+  });
+  T(inLogo, { y: lerp(-20, 0, ease.out(prog(t, .5, 1.0))), o: ease.out(prog(t, .5, 1.0)) * (1 - prog(t, at(2.4), at(2.7))) });
+  // 「速報」の帯
+  const band = ease.quint(prog(t, at(0.05), at(0.4)));
+  const close = ease.inOut(prog(t, at(2.35), at(2.6)));
+  T(inBand, { sy: band * (1 - close), sx: 1 });
+  T(inBN, { y: lerp(40, 0, ease.quint(prog(t, at(.25), at(.6)))), o: ease.out(prog(t, at(.25), at(.6))) * (1 - close) });
+  const glitch = [at(.9), at(1.5), at(1.95)].some(g => t >= g && t < g + .1) || (t > at(.3) && t < at(.42));
+  inSokuho.forEach((el, i) => {
+    const k = ease.back(prog(t, at(.15), at(.5)));
+    const off = i < 2 ? (glitch ? (i ? 14 : -14) : 0) : 0;
+    T(el, { x: off + (glitch && i === 2 ? (rnd(Math.floor(t * 60)) - .5) * 16 : 0), s: lerp(1.6, 1, k), o: clamp(k * 2) * (1 - close) * (i < 2 ? (glitch ? .9 : 0) : 1) });
+  });
+  T(inTick, { y: lerp(80, 0, ease.quint(prog(t, at(.4), at(.8)))), o: 1 - prog(t, at(2.4), at(2.6)) });
+  T(inTickTxt, { x: 1920 - (t - at(.4)) * 420 });
+  inLine.spans.forEach((sp, i) => {
+    const k = prog(t, at(2.55) + i * .07, at(2.85) + i * .07);
+    T(sp, { y: lerp(40, 0, ease.out(k)), o: ease.out(k) });
+  });
+  T(inDash, { sx: ease.quint(prog(t, at(3.0), at(3.45))), sy: 1 });
+  T(inLine.box, { s: lerp(1, 1.06, prog(t, at(2.5), T_SPLIT1)) });
+  const zoom = 1 + prog(t, 0, T_SPLIT1) * .04;
+  intro.style.transform = `scale(${zoom})`;
+}
+
+function drawLogo(t, logoK) {
+  const on = logoK > 0;
+  show(logo, on);
+  if (!on) return;
+  // 円形に広がって出入りする
+  const r = lerp(0, 1500, ease.inOut(logoK));
+  logo.style.clipPath = `circle(${r}px at 1500px 520px)`;
+  T(lgRays, { r: t * 18 });
+  lgRings.forEach((el, i) => {
+    const k = ((t - T_LOGO) / 1.2 + i / 4) % 1;
+    T(el, { s: lerp(1, 90, ease.out(k)), o: (1 - k) * .8 });
+  });
+  const L = t - T_LOGO;
+  T(lgTop, { x: lerp(-60, 0, ease.quint(prog(L, .3, .8))), o: ease.out(prog(L, .3, .8)) });
+  lgWord.spans.forEach((sp, i) => {
+    const k = prog(t, at(15.75) + i * .05, at(16.25) + i * .05);
+    const pulse = bell(prog(t, at(16.5), at(16.75))) * .08;
+    T(sp, { y: lerp(-220, 0, ease.back(k)), s: lerp(2.2, 1, ease.out(k)) + pulse, r: lerp(i % 2 ? 20 : -20, 0, ease.out(k)), o: clamp(k * 3) });
+  });
+  T(lgSub, { y: lerp(30, 0, ease.quint(prog(t, at(16.6), at(17.1)))), o: ease.out(prog(t, at(16.6), at(17.1))) });
+  lgStick.forEach(s => {
+    const k = ease.back(prog(t, at(s.o), at(s.o) + .35));
+    T(s.el, { s: k, r: s.r + Math.sin(t * 4 + s.x) * 3, o: clamp(k * 2) });
+  });
+}
+
+function drawEnd(t) {
+  const on = t >= T_END;
+  show(endL, on);
+  if (!on) return;
+  const L = t - T_END;
+  endStars.forEach((el, i) => T(el, { s: .4 + bell(((t * (.6 + rnd(i + 3))) + rnd(i)) % 1), o: .3 + .7 * bell(((t * .8) + rnd(i + 5)) % 1) }));
+  endPola.forEach((p, i) => {
+    const k = ease.quint(prog(L, .3 + i * .12, 1.0 + i * .12));
+    T(p.el, { x: lerp(p.x < 900 ? -400 : 400, 0, k), y: Math.sin(t * 1.4 + i) * 8, r: p.r + lerp(i % 2 ? 20 : -20, 0, k), o: k });
+  });
+  T(endSee, { y: lerp(20, 0, ease.quint(prog(L, .3, .8))), o: ease.out(prog(L, .3, .8)) });
+  endLogo.spans.forEach((sp, i) => {
+    const k = prog(L, .35 + i * .05, .9 + i * .05);
+    T(sp, { y: lerp(-160, 0, ease.back(k)), s: lerp(.4, 1, ease.back(k)), o: clamp(k * 3) });
+  });
+  endSub.spans.forEach((sp, i) => T(sp, { y: lerp(130, 0, ease.quint(prog(L, .9 + i * .045, 1.3 + i * .045))) }));
+  T(endTags, { y: lerp(20, 0, ease.quint(prog(L, 1.4, 1.9))), o: ease.out(prog(L, 1.4, 1.9)) });
+  endL.style.transform = `scale(${1 + L * .012})`;
+  T(endFade, { o: ease.in(prog(t, DURATION - .7, DURATION)) });
+}
+
+let lastFg = -1;
+async function setFootage(t) {
+  const f = srcFrame(t);
+  if (f === lastFg) return;
+  lastFg = f;
+  const n = String(f).padStart(4, '0');
+  fgImg.src = `assets/frames/fg/${n}.jpg`;
+  bgImg.src = `assets/frames/bg/${n}.jpg`;
+  await Promise.all([fgImg.decode(), bgImg.decode()]);
+}
+
+window.DURATION = DURATION;
+window.renderFrame = async t => {
+  await setFootage(t);
+  const seg = segAt(t);
+  // ロゴ区間への出入り（0〜1）
+  const logoK = prog(t, T_LOGO - .35, T_LOGO + .35) * (1 - prog(t, T_LOGO_END - .35, T_LOGO_END + .35));
+  const col = drawBackground(t, seg);
+  const presence = ease.out(prog(t, T_SPLIT1, T_SPLIT1 + .6)) * (1 - ease.inOut(logoK));
+  drawSplit(t, seg && (t < T_LOGO || t >= T_LOGO_END) ? seg : null, col, presence);
+  drawFrame(t, seg, col, logoK);
+  // テロップ帯
+  const tk = ease.quint(prog(t, T_SPLIT1 + .2, T_SPLIT1 + .8)) * (1 - ease.inOut(logoK));
+  tickBand.style.clipPath = `inset(0 ${(1 - tk) * 100}% 0 0)`;
+  T(tickLabel, { x: lerp(-220, 0, tk) });
+  T(tickText, { x: 220 - ((t * 200) % 1700) });
+  drawIntro(t);
+  drawLogo(t, logoK);
+  drawEnd(t);
+  drawWipe(t);
+};
+window.ready = (async () => {
+  await Promise.all(['40px Dela', '700 40px Noto', '900 40px Noto', '40px Anton'].map(f => document.fonts.load(f)));
+  await document.fonts.ready;
+  await Promise.all([...document.images].filter(i => i.src).map(i => i.decode().catch(() => {})));
+  await window.renderFrame(0);
+  return true;
+})();
+</script>
+</body>
+</html>
