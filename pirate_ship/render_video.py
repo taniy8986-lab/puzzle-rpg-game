@@ -1,6 +1,6 @@
 """本番レンダー: 保存済みの .blend からフレームを少しずつ描く（描いたフレームは飛ばす）。
 
-    /opt/bvenv/bin/python render_video.py START END     # build/frames/f_0000.png …
+    /opt/bvenv/bin/python render_video.py START END [BLEND]   # build/frames/f_0000.png …
 
 render_all.sh がこれを 24 フレームずつ呼び、間に休みを入れる。
 """
@@ -20,7 +20,7 @@ def main():
     todo = [f for f in range(a, b) if not os.path.exists(os.path.join(OUT, f"f_{f:04d}.png"))]
     if not todo:
         return
-    bpy.ops.wm.open_mainfile(filepath=BLEND)
+    bpy.ops.wm.open_mainfile(filepath=sys.argv[3] if len(sys.argv) > 3 else BLEND)
     sc = bpy.context.scene
     sc.render.resolution_percentage = 100
     sc.render.image_settings.file_format = "PNG"
