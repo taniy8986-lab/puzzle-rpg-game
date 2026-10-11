@@ -687,12 +687,12 @@
   });
 
   /* ---------- ミナのノート：ミライ製菓を ①〜⑥ で、事実・推測・不明に分ける ---------- */
-  K.miraiNote = (rows, { instant = false, praise = false } = {}) => ({
+  K.miraiNote = (rows, { instant = false, praise = false, title = 'ミライ製菓（※架空）を分けてみる', doodle = '🍔' } = {}) => ({
     build(box) {
       const { mk } = E();
       const W_ = E().W_;
       const paper = P().paper(box, { x: 220, y: 60, w: 1480, h: 880, rot: -.8, lines: false });
-      const head = W_.write(paper, 'ミライ製菓（※架空）を分けてみる', { left: '60px', top: '36px', fontSize: '48px', color: '#2b2b38' });
+      const head = W_.write(paper, title, { left: '60px', top: '36px', fontSize: '48px', color: '#2b2b38' });
       const COL = { '事実': '#2f7ad6', '推測': '#e0a400', '不明': '#e0312f', 'これから': '#16a085', '未確認': '#7f8c8d' };
       const gap = rows.length > 6 ? 100 : 118;
       const els = rows.map((r, i) => {
@@ -705,7 +705,7 @@
         const ring = r.ring ? P().circle(paper, 1300, y + 36, 135, 54) : null;
         return { num, txt, tag, ring, line: r.line ?? 0 };
       });
-      const burger = mk(paper, { left: '1300px', top: '800px', fontSize: '56px' }, 'a', '🍔');
+      const burger = mk(paper, { left: '1300px', top: '800px', fontSize: '56px' }, 'a', doodle);
       let pr = null;
       if (praise) {
         pr = mk(paper, { left: '980px', top: '14px', display: 'flex', alignItems: 'center', gap: '14px' }, 'a');

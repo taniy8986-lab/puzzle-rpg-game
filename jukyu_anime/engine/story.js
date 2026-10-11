@@ -344,8 +344,12 @@
     yakisoba: `<svg viewBox="0 0 120 120" width="120" height="120"><path d="M10 60 L110 60 L100 100 L20 100 Z" fill="#f2f2f2" stroke="#999" stroke-width="3"/>
       <path d="M16 62 q10 -20 20 -4 q10 -20 20 -4 q10 -20 20 -4 q10 -20 20 -4 q6 -10 10 0" stroke="#b5651d" stroke-width="7" fill="none" stroke-linecap="round"/>
       <circle cx="40" cy="56" r="5" fill="#e33"/><circle cx="76" cy="52" r="5" fill="#3a3"/></svg>`,
+    purin: `<svg viewBox="0 0 120 120" width="120" height="120"><ellipse cx="60" cy="98" rx="52" ry="12" fill="#eef5fa" stroke="#9fb3c0" stroke-width="3"/>
+      <path d="M36 34 Q60 26 84 34 L96 92 Q60 102 24 92 Z" fill="#ffd66b" stroke="#c9952e" stroke-width="3"/>
+      <path d="M36 34 Q60 26 84 34 L87 48 Q72 56 60 50 Q48 56 33 48 Z" fill="#8a4a1c"/>
+      <ellipse cx="44" cy="68" rx="5" ry="13" fill="#fff" opacity=".5"/></svg>`,
   };
-  const FOODS = [[/たこ焼/, FOOD_SVG.takoyaki], [/りんご飴/, FOOD_SVG.ringoame], [/焼きそば/, FOOD_SVG.yakisoba], [/ハンバーガー/, '🍔'], [/かき氷/, '🍧'], [/パフェ/, '🍨'], [/ナポリタン/, '🍝']];
+  const FOODS = [[/たこ焼/, FOOD_SVG.takoyaki], [/りんご飴/, FOOD_SVG.ringoame], [/焼きそば/, FOOD_SVG.yakisoba], [/ハンバーガー/, '🍔'], [/かき氷/, '🍧'], [/パフェ/, '🍨'], [/ナポリタン/, '🍝'], [/プリン/, FOOD_SVG.purin]];
   const dream = mk(chibiLayer, { left: '1180px', top: '90px', width: '620px', height: '360px' }, 'a');
   const dreamCloud = svg(dream, 620, 360, `<g fill="#fff" stroke="#e7b3c3" stroke-width="6">
       <circle cx="-60" cy="420" r="22"/><circle cx="-10" cy="360" r="34"/>
@@ -769,7 +773,8 @@
         dreamItems.dataset.k = foods.join('');
       }
       W_.pop(dream, prog(u, .3, .7));
-      [...dreamItems.children].forEach((e, i) => { e.style.transform = `translateY(${Math.sin(u * 4 + i * 1.3) * 10}px) scale(${ease.back(prog(u, .5 + i * .25, .8 + i * .25))})`; });
+      const big = foods.length === 1 ? 1.6 : 1;   // ひとつだけなら大きく
+      [...dreamItems.children].forEach((e, i) => { e.style.transform = `translateY(${Math.sin(u * 4 + i * 1.3) * 10}px) scale(${big * ease.back(prog(u, .5 + i * .25, .8 + i * .25))})`; });
     }
     return w => [W / 2, H - 560];
   }
@@ -822,7 +827,7 @@
     if ([...ct].length > 12 && !ct.includes('\n')) {
       const chars = [...ct], mid = chars.length / 2;
       let best = -1;
-      chars.forEach((c, i) => { if ('、，'.includes(c) && i < chars.length - 3 && (best < 0 || Math.abs(i + 1 - mid) < Math.abs(best - mid))) best = i + 1; });
+      chars.forEach((c, i) => { if ('、，。！？'.includes(c) && i < chars.length - 3 && (best < 0 || Math.abs(i + 1 - mid) < Math.abs(best - mid))) best = i + 1; });
       if (best < 0) chars.forEach((c, i) => { if ('はがをにでとも'.includes(c) && i > 3 && i < chars.length - 4 && (best < 0 || Math.abs(i + 1 - mid) < Math.abs(best - mid))) best = i + 1; });
       if (best > 0) ct = chars.slice(0, best).join('') + '\n' + chars.slice(best).join('');
     }
@@ -861,11 +866,15 @@
     if (subLineId !== l.id) {
       subText.innerHTML = '';
       subSpans = [];
+      // 名前札のぶんだけ字幕に使える幅が減る
+      show(subName, l.speaker !== 'narr');
+      subName.textContent = NAME[l.speaker];
+      const avail = Math.min(1460, 1680 - (l.speaker === 'narr' ? 0 : subName.offsetWidth + 16));
       let inQ = 0;
       const chars = [...l.text];
       const n0 = chars.length;
-      const fsz = n0 > 34 ? 44 : n0 > 26 ? 48 : 54;
-      const cap = Math.floor(1460 / fsz);
+      let fsz = n0 > 34 ? 44 : n0 > 26 ? 48 : 54;
+      const cap = Math.floor(avail / (fsz * 1.03));
       let brk = -1;
       if (n0 > cap) {
         const mid = n0 / 2;
@@ -895,6 +904,9 @@
       subText.style.fontSize = `${fsz}px`;
       subText.style.textAlign = 'center';
       subText.style.maxWidth = '1460px';
+      // それでも予定外の折り返しが出たら、収まるまで文字を小さくする
+      const rows = brk >= 0 ? 2 : 1;
+      while (fsz > 34 && subText.offsetHeight > fsz * 1.3 * rows + 4) { fsz -= 2; subText.style.fontSize = `${fsz}px`; }
       subLineId = l.id;
     }
     const narr = l.speaker === 'narr';
