@@ -301,13 +301,13 @@ const P = (() => {
     return n;
   };
   // 注文が成立した画面
-  P.order = (ph, { name = 'エスポア（3260）', side = '買い' } = {}) => {
+  P.order = (ph, { name = 'エスポア（3260）', side = '買い', note = '追加' } = {}) => {
     const sw = ph.sw;
     const n = E.div(ph.screen, { left: 0, top: 0, width: sw, height: 1000, background: '#f4f6f9' }).ini({ o: 0 });
     E.svg(n, { left: sw / 2 - 70, top: 200, width: 140, height: 140 }, '0 0 100 100', '<circle cx="50" cy="50" r="44" fill="#17915a"/><path d="M28 52 L44 67 L73 36" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>');
     E.div(n, { left: 0, top: 370, width: sw, textAlign: 'center', font: '900 32px/1.4 Zen', color: '#22252b' }, '注文が成立しました');
     E.div(n, { left: 30, top: 450, width: sw - 60, borderRadius: 18, background: '#fff', padding: '22px 24px', font: '800 26px/1.7 Round', color: '#2b2f36', boxShadow: '0 4px 12px rgba(0,0,0,.08)' },
-      `${name}<br><span style="color:#d22d68;font:900 30px Zen">${side}</span>　<span style="color:#8b919c;font-size:22px">（追加）</span>`);
+      `${name}<br><span style="color:#d22d68;font:900 30px Zen">${side}</span>　<span style="color:#8b919c;font-size:22px">${note ? `（${note}）` : ''}</span>`);
     return n;
   };
 
