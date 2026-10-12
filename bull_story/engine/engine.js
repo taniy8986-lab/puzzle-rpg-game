@@ -321,6 +321,7 @@ const E = (() => {
     window.DURATION = end;
     window.CUES = CUES;
     window.LINES = LINES;
+    window.SCENES = scenes.map(s => ({ name: s.name, t0: +s.t0.toFixed(2), t1: +s.t1.toFixed(2) }));
     window.renderFrame = E.renderFrame;
     window.ready = Promise.all([
       document.fonts.ready,

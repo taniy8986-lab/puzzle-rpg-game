@@ -357,7 +357,7 @@ E.chapter('07');
       const x = 120 + i * 350;
       const b = E.div(g, { left: x, top: 150, width: 320, height: 150, borderRadius: 22, background: i < 2 ? '#2b68d8' : i < 4 ? '#d9822b' : '#c62828', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', color: '#fff', boxShadow: '0 12px 24px rgba(0,0,0,.35)' },
         `<div style="font:900 30px/1 Noto">${n}</div><div style="font:900 44px/1.3 Zen">${t}</div>`).ini({ o: 0 });
-      const s = E.div(g, { left: x - 10, top: 320, width: 340, textAlign: 'center', font: '800 26px/1.45 Round', color: '#e8dcc0' }, sub).ini({ o: 0 });
+      const s = E.div(g, { left: x - 30, top: 320, width: 380, textAlign: 'center', font: '800 24px/1.45 Round', color: '#e8dcc0' }, sub).ini({ o: 0 });
       return [b, s];
     });
     const conv = [['延期', '「丁寧に調べている」'], ['再延期', '「期日が決まったから良い」'], ['上場廃止', '「大株主は売らない」→「MBO？TOB？再上場？」']].map(([a, b], i) =>

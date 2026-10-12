@@ -132,7 +132,7 @@ E.chapter('08');
     const tt = P.heading(g, 'ゼロベース質問', 50);
     E.show(tt, .3);
     const q = E.div(g, { left: 210, top: 150, width: 1500, height: 260, borderRadius: 30, background: '#fffdf8', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', font: '900 44px/1.6 Zen', color: '#262236', boxShadow: '0 20px 40px rgba(0,0,0,.4)' },
-      '今のポジションの時価を、全部現金でもらったとして——<br><span style="color:#b3122b">今日、この銘柄を、同じ金額だけ、新しく買うか？</span>').ini({ o: 0 });
+      '<div>今のポジションの時価を、全部現金でもらったとして——<br><span style="color:#b3122b">今日、この銘柄を、同じ金額だけ、新しく買うか？</span></div>').ini({ o: 0 });
     const yes = E.div(g, { left: 210, top: 470, width: 720, height: 300, borderRadius: 26, background: 'rgba(23,145,90,.18)', border: '5px solid #17915a', padding: '24px 30px', font: '800 30px/1.6 Round', color: '#cfeedd' },
       '<div style="font:900 50px/1.2 Zen;color:#9ee6c0;margin-bottom:14px">YES なら</div>根拠を、出来高・板・歩値・浮動株・<br>信用・貸株・会社の事実で書く').ini({ o: 0 });
     const no = E.div(g, { left: 990, top: 470, width: 720, height: 300, borderRadius: 26, background: 'rgba(198,40,40,.18)', border: '5px solid #c62828', padding: '24px 30px', font: '800 30px/1.6 Round', color: '#ffd6d6' },
@@ -161,7 +161,7 @@ E.chapter('08');
     const tt = P.heading(g, '同じ55円を、3人が見ている', 40);
     E.show(tt, .3);
     P.note(sc.root, '※取得単価700円は物語上の設定。計算は元資料の数字から', { x: 1180, y: 830, size: 22, dark: true });
-    const price = E.div(g, { left: 760, top: 130, width: 400, height: 110, borderRadius: 22, background: '#ffd84a', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '900 60px/1 Noto', color: '#3a2c10', boxShadow: '0 12px 24px rgba(0,0,0,.35)' }, '9/25 終値 55円').ini({ o: 0 });
+    const price = E.div(g, { left: 690, top: 130, width: 540, height: 110, borderRadius: 22, background: '#ffd84a', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '900 60px/1 Noto', color: '#3a2c10', boxShadow: '0 12px 24px rgba(0,0,0,.35)' }, '9/25 終値 55円').ini({ o: 0 });
     const views = [
       ['新しく買う人', '55円から先の<br>出来高・板・会社の事実と<br>期待リターン', '', '#2b68d8'],
       ['700円で買った人', '55円 → 700円', '12.73倍（＋1,172.73%）<br>で損益ゼロ', '#d9822b'],
