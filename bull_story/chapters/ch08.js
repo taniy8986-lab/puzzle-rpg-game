@@ -103,8 +103,8 @@ E.chapter('08');
       ['時間型', '「現物なら無期限」', '時間', '#7a5ad8'],
       ['数学型', '「300倍すれば戻る」', '巨大な倍率の可能性', '#b3122b'],
       ['生活型', '「笑って毎日過ごせる」', '損益と幸福の分離', '#e0457b'],
-      ['不可知型', '「この先は誰にもわからない」', '不確実性そのもの', '#5a6474'],
-      ['人生観型', '「失敗して這い上がるのが醍醐味」', '失敗の物語化', '#8a5a2b'],
+      ['不可知型', '「この先は<br>誰にもわからない」', '不確実性そのもの', '#5a6474'],
+      ['人生観型', '「失敗して<br>這い上がるのが醍醐味」', '失敗の物語化', '#8a5a2b'],
     ].map(([k, q, w, c], i) => {
       const x = 90 + (i % 4) * 440, y = 130 + Math.floor(i / 4) * 340;
       const n = E.div(g, { left: x, top: y, width: 410, height: 310, borderRadius: 24, background: '#fffdf8', overflow: 'hidden', boxShadow: '0 14px 28px rgba(0,0,0,.4)' }).ini({ o: 0 });
@@ -335,9 +335,9 @@ E.chapter('08');
     const kan = E.div(g, { left: 0, top: 300, width: W, textAlign: 'center', font: '900 150px/1 Zen', color: '#ffd84a', textShadow: '0 0 40px rgba(255,216,74,.6)' }, '完').ini({ o: 0 });
     const chapters = ['第1章 意見不表明', '第2章 調査は止まった', '第3章 延期の呪文', '第4章 審判の日', '第5章 9月18日の幻', '第6章 信じる者は救われる？', '第7章 投げる勇気', '最終章 答え合わせ'];
     const list = chapters.map((t, i) => E.div(g, { left: 220 + (i % 2) * 760, top: 500 + Math.floor(i / 2) * 60, width: 720, font: '800 32px/1.3 Round', color: 'rgba(255,255,255,.9)', whiteSpace: 'nowrap' }, t).ini({ o: 0 }));
-    const disc = E.div(g, { left: 0, top: 770, width: W, textAlign: 'center', font: '800 24px/1.5 Round', color: 'rgba(255,255,255,.75)' }, DISCLAIMER).ini({ o: 0 });
-    const credit = E.div(g, { left: 0, top: 820, width: W, textAlign: 'center', font: '800 20px/1.6 Round', color: 'rgba(255,255,255,.65)' },
-      'フォント：M PLUS Rounded 1c ／ Zen Maru Gothic ／ Dela Gothic One ／ Noto Sans JP ／ Anton（SIL Open Font License）<br>声：Open JTalk（名古屋工業大学）＋ HTS Voice "Mei"（MMDAgent, Nagoya Institute of Technology, CC BY 3.0）　音楽・効果音：オリジナル（合成）').ini({ o: 0 });
+    const disc = E.div(g, { left: 0, top: 770, width: 1720, textAlign: 'center', font: '800 24px/1.5 Round', color: 'rgba(255,255,255,.75)' }, DISCLAIMER).ini({ o: 0 });
+    const credit = E.div(g, { left: 0, top: 816, width: 1720, textAlign: 'center', font: '800 20px/1.6 Round', color: 'rgba(255,255,255,.65)' },
+      'フォント：M PLUS Rounded 1c ／ Zen Maru Gothic ／ Dela Gothic One ／ Noto Sans JP ／ Anton（SIL Open Font License）<br>声：Open JTalk（名古屋工業大学）＋ HTS Voice "Mei"（MMDAgent, Nagoya Institute of Technology, CC BY 3.0）<br>音楽・効果音：オリジナル（合成）').ini({ o: 0 });
     E.show(t1, .5, .3); E.show(t2, .6, .6);
     E.tw(kan, .6, { o: [0, 1], s: [2.2, 1] }, 'in2', 1.2); E.sfx('fanfare', { delay: 1.0, gain: .8 }); E.sfx('impact', { delay: 1.75, gain: .5 });
     list.forEach((n, i) => E.show(n, .4, 2.2 + i * .15));
