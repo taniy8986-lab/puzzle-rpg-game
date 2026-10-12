@@ -147,14 +147,15 @@ def main(lines_json):
         if override.exists():
             dur = len(x) / SR
         out[ln["id"]] = {"file": str(path), "dur": round(dur, 3), "line": i}
-        rows.append([i, who, re.sub(r"\{\w+\|([^}]*)\}", r"\1", ln["text"]).replace("\n", " "), text, f"{dur:.2f}"])
+        rows.append([i, who, re.sub(r"\{\w+\|([^}]*)\}", r"\1", ln["text"]).replace("\n", " "), text,
+                     "" if override.exists() else pyopenjtalk.g2p(text, kana=True), f"{dur:.2f}"])
 
     (HERE / "build" / f"ch{ch}_voice.json").write_text(json.dumps(out, ensure_ascii=False, indent=1))
     (HERE / "build" / f"ch{ch}_voice.js").write_text("window.VOICE = " + json.dumps({k: v["dur"] for k, v in out.items()}) + ";\n")
     (HERE / "out").mkdir(exist_ok=True)
     with open(HERE / "out" / f"ch{ch}_台本.csv", "w", newline="", encoding="utf-8-sig") as f:
         wr = csv.writer(f)
-        wr.writerow(["行", "話者", "字幕", "読み（合成に使った文字列）", "秒"])
+        wr.writerow(["行", "話者", "字幕", "読み（合成に使った文字列）", "カナ（読み間違いの確認用）", "秒"])
         wr.writerows(rows)
     total = sum(v["dur"] for v in out.values())
     print(f"声: {len(out)} 行（新しく合成 {made} 行）・合計 {total:.1f} 秒")
