@@ -31,7 +31,7 @@ if (!ch || !/^\d+$/.test(ch)) {
 }
 const opt = name => { const i = process.argv.indexOf(name); return i >= 0 ? process.argv[i + 1] : null; };
 const NOVOICE = process.argv.includes('--novoice');
-const PAGE = 'file://' + path.join(__dirname, 'player.html') + `?ch=${ch}` + (NOVOICE ? '&novoice' : '');
+const PAGE = 'file://' + path.join(__dirname, 'player.html') + `?ch=${ch}` + (NOVOICE ? '&novoice' : '') + (process.env.QS ? '&' + process.env.QS : '');
 
 function run(cmd, args) {
   return new Promise((ok, ng) => {

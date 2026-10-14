@@ -1,5 +1,5 @@
-// 最終章「答え合わせ」（2026年9月25日〜）
-// 台本: story/08_最終章_答え合わせ.md　元資料 p24〜25・p31・p44・p49〜50・p55
+// 最終章「答え合わせ」（2026年10月17日・上場廃止の日）
+// 台本: story/08_最終章_答え合わせ.md　元資料 p11・p24〜25・p31・p44・p49〜50・p55
 // 「投げられない理由」の8つの型は元資料が比較のために集めた別の銘柄の掲示板の言葉（要約・銘柄名は出さない）
 'use strict';
 E.chapter('08');
@@ -8,7 +8,24 @@ E.chapter('08');
   const CH = n => `assets/chara/${n}.png`;
   const DISCLAIMER = 'この物語はフィクションです　｜　エスポア（3260）の事実関係は公開資料に基づきます　｜　投資助言ではありません';
 
-  /* ============================================================ S0 アバン：朝の部屋 */
+  // 最終売買日（2026年10月16日・金）の終値。上場廃止日は10月17日（元資料 p11）。
+  // 確定したらここに数字を入れる。確認用の静止画だけは ?final=NN（render.js なら QS=final=NN）で仮の値を渡せる
+  const FINAL_CLOSE = null;
+  const QS = new URLSearchParams(location.search);
+  const PROVISIONAL = FINAL_CLOSE == null;
+  const LAST = PROVISIONAL ? Number(QS.get('final')) : FINAL_CLOSE;
+  if (!(LAST > 0)) throw new Error('最終章: 最終売買日の終値（FINAL_CLOSE）が未設定です');
+  const SOLD = 55, COST = 700, LONG = 1270;   // ブルちゃんの売値55円・取得単価700円は物語上の設定。1,270円は元資料の個人投資家の例
+  const f2 = v => Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const chg = from => (LAST / from - 1) * 100;          // from → LAST の騰落率（％）
+  const need = from => from / LAST;                     // LAST から from に戻る倍率
+  const yen = v => `${v.toLocaleString('en-US')}円`;
+  // 仮の値で撮った確認用の画には、大きく「仮の値」と出す（本番では出ない）
+  const provisionalBadge = parent => {
+    if (PROVISIONAL) E.div(parent, { left: W - 330, top: 24, width: 300, height: 64, borderRadius: 14, background: '#d42a2a', color: '#fff', font: '900 34px/64px Zen', textAlign: 'center', zIndex: 99 }, `仮の値 ${LAST}円`);
+  };
+
+  /* ============================================================ S0 アバン：上場廃止の日の朝 */
   E.scene({ name: 'avant' }, sc => {
     const g = sc.cam;
     E.bgm('daily', { fadeIn: 1.5, gain: .75 });
@@ -18,10 +35,31 @@ E.chapter('08');
     E.breathe(bull, .01, 2.2);
     const note = P.note(sc.root, DISCLAIMER, { x: 40, y: 30, size: 22 }).ini({ o: 0 });
     E.show(note, .6, .4);
+    provisionalBadge(sc.root);
     P.look(sc.cam, { s: 1.3, cx: 1300, cy: 470, dur: 4.0, delay: .5 });
     E.wait(1.0);
-    E.narr('エスポアを売った次の朝。ウォッチリストは、少しだけ軽くなっていた。');
+    E.narr('10月17日。エスポアは、上場廃止になった。', { yomi: '10月17日。エスポアは、じょうじょうはいしになった。' });
     E.hide(note, .5);
+    E.wait(.3);
+  });
+  E.scene({ name: 'avant_phone' }, sc => {
+    const g = sc.cam;
+    const back = E.div(g, { left: 0, top: 0, width: W, height: H }).ini({ blur: 12, bright: .85 });
+    const R = P.room(back);
+    P.watchlist(R.screen, [['・・・', ''], ['・・・', ''], ['・・・', '']], { title: 'ウォッチリスト' });
+    const ph = P.phone(g, { x: 750, y: 110, w: 420, h: 850 });
+    P.lock(ph, { date: '10月17日', week: '土曜日' });
+    E.from(ph, { y: 760 }, .6, 0, 'quint');
+    E.sfx('whoosh');
+    provisionalBadge(sc.root);
+    const nt = P.notice(ph, { app: '株価アラート', icon: '株', iconBg: '#2b68d8', title: 'エスポア（3260）',
+      body: `本日、<span style="color:#d42a2a">上場廃止</span><br>最終売買日（10/16）の終値<br><span style="font:900 40px/1.3 Noto;color:#d42a2a">${yen(LAST)}</span>`, y: 330 });
+    P.notifyIn(nt, .9);
+    P.look(sc.cam, { s: 1.18, cx: 960, cy: 430, dur: 3.6, delay: 1.4 });
+    E.wait(1.6);
+    const L = E.narr(`最後の値段は、10月16日の終値、${LAST}円。`, { wait: false });
+    P.circle(ph.screen, { x: 88, y: 534, w: 160, h: 66, dur: .45, delay: .6 });
+    E.at(L.end);
     E.narr('でも、終わりじゃない。ここからが、答え合わせだ。');
     E.wait(.4);
   });
@@ -41,7 +79,7 @@ E.chapter('08');
     E.tw(num, .45, { o: [0, 1], x: [-60, 0] }, 'out', .45);
     const tt_ = E.chars(g, '答え合わせ', { left: 200, top: 510, font: '900 120px/1.2 Zen', color: '#fff' });
     tt_.spans.forEach((sp, i) => E.tw(sp, .45, { o: [0, 1], y: [40, 0] }, 'back', .7 + i * .06));
-    const s = E.div(g, { left: 1100, top: 620, font: '800 38px/1.2 Round', color: 'rgba(255,255,255,.8)', whiteSpace: 'nowrap' }, '2026年9月25日 〜').ini({ o: 0 });
+    const s = E.div(g, { left: 1100, top: 620, font: '800 38px/1.2 Round', color: 'rgba(255,255,255,.8)', whiteSpace: 'nowrap' }, '2026年10月17日').ini({ o: 0 });
     E.show(s, .5, 1.2);
     E.sfx('dun', { delay: .45, gain: .7 });
     E.wait(3.4);
@@ -154,33 +192,39 @@ E.chapter('08');
     E.wait(.4);
   });
 
-  /* ============================================================ S5 自分が助かる価格と、新しく買う人の価格 */
+  /* ============================================================ S5 最後の値段を、3人が見ている（答え合わせ） */
   E.scene({ name: 'prices' }, sc => {
     const g = sc.cam;
     P.slate(g);
-    const tt = P.heading(g, '同じ55円を、3人が見ている', 40);
+    provisionalBadge(sc.root);
+    const tt = P.heading(g, `最後の${LAST}円を、3人が見ている`, 40);
     E.show(tt, .3);
-    P.note(sc.root, '※取得単価700円は物語上の設定。計算は元資料の数字から', { x: 1180, y: 830, size: 22, dark: true });
-    const price = E.div(g, { left: 690, top: 130, width: 540, height: 110, borderRadius: 22, background: '#ffd84a', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '900 60px/1 Noto', color: '#3a2c10', boxShadow: '0 12px 24px rgba(0,0,0,.35)' }, '9/25 終値 55円').ini({ o: 0 });
+    P.note(sc.root, '※売値55円・取得単価700円は物語上の設定／1,270円は元資料の例', { x: 1080, y: 830, size: 22, dark: true });
+    const price = E.div(g, { left: 560, top: 130, width: 800, height: 110, borderRadius: 22, background: '#ffd84a', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '900 54px/1 Noto', color: '#3a2c10', boxShadow: '0 12px 24px rgba(0,0,0,.35)', whiteSpace: 'nowrap' }, `10/16 最終売買日の終値 ${yen(LAST)}`).ini({ o: 0 });
+    const pm = v => `${v <= 0 ? '−' : '＋'}${f2(v)}％`;
+    const soldTxt = chg(SOLD) <= 0 ? 'その下落を、<br>避けた' : 'その上昇は、<br>逃した';
     const views = [
-      ['新しく買う人', '55円から先の<br>出来高・板・会社の事実と<br>期待リターン', '', '#2b68d8'],
-      ['700円で買った人', '55円 → 700円', '12.73倍（＋1,172.73%）<br>で損益ゼロ', '#d9822b'],
-      ['1,270円で買った人', '55円 → 1,270円', '23.09倍（＋2,209.09%）<br>で損益ゼロ', '#c62828'],
+      ['55円で投げた人', `55円 → ${yen(LAST)}<br>${pm(chg(SOLD))}`, soldTxt, '#2b68d8'],
+      ['700円で持ち続けた人', `700円 → ${yen(LAST)}<br>${pm(chg(COST))}`, `元に戻るには<br>${f2(need(COST))}倍（＋${f2((need(COST) - 1) * 100)}％）`, '#d9822b'],
+      ['1,270円で持ち続けた人', `1,270円 → ${yen(LAST)}<br>${pm(chg(LONG))}`, `元に戻るには<br>${f2(need(LONG))}倍（＋${f2((need(LONG) - 1) * 100)}％）`, '#c62828'],
     ].map(([who, a, b, c], i) => {
       const n = E.div(g, { left: 120 + i * 580, top: 300, width: 540, height: 470, borderRadius: 26, background: '#fffdf8', overflow: 'hidden', boxShadow: '0 16px 30px rgba(0,0,0,.4)' }).ini({ o: 0 });
-      E.div(n, { left: 0, top: 0, width: 540, height: 90, background: c }, `<div style="position:absolute;left:0;top:0;width:100%;text-align:center;font:900 38px/90px Zen;color:#fff">${who}</div>`);
-      E.div(n, { left: 30, top: 120, width: 480, textAlign: 'center', font: '800 32px/1.6 Round', color: '#3d3540' }, a);
-      if (b) E.div(n, { left: 30, top: 300, width: 480, textAlign: 'center', font: '900 36px/1.5 Noto', color: c }, b);
+      E.div(n, { left: 0, top: 0, width: 540, height: 90, background: c }, `<div style="position:absolute;left:0;top:0;width:100%;text-align:center;font:900 36px/90px Zen;color:#fff;white-space:nowrap">${who}</div>`);
+      E.div(n, { left: 30, top: 130, width: 480, textAlign: 'center', font: '800 34px/1.6 Round', color: '#3d3540' }, a);
+      E.div(n, { left: 30, top: 300, width: 480, textAlign: 'center', font: '900 34px/1.5 Noto', color: c }, b);
       return n;
     });
     E.pop(price, .4, .3); E.sfx('pop', { delay: .3 });
     E.wait(.8);
-    let L = E.say('hat', '同じ55円でも、見ている「必要な価格」がちがう。', { wait: false, yomi: '同じ55円でも、見ている、必要な価格、がちがう。' });
+    let L = E.say('hat', `最後の値段は、${LAST}円。同じ値段でも、3人の景色は、ちがう。`, { wait: false });
     views.forEach((n, i) => { E.tw(n, .45, { o: [0, 1], y: [40, 0] }, 'back', .2 + i * .35); E.sfx('slide', { delay: .2 + i * .35 }); });
     E.at(L.end);
-    E.say('hat', '新しく買う人にとって、2倍は大きい。でも、深い含み損の人には、2倍でも救済の途中だ。');
+    if (chg(SOLD) <= 0) E.say('hat', `55円で投げた人は、その後の、マイナス${f2(chg(SOLD))}％を、避けた。`);
+    else E.say('hat', `55円で投げた人は、その後の上昇を、逃した。それでも、壊れた前提で持つ理由には、ならない。`);
+    E.say('hat', `持ち続けた人が元に戻すには、700円なら${f2(need(COST))}倍、1,270円なら${f2(need(LONG))}倍が要る。`);
     E.say('hat', '上がる途中では、上で買った人の戻り売りも、吸収しなきゃならない。');
-    E.say('hat', '「自分が助かる価格」と、「新しい人が買いたい価格」は、同じじゃない。', { yomi: '自分が助かる価格、と、新しい人が買いたい価格、は、同じじゃない。' });
+    E.say('hat', 'そして上場廃止のあとは、取引所では、もう売り買いできない。', { yomi: 'そしてじょうじょうはいしのあとは、取引所では、もう売り買いできない。' });
+    E.say('hat', '「自分が助かる価格」と、「新しい人が買いたい価格」は、最後まで、重ならなかった。', { yomi: '自分が助かる価格、と、新しい人が買いたい価格、は、最後まで、重ならなかった。' });
     E.wait(.3);
   });
 

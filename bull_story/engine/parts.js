@@ -565,7 +565,7 @@ const P = (() => {
     const ink = night ? 'rgba(235,240,255,.92)' : 'rgba(50,32,32,.88)', sub = night ? 'rgba(220,228,255,.75)' : 'rgba(60,40,40,.75)';
     if (time == null) {
       E.div(s, { left: 0, top: 96, width: sw, textAlign: 'center', font: '800 28px/1.2 Round', color: sub }, week);
-      E.div(s, { left: 0, top: 136, width: sw, textAlign: 'center', font: '900 96px/1.1 Noto', color: ink, letterSpacing: '-.02em' }, date);
+      E.div(s, { left: 0, top: 136, width: sw, textAlign: 'center', font: `900 ${date.length > 5 ? 80 : 96}px/1.1 Noto`, color: ink, letterSpacing: '-.02em', whiteSpace: 'nowrap' }, date);
       return {};
     }
     E.div(s, { left: 0, top: 92, width: sw, textAlign: 'center', font: '800 28px/1.2 Round', color: sub }, `${date}　${week}`);
