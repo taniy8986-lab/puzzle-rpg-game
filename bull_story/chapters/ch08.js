@@ -15,6 +15,7 @@ E.chapter('08');
   const PROVISIONAL = FINAL_CLOSE == null;
   const LAST = PROVISIONAL ? Number(QS.get('final')) : FINAL_CLOSE;
   if (!(LAST > 0)) throw new Error('最終章: 最終売買日の終値（FINAL_CLOSE）が未設定です');
+  const PREV_CLOSE = 13;                      // 10/15 の終値（10/16 の板の前日比 −10円から）
   const SOLD = 55, COST = 700, LONG = 1270;   // ブルちゃんの売値55円・取得単価700円は物語上の設定。1,270円は元資料の個人投資家の例
   const f2 = v => Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const chg = from => (LAST / from - 1) * 100;          // from → LAST の騰落率（％）
@@ -53,7 +54,7 @@ E.chapter('08');
     E.sfx('whoosh');
     provisionalBadge(sc.root);
     const nt = P.notice(ph, { app: '株価アラート', icon: '株', iconBg: '#2b68d8', title: 'エスポア（3260）',
-      body: `本日、<span style="color:#d42a2a">上場廃止</span><br>最終売買日（10/16）の終値<br><span style="font:900 40px/1.3 Noto;color:#d42a2a">${yen(LAST)}</span>`, y: 330 });
+      body: `本日、<span style="color:#d42a2a">上場廃止</span><br>最終売買日（10/16）の終値<br><span style="font:900 40px/1.3 Noto;color:#d42a2a">${yen(LAST)}</span><br><span style="font:800 22px/1.4 Round;color:#6a6066">前日比 ${LAST - PREV_CLOSE < 0 ? '−' : '＋'}${Math.abs(LAST - PREV_CLOSE)}円（${LAST - PREV_CLOSE < 0 ? '−' : '＋'}${f2((LAST / PREV_CLOSE - 1) * 100)}%）</span>`, y: 330 });
     P.notifyIn(nt, .9);
     P.look(sc.cam, { s: 1.18, cx: 960, cy: 430, dur: 3.6, delay: 1.4 });
     E.wait(1.6);
@@ -223,9 +224,85 @@ E.chapter('08');
     else E.say('hat', `55円で投げた人は、その後の上昇を、逃した。それでも、壊れた前提で持つ理由には、ならない。`);
     E.say('hat', `持ち続けた人が元に戻すには、700円なら${f2(need(COST))}倍、1,270円なら${f2(need(LONG))}倍が要る。`);
     E.say('hat', '上がる途中では、上で買った人の戻り売りも、吸収しなきゃならない。');
-    E.say('hat', 'そして上場廃止のあとは、取引所では、もう売り買いできない。', { yomi: 'そしてじょうじょうはいしのあとは、取引所では、もう売り買いできない。' });
+    E.wait(.3);
+  });
+
+  /* ============================================================ S5b 最後の板（10/16 15:30） */
+  E.scene({ name: 'lastboard' }, sc => {
+    const g = sc.cam;
+    P.slate(g);
+    provisionalBadge(sc.root);
+    const tt = P.heading(g, '最後の板（10月16日 15:30）', 40);
+    E.show(tt, .3);
+    P.note(sc.root, '※最終売買日の大引け後の気配（証券会社アプリの表示から）', { x: 1130, y: 836, size: 22, dark: true });
+    // 証券会社アプリの 15:30 の板（売り: 4〜11円、買い: 1〜3円）
+    const BOOK = [['sell', 11, 11700], ['sell', 10, 20400], ['sell', 9, 3200], ['sell', 8, 21000], ['sell', 7, 1300], ['sell', 6, 11000], ['sell', 5, 32100], ['sell', 4, 12700], ['buy', 3, 52300], ['buy', 2, 210000], ['buy', 1, 376000]];
+    const px = 560, py = 130, pw = 800, rh = 52, hh = 70;
+    const panel = E.div(g, { left: px, top: py, width: pw, height: hh + 20 + BOOK.length * rh, borderRadius: 24, background: '#0f1a2e', boxShadow: '0 20px 40px rgba(0,0,0,.45)', overflow: 'hidden' }).ini({ o: 0 });
+    E.div(panel, { left: 0, top: 0, width: pw, height: hh, background: '#1b7a3a' },
+      `<div style="display:flex;height:${hh}px;align-items:center;font:900 28px/1 Zen;color:#fff"><div style="width:300px;text-align:center">売数量</div><div style="width:200px;text-align:center">値段</div><div style="width:300px;text-align:center">買数量</div></div>`);
+    const rows = BOOK.map(([side, p, v], i) => {
+      const last = p === LAST;
+      return E.div(panel, { left: 0, top: hh + 10 + i * rh, width: pw, height: rh, display: 'flex', alignItems: 'center', background: last ? 'rgba(255,216,74,.2)' : 'transparent', font: '800 32px/1 Noto' },
+        `<div style="width:300px;text-align:right;padding-right:40px;color:#ff8a8a">${side === 'sell' ? v.toLocaleString('en-US') : ''}</div>
+         <div style="width:200px;text-align:center;font-weight:900;color:${last ? '#ffd84a' : '#f3e6c8'}">${p}</div>
+         <div style="width:300px;text-align:left;padding-left:40px;color:#8ec5ff">${side === 'buy' ? v.toLocaleString('en-US') : ''}</div>`).ini({ o: 0 });
+    });
+    const pill = E.div(g, { left: 70, top: 300, width: 440, height: 170, borderRadius: 24, background: '#ffd84a', color: '#3a2c10', textAlign: 'center', boxShadow: '0 12px 24px rgba(0,0,0,.35)' },
+      `<div style="font:900 60px/1.1 Noto;padding-top:26px">終値 ${yen(LAST)}</div><div style="font:800 26px/1.4 Round;margin-top:10px">前日比 ${LAST - PREV_CLOSE < 0 ? '−' : '＋'}${Math.abs(LAST - PREV_CLOSE)}円（${LAST - PREV_CLOSE < 0 ? '−' : '＋'}${f2((LAST / PREV_CLOSE - 1) * 100)}%）</div>`).ini({ o: 0 });
+    const lblSell = E.div(g, { left: 1400, top: py + hh + 10 + 3 * rh + 4, width: 460, font: '900 32px/1.3 Zen', color: '#ff8a8a', whiteSpace: 'nowrap' }, '◀ 売りたい人の値段').ini({ o: 0 });
+    const lblBuy = E.div(g, { left: 1400, top: py + hh + 10 + 9 * rh + 4, width: 460, font: '900 32px/1.3 Zen', color: '#8ec5ff', whiteSpace: 'nowrap' }, '◀ 買いたい人の値段').ini({ o: 0 });
+    E.tw(panel, .45, { o: [0, 1], s: [.94, 1] }, 'back', .2); E.sfx('whoosh', { delay: .2, gain: .6 });
+    rows.forEach((r, i) => { E.tw(r, .3, { o: [0, 1], x: [-30, 0] }, 'out', .7 + i * .1); if (i % 2 === 0) E.sfx('slide', { delay: .7 + i * .1, gain: .3 }); });
+    E.tw(pill, .4, { o: [0, 1], y: [30, 0] }, 'back', 1.0); E.sfx('pop', { delay: 1.0, gain: .6 });
+    E.wait(2.2);
+    let L = E.say('hat', '最後の板だ。売りは、4円から上に並び、買いは、3円、2円、1円。', { wait: false, yomi: '最後のいただ。売りは、4円から上に並び、買いは、3円、2円、1円。' });
+    E.tw(lblSell, .35, { o: [0, 1], x: [30, 0] }, 'out', L.dur * .3); E.sfx('ding', { delay: L.dur * .3, gain: .5 });
+    E.tw(lblBuy, .35, { o: [0, 1], x: [30, 0] }, 'out', L.dur * .7); E.sfx('ding', { delay: L.dur * .7, gain: .5 });
+    E.at(L.end);
+    L = E.say('hat', '1円に、37万6千株の買いが、待っていた。新しい人が買いたい価格は、ここだった。', { wait: false, yomi: '1円に、さんじゅうななまんろくせんかぶの買いが、待っていた。新しい人が買いたい価格は、ここだった。' });
+    P.circle(g, { x: px + 500 + 40 + 72, y: py + hh + 10 + 10 * rh + rh / 2, w: 210, h: 60, dur: .45, delay: .3 });
+    E.at(L.end);
     E.say('hat', '「自分が助かる価格」と、「新しい人が買いたい価格」は、最後まで、重ならなかった。', { yomi: '自分が助かる価格、と、新しい人が買いたい価格、は、最後まで、重ならなかった。' });
     E.wait(.3);
+  });
+
+  /* ============================================================ S5c 上場廃止のあと（会社の開示より） */
+  E.scene({ name: 'after_ir' }, sc => {
+    const g = sc.cam;
+    const { hat, call, bd } = P.boardScene(g, ['anxious', 'normal']);
+    provisionalBadge(sc.root);
+    E.div(bd, { left: 0, top: 28, width: 1020, textAlign: 'center', font: '800 24px/1.2 Round', color: '#8a8070' }, '適時開示　2026年10月16日　株式会社エスポア');
+    const title = E.div(bd, { left: 40, top: 64, width: 940, textAlign: 'center', font: '900 34px/1.35 Zen', color: '#2a2430' }, '株式の上場廃止及び<br>上場廃止後の株式の取扱いに関するお知らせ').ini({ o: 0 });
+    P.note(sc.root, '※会社の開示（2026年10月16日）の要約', { x: 1400, y: 866, size: 22, dark: true });
+    const pts = [
+      ['取引所', '売買できなくなる → 売りたい人と買いたい人の<b>相対取引</b>だけ'],
+      ['株券', '発行されない（株券不発行会社）'],
+      ['保振機構', '取扱いは <b>10月21日</b> で廃止 → 以後は会社の<b>株主名簿</b>で管理'],
+      ['名義書換', '<b>実印</b>と<b>印鑑証明書</b>で本人確認（証明書の発行に1〜2週間）'],
+      ['窓口', '11月以降は<b>会社自身</b>（信託銀行との契約は10月末で終了）'],
+    ].map(([k, v], i) => E.div(bd, { left: 60, top: 176 + i * 104, width: 900, height: 88, borderRadius: 16, background: '#f3eee4', display: 'flex', alignItems: 'center' },
+      `<div style="width:190px;padding-left:26px;font:800 26px/1.2 Round;color:#8a8070;flex:none">${k}</div><div style="flex:1;font:800 25px/1.35 Round;color:#262230;padding-right:20px">${v}</div>`).ini({ o: 0 }));
+    E.wait(.6);
+    E.say('eve', 'ねえねえ、上場廃止のあとって、持ってる株はどうなるの〜？', { talk: call, talkAmp: 3, yomi: 'ねえねえ、じょうじょうはいしのあとって、持ってる株はどうなるのー？' });
+    let L = E.say('hat', '会社が、最終売買日に、開示を出している。', { talk: hat, talkAmp: 2, wait: false });
+    E.tw(title, .4, { o: [0, 1], y: [20, 0] }, 'out', .3); E.sfx('page', { delay: .3, gain: .6 });
+    E.at(L.end);
+    L = E.say('hat', '取引所では、もう売買できない。売りたい人と買いたい人が、自分たちで相手を見つける、相対取引だけだ。', { talk: hat, talkAmp: 2, wait: false, yomi: '取引所では、もう売買できない。売りたい人と買いたい人が、自分たちで相手を見つける、あいたいとりひきだけだ。' });
+    E.tw(pts[0], .4, { o: [0, 1], x: [-40, 0] }, 'back', .2); E.sfx('slide', { delay: .2 });
+    E.at(L.end);
+    L = E.say('hat', '株券は、発行されない。保振機構の取扱いも、10月21日で終わる。あとは、会社の株主名簿で管理される。', { talk: hat, talkAmp: 2, wait: false, yomi: '株券は、発行されない。ほふりきこうの取扱いも、10月21日で終わる。あとは、会社のかぶぬしめいぼで管理される。' });
+    E.tw(pts[1], .4, { o: [0, 1], x: [-40, 0] }, 'back', .2); E.sfx('slide', { delay: .2 });
+    E.tw(pts[2], .4, { o: [0, 1], x: [-40, 0] }, 'back', L.dur * .4); E.sfx('slide', { delay: L.dur * .4 });
+    E.at(L.end);
+    L = E.say('hat', '名義書換には、実印と、印鑑証明書。11月からの窓口は、会社そのものだ。', { talk: hat, talkAmp: 2, wait: false, yomi: 'めいぎかきかえには、実印と、印鑑証明書。11月からの窓口は、会社そのものだ。' });
+    E.tw(pts[3], .4, { o: [0, 1], x: [-40, 0] }, 'back', .2); E.sfx('slide', { delay: .2 });
+    E.tw(pts[4], .4, { o: [0, 1], x: [-40, 0] }, 'back', L.dur * .55); E.sfx('slide', { delay: L.dur * .55 });
+    E.at(L.end + .3);
+    E.say('hat', '株は、消えない。株主のままだ。でも、「いつでも売れる場所」は、なくなった。', { talk: hat, talkAmp: 2, yomi: '株は、消えない。株主のままだ。でも、いつでも売れる場所は、なくなった。' });
+    E.say('hat', '「現物なら無期限」は、本当だ。ただ、値段をつけてくれる市場も、もうない。', { talk: hat, talkAmp: 2, yomi: '現物なら無期限、は、本当だ。ただ、値段をつけてくれるしじょうも、もうない。' });
+    E.say('eve', '……だから、持つ理由は、買う前に決めておくんだね〜。', { talk: call, talkAmp: 3, yomi: 'だから、持つ理由は、買う前に決めておくんだねー。' });
+    E.wait(.4);
   });
 
   /* ============================================================ S6 再発防止チェックリスト */
