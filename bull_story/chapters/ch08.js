@@ -10,7 +10,7 @@ E.chapter('08');
 
   // 最終売買日（2026年10月16日・金）の終値。上場廃止日は10月17日（元資料 p11）。
   // 確定したらここに数字を入れる。確認用の静止画だけは ?final=NN（render.js なら QS=final=NN）で仮の値を渡せる
-  const FINAL_CLOSE = null;
+  const FINAL_CLOSE = 3;   // 2026/10/16 大引け（ユーザーの証券アプリの値）
   const QS = new URLSearchParams(location.search);
   const PROVISIONAL = FINAL_CLOSE == null;
   const LAST = PROVISIONAL ? Number(QS.get('final')) : FINAL_CLOSE;
