@@ -53,6 +53,7 @@ def normalize(text):
     s = re.sub(r"…+|‥+", "、", s)
     s = s.replace("〜", "ー").replace("～", "ー")
     s = s.replace("≠", "とは違う")
+    s = s.replace("取引所", "とりひきじょ")             # 単独では「とりひきしょ」と読まれるため
     s = re.sub(r"、+", "、", s).strip("、 ")
     return s
 

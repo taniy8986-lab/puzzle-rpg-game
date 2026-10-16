@@ -277,12 +277,12 @@ E.chapter('08');
     P.note(sc.root, '※会社の開示（2026年10月16日）の要約', { x: 1400, y: 866, size: 22, dark: true });
     const pts = [
       ['取引所', '売買できなくなる → 売りたい人と買いたい人の<b>相対取引</b>だけ'],
-      ['株券', '発行されない（株券不発行会社）'],
-      ['保振機構', '取扱いは <b>10月21日</b> で廃止 → 以後は会社の<b>株主名簿</b>で管理'],
-      ['名義書換', '<b>実印</b>と<b>印鑑証明書</b>で本人確認（証明書の発行に1〜2週間）'],
-      ['窓口', '11月以降は<b>会社自身</b>（信託銀行との契約は10月末で終了）'],
+      ['株券', '発行の予定なし（株券不発行会社）'],
+      ['保振機構', '取扱いは <b>10月21日</b> で廃止（予定）<br>→ 以後は会社の<b>株主名簿</b>で管理'],
+      ['名義書換', '<b>実印</b>と<b>印鑑証明書</b>で本人確認<br>会社が出す<b>株主名簿記載事項証明書</b>の発行に1〜2週間程度'],
+      ['窓口', '11月以降は<b>会社自身</b><br>（信託銀行との契約は10月末で終了予定）'],
     ].map(([k, v], i) => E.div(bd, { left: 60, top: 176 + i * 104, width: 900, height: 88, borderRadius: 16, background: '#f3eee4', display: 'flex', alignItems: 'center' },
-      `<div style="width:190px;padding-left:26px;font:800 26px/1.2 Round;color:#8a8070;flex:none">${k}</div><div style="flex:1;font:800 25px/1.35 Round;color:#262230;padding-right:20px">${v}</div>`).ini({ o: 0 }));
+      `<div style="width:160px;padding-left:26px;font:800 26px/1.2 Round;color:#8a8070;flex:none">${k}</div><div style="flex:1;font:800 24px/1.4 Round;color:#262230;padding-right:16px;white-space:nowrap">${v}</div>`).ini({ o: 0 }));
     E.wait(.6);
     E.say('eve', 'ねえねえ、上場廃止のあとって、持ってる株はどうなるの〜？', { talk: call, talkAmp: 3, yomi: 'ねえねえ、じょうじょうはいしのあとって、持ってる株はどうなるのー？' });
     let L = E.say('hat', '会社が、最終売買日に、開示を出している。', { talk: hat, talkAmp: 2, wait: false });
