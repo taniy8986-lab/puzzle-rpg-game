@@ -1,0 +1,341 @@
+// 完全版 第19章（最終章）「答え合わせ（完全版）」（2026年10月17日）
+// 台本: story/k/k19_答え合わせ（完全版）.md　元資料 p13・p15・p35
+// 主要発言の検証は、元資料のラベルを同じ重さで並べる。時刻の帯は順番だけ。限界を必ず出す
+// 有名投資家の名前・アカウント・元資料の題名は出さない。ブルちゃんの売買と男爵の物語はフィクション
+'use strict';
+E.chapter('k19');
+{
+  const { W, H } = E;
+  const CH = n => `assets/chara/${n}.png`;
+  const panel = (g, { x, y, w, h = 120, html, size = 40, dark = false }) => E.div(g, { left: x, top: y, width: w, height: h, borderRadius: 24, background: dark ? '#2a2430' : 'rgba(255,255,255,.95)', border: dark ? '3px solid #ffd84a' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '24px', font: `900 ${size}px/1.25 Zen`, color: dark ? '#ffd84a' : '#262236', boxShadow: '0 12px 24px rgba(0,0,0,.35)', whiteSpace: 'nowrap' }, html).ini({ o: 0 });
+  const rise = (n, d = 0) => { E.tw(n, .4, { o: [0, 1], y: [20, 0] }, 'back', d); E.sfx('pop', { delay: d, gain: .5 }); };
+  const fiction = sc => P.note(sc.root, 'ブルちゃんの売買はフィクションです', { x: 1440, y: 40, size: 24, dark: true });
+
+  /* ============================================================ 注意書き */
+  E.scene({ name: 'notice', bg: '#0b1022' }, sc => {
+    const g = sc.cam;
+    E.div(g, { left: 0, top: 0, width: W, height: H, background: 'radial-gradient(ellipse at 50% 45%, #1d2a4a 0%, #0b1022 75%)' });
+    const n = P.kNotice(g, { x: 100, y: 330, w: 1720, size: 32 });
+    E.show(n, .6, .2);
+    E.wait(6.0);
+    E.hide(n, .5);
+    E.wait(.5);
+  });
+
+  /* ============================================================ S0 アバン：10月17日の朝 */
+  P.phoneScene((ph, sc) => {
+    E.bgm('memory', { fadeIn: 1.0, gain: .75 });
+    P.lock(ph, { date: '10月17日', week: '土曜日', time: '8:00' });
+    E.wait(1.2);
+    E.narr('10月17日。エスポアは、上場廃止になった。');
+    E.narr('最終売買日、10月16日の終値は、3円。ここからが、答え合わせだ。', { yomi: 'さいしゅう、ばいばいび、10月16日の、おわりねは、さんえん。ここからが、答え合わせだ。' });
+  }, { name: 'avant_phone', wait: .4 });
+
+  /* ============================================================ S1 タイトル・章扉 */
+  E.trans('flash', { dur: .5 });
+  E.bgm('title', { fadeIn: .1, fadeOut: .6 });
+  P.titleScene({ arc: 'エスポア（3260）編・完全版', catchCopy: '〜 投稿と、IRと、ローソク足 〜', dur: 3.8 });
+  E.trans('stripes', { dur: .9 });
+  P.chapterCard({ n: 19, title: '答え合わせ（完全版）', sub: '最終章　2026年10月17日', dur: 3.6, subTop: true });
+  E.trans('fade', { dur: .7, color: '#000' });
+
+  /* ============================================================ S2 一括で採点しない */
+  E.scene({ name: 'nograde' }, sc => {
+    const g = sc.cam;
+    E.bgm('lesson', { fadeIn: .6, gain: .85 });
+    P.slate(g);
+    const card = E.div(g, { left: 160, top: 300, width: 1600, height: 260, borderRadius: 28, background: 'rgba(255,255,255,.96)', boxShadow: '0 16px 32px rgba(0,0,0,.4)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
+      `<div style="font:900 48px/1.55 Zen;color:#262236">「当たった／外れた」の一括採点ではなく、<br>確認できる部分ごとに判断する</div><div style="font:800 26px/1.4 Round;color:#6a6066;margin-top:14px">元資料 p13</div>`).ini({ o: 0 });
+    E.wait(.3);
+    const L = E.say('hat', '元資料は、主要な発言を、当たった、外れた、で、まとめて採点しない。', { wait: false, yomi: 'もとしりょうは、しゅような発言を、当たった、外れた、で、まとめて、さいてんしない。' });
+    E.tw(card, .6, { o: [0, 1], s: [.94, 1] }, 'out', .3); E.sfx('shine', { delay: .3, gain: .5 });
+    E.at(L.end);
+    E.say('hat', '確かめられる部分ごとに、判断している。');
+    E.wait(.4);
+  });
+
+  /* ============================================================ S3 主要発言の検証結果 */
+  E.scene({ name: 'results' }, sc => {
+    const g = sc.cam;
+    P.slate(g);
+    const tt = P.heading(g, '主要発言の検証結果（元資料 p13）', 34);
+    E.show(tt, .3);
+    // 6枚とも同じ大きさ・同じ色（同じ重さで並べる）
+    const cardT = (i, id, t, lab, body) => E.div(g, { left: 70 + (i % 3) * 600, top: 130 + Math.floor(i / 3) * 380, width: 570, height: 350, borderRadius: 22, background: '#fbfcff', borderLeft: `12px solid ${P.T_BLUE}`, boxShadow: '0 12px 24px rgba(0,0,0,.35)', boxSizing: 'border-box', padding: '20px 24px' },
+      `<div style="display:flex;align-items:center;gap:12px"><span style="flex:none;padding:3px 12px 4px;border-radius:10px;background:${P.T_BLUE};color:#fff;font:900 26px/1.2 Noto">${id}</span><span style="font:900 25px/1.3 Zen;color:#22252b;white-space:nowrap">${t}</span></div>
+       <div style="display:inline-block;margin-top:16px;padding:6px 18px;border-radius:12px;background:#3a4560;color:#fff;font:900 30px/1.3 Zen">${lab}</div>
+       <div style="margin-top:14px;font:800 22px/1.55 Round;color:#3d3540">${body}</div>`).ini({ o: 0 });
+    const cs = [
+      cardT(0, 'T23', '4/8　930円のしこり', '値動きは整合', '4/10高値935円、4/14高値1,000円。<br>売り圧力の主体や吸収量の裏付けはない'),
+      cardT(1, 'T24', '4/13　GC', '数値で確認', '25日線803.60円、200日線799.42円。<br>終値で上抜けを確認'),
+      cardT(2, 'T30', '4/21　短期の窓埋め', '未達', '4/22〜24の高値は885・875・913円。<br>上側969円に届かず、<br>その後最終売買まで未充足'),
+      cardT(3, 'T34', '4/24　適正意見を見込む', '結果と不一致', '5/28提出の有報に意見不表明の<br>監査報告書。9/16の名証廃止決定に至る'),
+      cardT(4, 'T36', '4/30　25MA超え', '場中と終値を区別', '高値910円は到達、終値868円は未到達。<br>15時投稿時点の価格を推測で補わない'),
+      cardT(5, 'T37・T44', '二番底・三番底', '安値圏の反発は確認', '5/13の下ヒゲ、6/5への反発は実在。<br>持続的な底打ちとはならず<br>7/23安値480円'),
+    ];
+    const pop = (n, d = .2) => { E.tw(n, .35, { o: [0, 1], y: [20, 0] }, 'back', d); E.sfx('pop', { delay: d, gain: .4 }); };
+    E.wait(.3);
+    let L = E.say('hat', 'T23。4月8日の、930円のしこり。値動きは、整合していた。', { wait: false, yomi: 'ティーニジューサン。4月8日の、きゅうひゃくさんじゅうえんの、しこり。値動きは、せいごうしていた。' });
+    pop(cs[0]);
+    E.at(L.end);
+    E.say('hat', 'ただ、売り圧力の主体や、吸収した量の、裏付けはない。', { yomi: 'ただ、うりあつりょくの、しゅたいや、きゅうしゅうした量の、うらづけはない。' });
+    L = E.say('hat', 'T24。4月13日のゴールデンクロスは、数値で確認できた。', { wait: false, yomi: 'ティーニジューヨン。4月13日の、ゴールデンクロスは、すうちで、確認できた。' });
+    pop(cs[1]);
+    E.at(L.end);
+    L = E.say('hat', 'T30。4月21日の、短い窓埋めは、未達。上の969円に、届かなかった。', { wait: false, yomi: 'ティーサンジュー。4月21日の、短い、まどうめは、みたつ。上の、きゅうひゃくろくじゅうきゅうえんに、届かなかった。' });
+    pop(cs[2]);
+    E.at(L.end);
+    L = E.say('hat', 'T34。4月24日に、適正意見を見込んだ投稿は、結果と一致しなかった。', { wait: false, yomi: 'ティーサンジューヨン。4月24日に、てきせいいけんを、見込んだ投稿は、結果と、いっちしなかった。' });
+    pop(cs[3]);
+    E.at(L.end);
+    L = E.say('hat', 'T36。4月30日の25日線超えは、場中と終値を、分けて見る。', { wait: false, yomi: 'ティーサンジューロク。4月30日の、にじゅうごにちせん、ごえは、ばちゅうと、おわりねを、分けて見る。' });
+    pop(cs[4]);
+    E.at(L.end);
+    L = E.say('hat', 'T37とT44。二番底、三番底。安値圏の反発は、確認できた。', { wait: false, yomi: 'ティーサンジューナナと、ティーヨンジューヨン。にばんぞこ、さんばんぞこ。やすねけんの、はんぱつは、確認できた。' });
+    pop(cs[5]);
+    E.at(L.end);
+    E.say('hat', 'でも、持続的な底打ちにはならず、7月23日には、480円まで下がった。', { yomi: 'でも、じぞくてきな、そこうちには、ならず、7月23日には、よんひゃくはちじゅうえんまで、下がった。' });
+    E.say('hat', 'どれも、同じ重さで並べる。当たり外れの、一つの点数にはしない。', { yomi: 'どれも、同じ重さで、ならべる。当たり外れの、ひとつの点数には、しない。' });
+    E.wait(.4);
+  });
+
+  /* ============================================================ S4 時刻の照合を、振り返る */
+  E.trans('stripes', { dur: .7 });
+  E.scene({ name: 'clock' }, sc => {
+    const g = sc.cam;
+    E.bgm('tension', { fadeIn: .6, gain: .7 });
+    P.slate(g);
+    const tt = P.heading(g, '時刻の照合を、振り返る（元資料 p15）', 30);
+    E.show(tt, .3);
+    const chip = (id, c) => `<span style="display:inline-block;padding:2px 10px 3px;border-radius:8px;background:${c};color:#fff;font:900 22px/1.2 Noto;margin:0 6px">${id}</span>`;
+    const I = id => chip(id, P.I_ORANGE), T = id => chip(id, P.T_BLUE);
+    const row = (i, d, html, note) => E.div(g, { left: 80, top: 112 + i * 108, width: 1760, height: 94, borderRadius: 18, background: 'rgba(255,255,255,.95)', display: 'flex', alignItems: 'center', boxShadow: '0 8px 18px rgba(0,0,0,.3)' },
+      `<div style="flex:none;width:250px;text-align:center;font:900 28px/1.2 Noto;color:#6b5a40">${d}</div><div style="flex:1;font:900 28px/1.3 Zen;color:#262236;white-space:nowrap">${html}</div><div style="flex:none;width:420px;padding-right:22px;text-align:right;font:900 24px/1.3 Zen;color:#b8651a;white-space:nowrap">${note}</div>`).ini({ o: 0 });
+    const rs = [
+      row(0, '2025/4/17', `15:10 ${I('I13')} 役員交代　▶　15:11 ${T('T11')}`, '公表の1分後'),
+      row(1, '2025/11/13〜14', `16:30 ${I('I22')} 包括合意　▶　翌日 11:36 ${T('T14')}`, '翌日'),
+      row(2, '2026/4/13', `10:22 ${T('T24')} GC　▶　16:30 ${I('I31')} 決算延期`, '投稿の時点で延期は未公表'),
+      row(3, '2026/4/24', `17:45 ${I('I33')} 会社法監査の不表明　▶　18:45 ${T('T34')}`, '公表の60分後'),
+      row(4, '2026/5/27', `18:10 ${I('I37')} 有報監査の不表明・辞任　▶　18:28 ${T('T40')}`, '公表の18分後'),
+      row(5, '2026/6/30', `17:45 ${I('I41')}${I('I42')} 調査中断・事業IR　▶　18:44 ${T('T46')}`, '公表の59分後'),
+      row(6, '2026/9/16', `01:15 調査結果　▶　16:00 報告書　▶　17:00 廃止IR`, '一括りにしない'),
+    ];
+    const slide = (n, d = .2) => { E.tw(n, .35, { o: [0, 1], x: [-40, 0] }, 'back', d); E.sfx('slide', { delay: d, gain: .4 }); };
+    E.wait(.3);
+    E.say('hat', '時刻の照合も、振り返る。', { yomi: 'じこくの、しょうごうも、振り返る。' });
+    let L = E.say('hat', '2025年4月17日。役員交代の公表の、1分後に、投稿があった。', { wait: false, yomi: '2025年4月17日。やくいん、こうたいの公表の、いっぷんごに、投稿があった。' });
+    slide(rs[0]);
+    E.at(L.end);
+    L = E.say('hat', '11月13日の、包括合意の開示。投稿は、翌日の11時36分だった。', { wait: false, yomi: '11月13日の、ほうかつごういの開示。投稿は、よくじつの、11時36分だった。' });
+    slide(rs[1]);
+    E.at(L.end);
+    L = E.say('hat', '2026年4月13日は、投稿が先だ。10時22分の投稿の時点で、決算の延期は、未公表。', { wait: false, yomi: '2026年4月13日は、投稿が先だ。10時22分の、投稿の時点で、決算の延期は、みこうひょう。' });
+    slide(rs[2]);
+    E.at(L.end);
+    E.say('hat', '延期の開示は、16時30分。引けのあとだった。', { yomi: 'えんきの開示は、16時30分。ひけのあとだった。' });
+    L = E.say('hat', '4月24日は、公表の60分後。5月27日は、18分後。6月30日は、59分後。', { wait: false, yomi: '4月24日は、公表の、ろくじっぷんご。5月27日は、じゅうはっぷんご。6月30日は、ごじゅうきゅうふんご。' });
+    slide(rs[3], .2); slide(rs[4], L.dur * .45); slide(rs[5], L.dur * .75);
+    E.at(L.end);
+    L = E.say('hat', '9月16日は、1時15分、16時、17時。三つの時刻を、一括りにしない。', { wait: false, yomi: '9月16日は、1時15分、16時、17時。みっつの時刻を、ひとくくりにしない。' });
+    slide(rs[6]);
+    E.at(L.end);
+    rs.forEach(r => E.tw(r, .4, { o: .35 }, 'inOut'));
+    const nb = panel(g, { x: 360, y: 860, w: 1200, h: 100, size: 38, dark: true, html: '時刻の帯で分かるのは、順番だけ' });
+    L = E.say('hat', '並べて分かるのは、順番だけだ。', { wait: false, yomi: 'ならべて分かるのは、じゅんばんだけだ。' });
+    E.tw(nb, .4, { o: [0, 1], y: [20, 0] }, 'back', .2); E.sfx('dun', { delay: .2, gain: .6 });
+    E.at(L.end + .5);
+  });
+
+  /* ============================================================ S5 調べられた範囲と、限界 */
+  E.scene({ name: 'limits' }, sc => {
+    const g = sc.cam;
+    E.bgm('lesson', { fadeIn: .6, gain: .8 });
+    P.slate(g);
+    const tt = P.heading(g, '調べられた範囲と、限界（元資料 p35）', 50);
+    E.show(tt, .3);
+    const lim = (i, html) => E.div(g, { left: 160, top: 160 + i * 175, width: 1600, height: 150, borderRadius: 22, background: 'rgba(255,255,255,.95)', display: 'flex', alignItems: 'center', gap: '26px', padding: '0 36px', boxSizing: 'border-box', boxShadow: '0 10px 20px rgba(0,0,0,.3)' },
+      `<span style="flex:none;width:60px;height:60px;border-radius:50%;background:#3a4560;color:#fff;font:900 34px/60px Noto;text-align:center">${i + 1}</span><div style="font:900 32px/1.45 Zen;color:#262236">${html}</div>`).ini({ o: 0 });
+    const ls = [
+      lim(0, '確認できた関連投稿は50件（2024/6/18〜2026/8/25）。<br><span style="font:800 26px Round;color:#4a4552">削除・非公開・検索未掲載の投稿は漏れ得る</span>'),
+      lim(1, '長文の取得範囲外や、分足・全日の板データは補っていない'),
+      lim(2, 'Tの印は、投稿を含む日・週・月の終値の位置。<br><span style="font:800 26px Round;color:#4a4552">投稿した瞬間の値段ではない</span>'),
+      lim(3, '<span style="color:#c62828">前後の値動きは、投稿による因果関係の証明ではない</span>'),
+    ];
+    E.wait(.3);
+    E.say('hat', '最後に、元資料が調べられた範囲と、限界だ。', { yomi: '最後に、もとしりょうが、調べられた範囲と、げんかいだ。' });
+    let L = E.say('hat', '確認できた関連投稿は、50件。2024年6月18日から、2026年8月25日まで。', { wait: false, yomi: '確認できた、かんれん投稿は、ごじゅっけん。2024年6月18日から、2026年8月25日まで。' });
+    rise(ls[0], .3);
+    E.at(L.end);
+    E.say('hat', '削除されたり、公開されていなかったり、検索に出ない投稿は、漏れ得る。', { yomi: 'さくじょされたり、公開されていなかったり、けんさくに出ない投稿は、もれうる。' });
+    L = E.say('hat', '長い文章の取得範囲の外や、分足、一日全部の板のデータは、補っていない。', { wait: false, yomi: '長い文章の、しゅとく範囲の外や、ふんあし、いちにち全部の、いたの、データは、おぎなっていない。' });
+    rise(ls[1], .3);
+    E.at(L.end);
+    L = E.say('hat', 'Tの印は、投稿を含む日の、終値の位置だ。投稿した瞬間の値段では、ない。', { wait: false, yomi: 'ティーの、しるしは、投稿を含む日の、おわりねの位置だ。投稿した、しゅんかんの値段では、ない。' });
+    rise(ls[2], .3);
+    E.at(L.end);
+    L = E.say('hat', 'そして、前後の値動きは、投稿による因果関係の、証明ではない。', { wait: false, yomi: 'そして、ぜんごの値動きは、投稿による、いんがかんけいの、しょうめいではない。' });
+    rise(ls[3], .3); E.sfx('dun', { delay: .4, gain: .6 });
+    E.at(L.end + .5);
+  });
+
+  /* ============================================================ S6 私の答え合わせ */
+  E.trans('fade', { dur: .6, color: '#fff' });
+  E.scene({ name: 'mine' }, sc => {
+    const g = sc.cam;
+    E.bgm('memory', { fadeIn: .8, gain: .75 });
+    const R = P.room(g, { night: false });
+    P.watchlist(R.screen, [['エスポア', '10/17 上場廃止'], ['・・・', ''], ['・・・', '']], { title: 'ウォッチ', hi: 0 });
+    const back = E.div(g, { left: 0, top: 0, width: W, height: H, background: 'rgba(20,16,30,.55)' });
+    fiction(sc);
+    const steps = [['3/24', '買う　700円', '自分の判断', '#2b68d8'], ['4/24', '会社法監査の<br>意見不表明', '', '#b8651a'], ['5/27', '有報監査の<br>意見不表明', '', '#b8651a'], ['9/16', '上場廃止決定', '', '#b8651a'], ['9/25', '売る　55円', '', '#2b68d8'], ['10/16', '終値　3円', '最終売買日', '#c62828']];
+    const ns = steps.map(([d, t, s, c], i) => E.div(g, { left: 70 + i * 300, top: 300, width: 270, height: 300, borderRadius: 22, background: 'rgba(255,255,255,.96)', borderTop: `10px solid ${c}`, textAlign: 'center', boxShadow: '0 12px 24px rgba(0,0,0,.35)', boxSizing: 'border-box', paddingTop: '30px' },
+      `<div style="font:900 40px/1.2 Noto;color:${c}">${d}</div><div style="font:900 30px/1.4 Zen;color:#262236;margin-top:20px">${t}</div><div style="font:800 22px/1.4 Round;color:#6a6066;margin-top:12px">${s}</div>`).ini({ o: 0 }));
+    E.div(g, { left: 70, top: 230, font: '900 36px/1.2 Zen', color: '#f3e6c8' }, '私の答え合わせ');
+    E.wait(.4);
+    E.narr('私の答え合わせも、同じようにする。');
+    let L = E.narr('3月24日、700円で買ったのは、私が、自分で決めたことだ。', { wait: false, yomi: '3月24日、ななひゃくえんで買ったのは、私が、自分で決めたことだ。' });
+    rise(ns[0], .3);
+    E.at(L.end);
+    L = E.narr('4月24日、5月27日。前提が崩れる知らせは、時刻つきで、出ていた。', { wait: false, yomi: '4月24日、5月27日。ぜんていが崩れる知らせは、じこくつきで、出ていた。' });
+    rise(ns[1], .2); rise(ns[2], L.dur * .3); rise(ns[3], L.dur * .6);
+    E.at(L.end);
+    E.narr('私は、それを並べずに、読みたいものだけを、読んでいた。', { yomi: '私は、それを、ならべずに、読みたいものだけを、読んでいた。' });
+    L = E.narr('9月25日、55円で売った。最後の終値は、3円だった。', { wait: false, yomi: '9月25日、ごじゅうごえんで売った。最後の、おわりねは、さんえんだった。' });
+    rise(ns[4], .2); rise(ns[5], L.dur * .55);
+    E.at(L.end + .5);
+  });
+
+  /* ============================================================ S7 時計で読む */
+  E.trans('fade', { dur: .6, color: '#000' });
+  E.scene({ name: 'theme' }, sc => {
+    const g = sc.cam;
+    E.bgm('resolve', { fadeIn: .8, gain: .8 });
+    P.slate(g);
+    const clk = P.clock(g, { x: 110, y: 120, size: 300, min: 0 });
+    E.show(clk, .4, .2);
+    E.tw(clk, 8, { min: [0, 1440] }, 'inOut', .2);
+    const big = E.div(g, { left: 470, top: 130, width: 1340, height: 300, borderRadius: 28, background: 'rgba(255,255,255,.96)', boxShadow: '0 16px 32px rgba(0,0,0,.4)', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 50px', boxSizing: 'border-box' },
+      `<div style="font:900 70px/1.2 Zen;color:#262236">時計で読む。</div><div style="font:900 34px/1.5 Zen;color:#4a4552;margin-top:16px">投稿の時刻、会社の発表の時刻、<br>ローソク足の時刻を、一つずつ並べる</div>`).ini({ o: 0 });
+    const p = (i, t) => E.div(g, { left: 470 + i * 450, top: 500, width: 430, height: 140, borderRadius: 22, background: '#2a2430', border: '3px solid #ffd84a', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', font: '900 32px/1.4 Zen', color: '#ffd84a', boxShadow: '0 12px 24px rgba(0,0,0,.35)' }, t).ini({ o: 0 });
+    const p1 = p(0, '並べて分かるのは、<br>順番だけ'), p2 = p(1, '判断には、<br>主語を付ける'), p3 = p(2, '事実・推測・未確認を<br>分ける');
+    E.wait(.4);
+    let L = E.narr('時計で読む。投稿の時刻、会社の発表の時刻、ローソク足の時刻を、一つずつ並べる。', { wait: false, yomi: 'とけいで読む。投稿の時刻、会社の発表の時刻、ローソクあしの時刻を、ひとつずつ、ならべる。' });
+    E.tw(big, .6, { o: [0, 1], s: [.94, 1] }, 'out', .2); E.sfx('shine', { delay: .2, gain: .5 });
+    E.at(L.end);
+    L = E.narr('並べて分かるのは、順番だけ。判断には、主語を付ける。', { wait: false, yomi: 'ならべて分かるのは、じゅんばんだけ。判断には、しゅごを付ける。' });
+    rise(p1, .2); rise(p2, L.dur * .5);
+    E.at(L.end);
+    L = E.narr('事実と、推測と、未確認を、分ける。', { wait: false, yomi: 'じじつと、すいそくと、みかくにんを、分ける。' });
+    rise(p3, .2);
+    E.at(L.end + .8);
+  });
+
+  /* ============================================================ S8 最後の対面 */
+  E.trans('fade', { dur: .8, color: '#000' });
+  E.scene({ name: 'face_off' }, sc => {
+    const g = sc.cam;
+    E.bgm('boss', { fadeIn: .6, gain: .85 });
+    const L = P.lair(g, { screen: false, faces: ['normal', 'smile', 'surprise'] });
+    E.breathe(L.baron, .008, 1.5);
+    E.breathe(L.hat, .01, 1.9);
+    L.pigs.forEach((p, i) => E.breathe(p, .012, 2.3, i));
+    const bull = E.actor(g, 'bull', { x: 700, y: 1080, h: 640, pose: 'back' });
+    E.breathe(bull, .01, 2.0);
+    E.from(bull, { x: -500 }, 1.4, .3, 'out');
+    for (let i = 0; i < 4; i++) E.sfx('footstep', { delay: .4 + i * .32, gain: .6 });
+    E.tw(sc.cam, 2.0, { s: [1.15, 1], y: [80, 0] }, 'inOut');
+    E.wait(2.0);
+    E.say('baron', '……来たか。', { talk: L.baron, talkAmp: 1.5, yomi: '来たか。', gap: .5 });
+  });
+
+  E.scene({ name: 'bull_vow' }, sc => {
+    const g = sc.cam;
+    const C = P.closeup(g, CH('bull_e_normal'), { bg: 'radial-gradient(ellipse at 50% 40%, #4c1820, #140707)', panelBg: 'linear-gradient(180deg,#3a1018,#14060a)', imgH: 820 });
+    E.tw(C.img, 10, { s: [1, 1.05] }, 'linear');
+    E.wait(.3);
+    E.say('bull', '師匠。私は、人を信じることを、やめません。', { talk: C.img, talkAmp: 2 });
+    E.say('bull', 'でも、時刻を並べて、会社の資料で、確かめます。', { talk: C.img, talkAmp: 2, yomi: 'でも、じこくを、ならべて、会社の資料で、確かめます。' });
+    E.wait(.3);
+  });
+
+  E.scene({ name: 'baron_photo' }, sc => {
+    const g = sc.cam;
+    E.bgm('memory', { fadeIn: 1.2, gain: .8 });
+    const C = P.closeup(g, CH('baron_e_normal'), { bg: 'radial-gradient(ellipse at 50% 40%, #4c1820, #140707)', panelBg: 'linear-gradient(180deg,#2c0f14,#120607)', imgH: 820 });
+    E.tw(C.img, 10, { s: [1, 1.04] }, 'linear');
+    // 手元の写真に色が戻る
+    const fr = E.div(g, { left: 1300, top: 300, width: 300, height: 330, borderRadius: 10, background: '#8a5a30', boxShadow: '0 20px 40px rgba(0,0,0,.6)' }).ini({ r: 6, o: 0 });
+    E.img(fr, CH('mentor_photo'), { left: 18, top: 18, width: 264, height: 294, objectFit: 'cover' });
+    const col = E.img(fr, CH('mentor_photo_color'), { left: 18, top: 18, width: 264, height: 294, objectFit: 'cover' }).ini({ o: 0 });
+    E.wait(1.2);
+    E.show(fr, .6);
+    E.tw(col, 2.0, { o: [0, .55] }, 'inOut', .8);
+    E.sfx('swell', { delay: .6, gain: .35 });
+    E.wait(2.6);
+    E.say('baron', '押し目おじさんは、もういない。……今は、まだ。', { talk: C.img, talkAmp: 1.5, yomi: '押し目おじさんは、もういない。今は、まだ。', gap: .6 });
+  });
+
+  E.scene({ name: 'wait_for' }, sc => {
+    const g = sc.cam;
+    const C = P.closeup(g, CH('bull_e_smile'), { bg: 'radial-gradient(ellipse at 50% 40%, #4c1820, #140707)', panelBg: 'linear-gradient(180deg,#3a1018,#14060a)', imgH: 820 });
+    E.from(C.img, { s: .94 }, .4, 0, 'back');
+    E.wait(.3);
+    E.say('bull', '待ってます。', { talk: C.img, talkAmp: 2, gap: .6 });
+  });
+
+  E.scene({ name: 'lair_end' }, sc => {
+    const g = sc.cam;
+    E.bgm('daily', { fadeIn: 1.0, gain: .75 });
+    const L = P.lair(g, { screen: false, faces: ['smile', 'laugh', 'normal'] });
+    E.breathe(L.baron, .008, 1.5);
+    E.breathe(L.hat, .01, 1.9);
+    L.pigs.forEach((p, i) => E.breathe(p, .012, 2.3, i));
+    const bull = E.actor(g, 'bull', { x: 700, y: 1080, h: 640, pose: 'back' });
+    E.breathe(bull, .01, 2.0);
+    P.look(sc.cam, { s: 1.25, cx: 380, cy: 720, dur: 1.0 });
+    E.say('hat', '……いい弟子じゃないか。', { talk: L.hat, yomi: 'いい弟子じゃないか。', delay: .4 });
+    P.look(sc.cam, { s: 1.3, cx: 1685, cy: 330, dur: .9 });
+    E.set(L.call, { face: 'laugh' }, .3);
+    E.say('eve', 'ねえねえ、次はどの銘柄を見る〜？', { talk: L.call, talkAmp: 3, delay: .3, yomi: 'ねえねえ、次はどの銘柄を見るー？' });
+    E.unsub(.3);
+    P.look(sc.cam, { s: 1, cx: 960, cy: 540, dur: 1.2 });
+    E.wait(1.6);
+  });
+
+  /* ============================================================ S9 エンドカード */
+  E.trans('fade', { dur: 1.0, color: '#000' });
+  E.scene({ name: 'end', bg: '#10224a' }, sc => {
+    const g = sc.cam;
+    E.bgm('title', { fadeIn: .6, gain: .8 });
+    E.div(g, { left: 0, top: 0, width: W, height: H, background: 'radial-gradient(circle at 50% 40%, #2c5596 0%, #1d3766 48%, #0e1d40 100%)' });
+    E.particles(g, { n: 40, kind: 'sparkle', color: '#fff6c8', area: [0, 0, W, H], speed: .6, seed: 1919 });
+    const t1 = E.div(g, { left: 0, top: 40, width: W, textAlign: 'center', font: '900 36px/1.2 Zen', color: '#27b4c2' }, 'ブルちゃん証券 〜株価の向こう側〜').ini({ o: 0 });
+    const t2 = E.div(g, { left: 0, top: 90, width: W, textAlign: 'center', font: '900 76px/1.2 Zen', color: '#fff', textShadow: '0 7px 0 #27b4c2' }, 'エスポア（3260）編・完全版').ini({ o: 0 });
+    const kan = E.div(g, { left: 1540, top: 70, width: 200, textAlign: 'center', font: '900 120px/1 Zen', color: '#ffd84a', textShadow: '0 0 40px rgba(255,216,74,.6)' }, '完').ini({ o: 0 });
+    const titles = ['上昇は、投稿より前に', '総会と、買収提案', '経営交代', '蓄電池と65億円', '増資の決議と払込', '売りが出ない', '決算延期', '4月24日 17時45分', '二番底', '5月27日 18時10分', '516円のトリプルボトム', '調査中断と、監理（審査中）', '480円と、売れていく用地', '9月16日、三つの時刻', '増資は、払い込まれていた', '最後の1か月', '海帆との比較', '人を信じることと、判断を変えること', '答え合わせ（完全版）'];
+    const list = titles.map((t, i) => E.div(g, { left: 160 + Math.floor(i / 10) * 820, top: 215 + (i % 10) * 50, width: 800, font: '800 28px/1.3 Round', color: 'rgba(255,255,255,.92)', whiteSpace: 'nowrap' }, `<span style="display:inline-block;width:110px;color:#ffd84a">第${i + 1}章</span>${t}`).ini({ o: 0 }));
+    const disc = E.div(g, { left: 100, top: 722, width: 1720, textAlign: 'center', font: '800 21px/1.5 Round', color: 'rgba(255,255,255,.78)' }, 'ブルちゃん・空売り軍団とその売買・会話はフィクションです　｜　投資助言ではありません<br>エスポアの出来事・数値・投稿の要約は元資料（会社・名証の公表資料など）に基づきます').ini({ o: 0 });
+    const credit = E.div(g, { left: 100, top: 806, width: 1720, textAlign: 'center', font: '800 19px/1.6 Round', color: 'rgba(255,255,255,.65)' },
+      'フォント：M PLUS Rounded 1c ／ Zen Maru Gothic ／ Dela Gothic One ／ Noto Sans JP ／ Anton（SIL Open Font License）<br>声：Open JTalk（名古屋工業大学）＋ HTS Voice "Mei"（MMDAgent, Nagoya Institute of Technology, CC BY 3.0）<br>音楽・効果音：オリジナル（合成）').ini({ o: 0 });
+    E.show(t1, .5, .3); E.show(t2, .6, .6);
+    E.tw(kan, .6, { o: [0, 1], s: [2.2, 1] }, 'in2', 1.2); E.sfx('fanfare', { delay: 1.0, gain: .8 }); E.sfx('impact', { delay: 1.75, gain: .5 });
+    list.forEach((n, i) => E.show(n, .3, 2.0 + i * .1));
+    E.show(disc, .6, 4.2); E.show(credit, .6, 4.6);
+    const pig = E.actor(g, 'pig', { x: 1760, y: 1130, h: 460, pose: 'front', shadow: false }).ini({ x: 420 });
+    E.tw(pig, .7, { x: [420, 0] }, 'back', 4.8);
+    E.sfx('snort', { delay: 5.0 });
+    E.wait(5.6);
+    E.say('pig', 'ブヒッ。最後まで見てくれて、ありがとうだブー。', { talk: pig, talkAmp: 5 });
+    E.unsub(.4);
+    E.wait(4.0);
+  });
+  E.scene({ name: 'notice_end', bg: '#0b1022' }, sc => {
+    const g = sc.cam;
+    E.div(g, { left: 0, top: 0, width: W, height: H, background: 'radial-gradient(ellipse at 50% 45%, #1d2a4a 0%, #0b1022 75%)' });
+    const n = P.kNotice(g, { x: 100, y: 330, w: 1720, size: 32 });
+    E.show(n, .6, .2);
+    E.wait(6.0);
+  });
+  E.bgmStop(3.0, -3.0);
+  E.finish();
+}
