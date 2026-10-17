@@ -11,7 +11,7 @@ E.chapter('k18');
   const box = (g, { x, y, w = 700, h = 280, top = '', main = '', sub = '', c = '#262236', border = 'none', size = 50 }) => E.div(g, { left: x, top: y, width: w, height: h, borderRadius: 26, background: 'rgba(255,255,255,.95)', border, boxShadow: '0 12px 24px rgba(0,0,0,.35)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 30px' },
     `${top ? `<div style="font:800 28px/1.3 Round;color:#6a6066">${top}</div>` : ''}<div style="font:900 ${size}px/1.3 Zen;color:${c};white-space:nowrap">${main}</div>${sub ? `<div style="font:800 30px/1.5 Round;color:#4a4552;margin-top:14px">${sub}</div>` : ''}`).ini({ o: 0 });
   const rise = (n, d = 0) => { E.tw(n, .4, { o: [0, 1], y: [20, 0] }, 'back', d); E.sfx('pop', { delay: d, gain: .5 }); };
-  const fiction = sc => P.note(sc.root, 'ブルちゃんの保有はフィクションです', { x: 1440, y: 40, size: 24, dark: true });
+  const fiction = sc => P.note(sc.root, 'ブルちゃんの売買はフィクションです', { x: 1440, y: 40, size: 24, dark: true });
   const OLD = { chip: '押し目おじさん（昔）', chipColor: '#25386b' };
 
   /* ============================================================ 注意書き */
@@ -37,7 +37,7 @@ E.chapter('k18');
     E.wait(.6);
     E.narr('10月17日。エスポアは、上場廃止になった。');
     P.look(sc.cam, { s: 1.7, cx: 880, cy: 700, dur: 2.4 });
-    E.narr('私は、師匠の写真を見ていた。師匠も、昔、誰かを信じていたのだろうか。');
+    E.narr('私は、師匠の写真を見ていた。師匠も、昔、何かを信じて、判断を変えなかったのだろうか。');
     E.wait(.3);
   });
 
@@ -69,13 +69,13 @@ E.chapter('k18');
     P.slate(g);
     const tt = P.heading(g, '「この人が関わっているから大丈夫」を、最終確認にしない', 60);
     E.show(tt, .3);
-    const A = box(g, { x: 120, y: 200, w: 640, h: 420, top: '期待材料', main: '経営交代<br>著名投資家の関与', sub: '', c: '#2b68d8', border: '5px solid #2b68d8', size: 46 });
+    const A = box(g, { x: 120, y: 200, w: 640, h: 420, top: '期待材料', main: '経営交代<br>著名投資家との関わり', sub: '', c: '#2b68d8', border: '5px solid #2b68d8', size: 46 });
     const arr = E.div(g, { left: 790, top: 360, font: '900 80px/1 Zen', color: '#ffd84a' }, '▶').ini({ o: 0 });
     const chk = (y, t) => E.div(g, { left: 920, top: y, width: 880, height: 110, borderRadius: 22, background: 'rgba(255,255,255,.95)', display: 'flex', alignItems: 'center', gap: '24px', padding: '0 34px', boxShadow: '0 10px 20px rgba(0,0,0,.3)', boxSizing: 'border-box' },
       `<span style="flex:none;width:52px;height:52px;border-radius:12px;border:4px solid #1b8a5a;font:900 40px/48px Zen;color:#1b8a5a;text-align:center">✓</span><span style="font:900 40px/1.2 Zen;color:#262236">${t}</span><span style="margin-left:auto;font:800 24px/1.2 Round;color:#6a6066">会社の資料で確かめる</span>`).ini({ o: 0 });
     const c1 = chk(200, '取引の実態'), c2 = chk(355, '資金の入金'), c3 = chk(510, '監査の結果');
     E.wait(.3);
-    let L = E.say('hat', '経営の交代や、有名な投資家の関与は、期待の材料だ。', { wait: false, yomi: 'けいえいの、こうたいや、ゆうめいな投資家の、かんよは、期待の材料だ。' });
+    let L = E.say('hat', '元資料は、経営の交代や、有名な投資家との関わりを、期待の材料としている。', { wait: false, yomi: 'もとしりょうは、けいえいの、こうたいや、ゆうめいな投資家との、かかわりを、期待の材料としている。' });
     rise(A, .3);
     E.at(L.end);
     L = E.say('hat', 'でも、そのあとの取引の実態、お金の入金、監査の結果は、それぞれ、会社の資料で確かめる。', { wait: false, yomi: 'でも、そのあとの、取引の、じったい、お金の、にゅうきん、かんさの結果は、それぞれ、会社の資料で確かめる。' });
@@ -242,15 +242,19 @@ E.chapter('k18');
     const tt = P.heading(g, '元資料が、扱っていないこと（p42）', 60);
     E.show(tt, .3);
     const a = E.div(g, { left: 160, top: 200, width: 1600, height: 200, borderRadius: 24, background: 'rgba(255,255,255,.96)', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', font: '900 38px/1.55 Zen', color: '#262236', boxShadow: '0 12px 24px rgba(0,0,0,.35)' },
-      '<div>元資料は、会社との関係や投稿だけを根拠に、<br>この投資家が会計問題を<span style="color:#c62828">知っていた・関与した</span>とは扱っていない</div>').ini({ o: 0 });
-    const b = panel(g, { x: 160, y: 460, w: 1600, h: 110, size: 34, dark: true, html: '監査の指摘すべてを、意見不表明や不正と同列にしない' });
+      '<div>元資料は、会社との関係や投稿だけを根拠に、<br>この投資家が会計問題を知っていた・関与したとは<span style="color:#c62828">扱っていない</span></div>').ini({ o: 0 });
+    const b = panel(g, { x: 160, y: 300, w: 1600, h: 110, size: 34, dark: true, html: '<span style="font:800 24px Round;color:#cfc6b0">元資料の注記</span>監査の指摘すべてを、意見不表明や不正と同列にしない' });
     E.wait(.3);
     E.say('hat', 'そして、元資料は、こうも書いている。', { yomi: 'そして、もとしりょうは、こうも書いている。' });
-    let L = E.say('hat', '会社との関係や、投稿だけを根拠に、この投資家が、会計の問題を知っていた、', { wait: false, yomi: '会社との、かんけいや、投稿だけを、こんきょに、この投資家が、かいけいの問題を、知っていた、' });
+    let L = E.say('hat', '会社との関係や、投稿だけを根拠に、', { wait: false, yomi: '会社との、かんけいや、投稿だけを、こんきょに、' });
     rise(a, .3);
     E.at(L.end);
-    E.say('hat', '関与した、とは扱っていない。', { yomi: 'かんよした、とは、あつかっていない。' });
-    L = E.say('hat', '監査の指摘すべてを、意見不表明や、不正と、同じ列に並べることも、しない。', { wait: false, yomi: 'かんさの、してき、すべてを、いけんふひょうめいや、ふせいと、同じ列に、ならべることも、しない。' });
+    E.say('hat', 'この投資家が、会計の問題を知っていた、関与した、とは扱っていない。', { yomi: 'この投資家が、かいけいの問題を、知っていた、かんよした、とは、あつかっていない。' });
+    E.wait(.4);
+    E.hide(a, .3);
+    E.wait(.3);
+    E.say('hat', 'もう一つ、元資料は、監査について、こう書いている。', { yomi: 'もうひとつ、もとしりょうは、かんさについて、こう書いている。' });
+    L = E.say('hat', '監査の指摘すべてを、意見不表明や、不正と、同じ列に並べることは、しない。', { wait: false, yomi: 'かんさの、してき、すべてを、いけんふひょうめいや、ふせいと、同じ列に、ならべることは、しない。' });
     E.tw(b, .4, { o: [0, 1], y: [20, 0] }, 'back', .3); E.sfx('ding', { delay: .3, gain: .5 });
     E.at(L.end + .4);
   });
@@ -267,7 +271,7 @@ E.chapter('k18');
     fiction(sc);
     P.look(sc.cam, { s: 1.2, cx: 1150, cy: 430, dur: 4, delay: .3 });
     E.wait(.6);
-    E.narr('私は、信じていた。信じたこと自体は、まちがいではなかったのかもしれない。', { yomi: '私は、信じていた。信じたこと、じたいは、まちがいではなかったのかもしれない。' });
+    E.narr('私は、事業の知らせが続けば、まだ上がる、と信じていた。');
     E.narr('前提が崩れたのに、判断を変えなかった。私が、まちがえたのは、そこだった。', { yomi: 'ぜんていが、崩れたのに、判断を変えなかった。私が、まちがえたのは、そこだった。' });
     E.wait(.3);
   });
