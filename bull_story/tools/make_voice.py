@@ -55,6 +55,7 @@ def normalize(text):
     s = s.replace("≠", "とは違う")
     s = s.replace("取引所", "とりひきじょ")             # 単独では「とりひきしょ」と読まれるため
     s = s.replace("監査人", "かんさにん")               # 「かんさじん」と読まれるため
+    s = s.replace("中間期", "ちゅうかんき")             # 「ちゅうげんき」と読まれるため
     s = re.sub(r"、+", "、", s).strip("、 ")
     return s
 
