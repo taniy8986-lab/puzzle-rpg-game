@@ -71,11 +71,10 @@ E.chapter('k16');
     bar(g, [9, 18], [9, 18]);
     const clk = P.clock(g, { x: 120, y: 170, size: 230, min: 538, label: '8:58' });
     E.show(clk, .4, .2);
-    const t = P.tcard(g, { id: '投稿', when: '2026/9/18 8:58', kind: '大株主', session: '寄り前', text: '船の絵文字付きで「大株主は市場で売らない」と投稿', note: '元資料の投稿一覧（50件・2024/6/18〜2026/8/25）の外。<br>元資料は、エスポアの保有継続を示す根拠として採用していない', x: 420, y: 150, w: 1380, size: 38 });
+    const t = P.tcard(g, { id: '投稿', when: '2026/9/18 8:58', kind: '需給', session: '寄り前', text: '船の絵文字付きで「大株主は市場で売らない」と投稿', note: '元資料の投稿一覧（50件・2024/6/18〜2026/8/25）の外。<br>元資料は、エスポアの保有継続を示す根拠として採用していない', x: 420, y: 150, w: 1380, size: 38 });
     card(g, t, .6);
     E.wait(1.2);
-    E.narr('9月18日、8時58分。取引が始まる前に、投稿があった。');
-    E.narr('「大株主は、市場で売らない」。', { yomi: 'だいかぶぬしは、しじょうで、うらない。' });
+    E.narr('9月18日、8時58分。取引が始まる前に、大株主は市場で売らない、という投稿があった。', { yomi: '9月18日、8時58分。取引が始まる前に、だいかぶぬしは、しじょうで、うらない、という投稿があった。' });
     E.tw(t, .45, { y: -40, s: .82 }, 'inOut'); E.hide(clk, .3);
     const L0 = box(g, { x: 160, y: 520, w: 760, h: 300, top: '書かれていること', main: '大株主は市場で売らない', sub: '売る側（供給）の話', c: '#1b6a3a', border: '5px solid #1b8a5a', size: 44 });
     const R0 = box(g, { x: 1000, y: 520, w: 760, h: 300, top: '書かれていないこと', main: '買う人がいるか（需要）', sub: '個人株主が売れる値段（出口）', c: '#c62828', border: '5px dashed #c62828', size: 44 });
@@ -91,7 +90,7 @@ E.chapter('k16');
     E.wait(.4);
   });
 
-  /* ============================================================ S3 ブルちゃん（注文を取り消す） */
+  /* ============================================================ S3 ブルちゃん（9月18日の朝・注文の状況） */
   E.trans('fade', { dur: .6, color: '#fff' });
   P.phoneScene((ph, sc) => {
     E.bgm('memory', { fadeIn: .8, gain: .75 });
@@ -103,13 +102,11 @@ E.chapter('k16');
     E.div(cd, { left: 24, top: 20, font: '900 30px/1.4 Zen', color: '#22252b' }, 'エスポア（3260）');
     E.div(cd, { left: 24, top: 80, font: '900 34px/1.4 Zen', color: '#1b8a5a' }, '売り　9/16');
     E.div(cd, { left: 24, top: 150, padding: '6px 18px', borderRadius: 12, background: '#eef0f4', font: '900 32px/1.4 Zen', color: '#6a6066' }, '未約定');
-    const cx = E.div(cd, { left: 0, top: 0, width: sw - 48, height: 260, borderRadius: 18, background: 'rgba(240,242,246,.86)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '900 44px/1 Zen', color: '#c62828', letterSpacing: '.2em' }, '取消').ini({ o: 0 });
     E.wait(1.0);
     E.narr('大株主が売らないなら、値段は、戻るかもしれない。私は、そう読みたかった。', { yomi: 'だいかぶぬしが、うらないなら、値段は、戻るかもしれない。私は、そう読みたかった。' });
-    const L = E.narr('私は、売りの注文を、取り消した。', { wait: false });
-    E.tw(cx, .35, { o: [0, 1], s: [1.2, 1] }, 'back', L.dur * .55); E.sfx('stamp', { delay: L.dur * .55, gain: .5 });
-    E.at(L.end + .3);
-  }, { name: 'bull_cancel', wait: .4 });
+    E.narr('私の売りの注文は、9月16日に出した値段のまま、残っていた。', { yomi: '私の売りの注文は、9月16日に出した、値段のまま、残っていた。' });
+    E.wait(.3);
+  }, { name: 'bull_order', wait: .4 });
 
   /* ============================================================ S4 9月18日の取引 */
   E.trans('fade', { dur: .6, color: '#000' });
@@ -228,7 +225,7 @@ E.chapter('k16');
     const fm = E.div(scr, { left: 24, top: 450, width: sw - 48, height: 210, borderRadius: 18, background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,.08)', textAlign: 'center' },
       `<div style="font:800 22px/1.4 Round;color:#6a6066;padding-top:22px;white-space:nowrap">買値 700円　→　売値 55円</div><div style="font:900 28px/1.5 Noto;color:#22252b;margin-top:8px">（55 ÷ 700 − 1）× 100</div><div style="font:900 40px/1.4 Noto;color:#c62828">＝ −92.14%</div>`).ini({ o: 0 });
     E.wait(1.0);
-    let L = E.narr('9月25日。私は、55円で、売った。', { wait: false, yomi: '9月25日。私は、ごじゅうごえんで、売った。' });
+    let L = E.narr('9月25日。私は、自分で値段を決め直して、55円で売った。', { wait: false, yomi: '9月25日。私は、自分で値段を決め直して、ごじゅうごえんで売った。' });
     E.pop(st, .4, L.dur * .6); E.sfx('ding', { delay: L.dur * .6, gain: .4 });
     E.at(L.end);
     E.narr('3月24日に、700円で買った株だった。', { yomi: '3月24日に、ななひゃくえんで買った株だった。' });
@@ -274,7 +271,7 @@ E.chapter('k16');
     E.tw(i52, .4, { y: -20, s: .92 }, 'inOut');
     const tl = panel(g, { x: 110, y: 560, w: 1700, h: 100, size: 30, dark: true, html: '9/16 上場廃止決定　▶　10/16 最終売買　▶　10/17 上場廃止　▶　10/21 保振での取扱廃止（予定）' });
     E.tw(tl, .4, { o: [0, 1], y: [20, 0] }, 'back', .1); E.sfx('dun', { delay: .1, gain: .6 });
-    const ex = panel(g, { x: 260, y: 700, w: 1400, h: 110, size: 30, html: '<span style="color:#b8651a">保振</span><span style="font:800 26px Round;color:#4a4552">＝ 証券保管振替機構。株の持ち主の記録を、電子的に管理する仕組み</span>' });
+    const ex = panel(g, { x: 260, y: 700, w: 1400, h: 110, size: 30, html: '<span style="color:#b8651a">保振</span><span style="font:800 26px Round;color:#4a4552">＝ 証券保管振替機構。株の持ち主の記録を、電子的に管理する機関</span>' });
     const L = E.say('hat', '保振は、証券保管振替機構のことだ。株の持ち主の記録を、電子的に管理している。', { wait: false, yomi: 'ほふりは、しょうけん、ほかん、ふりかえ、きこうのことだ。株の、もちぬしの記録を、でんしてきに、管理している。' });
     rise(ex, .3);
     E.at(L.end + .4);
@@ -303,9 +300,10 @@ E.chapter('k16');
     P.circle(g, { x: lo.x, y: lo.y, w: 40, h: 30, sw: 3, delay: .3, dur: .3, seed: 4 }); rise(pc, .5);
     E.at(L.end);
     E.hide(pc, .3);
-    const sp = C.at(X11(100.5), PY11(800));
+    const sp1 = C.at(X11(98.5), PY11(900)), sp2 = C.at(X11(102.3), PY11(820));
     L = E.say('hat', '2026年の、春や夏にも、上がる場面は、あった。', { wait: false });
-    P.circle(g, { x: sp.x, y: sp.y, w: 150, h: 110, sw: 3, delay: .3, dur: .4, seed: 7 });
+    P.circle(g, { x: sp1.x, y: sp1.y, w: 50, h: 80, sw: 3, delay: .3, dur: .4, seed: 7 });
+    P.circle(g, { x: sp2.x, y: sp2.y, w: 34, h: 56, sw: 3, delay: L.dur * .55, dur: .4, seed: 8 });
     E.at(L.end);
     E.say('hat', 'でも、2024年の高値を超える、長い上昇には、戻らなかった。', { yomi: 'でも、2024年の、たかねを超える、長い上昇には、戻らなかった。' });
     const nb = E.div(sc.root, { left: 260, top: 700, width: 1400, height: 110, borderRadius: 24, background: '#2a2430', border: '3px solid #ffd84a', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '24px', font: '900 34px/1.25 Zen', color: '#ffd84a', boxShadow: '0 12px 24px rgba(0,0,0,.35)', whiteSpace: 'nowrap' },
@@ -347,7 +345,7 @@ E.chapter('k16');
     const b1 = nb(150, '供給', '大株主は<br>市場で売らない', '#1b6a3a'), b2 = nb(730, '需要', '買う人がいるかは<br>別', '#c62828', true);
     E.wait(2.4);
     E.narr('師匠のノートには、こう書いてあった。');
-    const L = E.narr('「売らない、は、買う、ではない」。', { wait: false, yomi: 'うらない、は、かう、ではない。' });
+    const L = E.narr('「売らない、は、買う、ではない」。', { wait: false, yomi: 'うらないは、かう、ではない。' });
     E.show(b1, .3, .3); E.show(b2, .3, L.dur * .5); E.sfx('stamp', { delay: L.dur * .5, gain: .5 });
     E.at(L.end + 1.0);
   });
