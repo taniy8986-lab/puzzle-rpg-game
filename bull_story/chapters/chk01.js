@@ -47,7 +47,7 @@ E.chapter('k01');
     C.draw(3.0, .3);
     E.wait(1.2);
     E.narr('でも、2年前。この株は、ずっと上にいた。');
-    const peak = C.at(1878, 236), low = C.at(1725, 572), last = C.at(2404, 600);
+    const peak = C.at(1882.5, 240), low = C.at(1691, 572), last = C.at(2413, 605);
     P.look(sc.cam, { s: 1.45, cx: (peak.x + last.x) / 2 - 60, cy: 420, dur: 1.4, delay: .1 });
     let L = E.narr('195円から、1,880円へ。そして、3円へ。', { wait: false, yomi: 'ひゃくきゅうじゅうごえんから、せんはっぴゃくはちじゅうえんへ。そして、さんえんへ。' });
     const lab = (pt, txt, c, d, dx = 0, dy = -70) => {
@@ -182,7 +182,7 @@ E.chapter('k01');
     E.say('hat', 'そこから、6月17日の終値1,550円まで、上がっていった。', { yomi: 'そこから、6月17日の終値、せんごひゃくごじゅうえんまで、上がっていった。' });
     // I01
     const i01 = P.icard(g, { id: 'I01', when: '2024/3/7 16:30', session: '引け後', title: '時間貸し駐車場の事業を開始', text: '首都圏を中心に37か所。<br>運営機材・権利等への投資額は約9,400万円', x: 120, y: 190, w: 760 });
-    const p1 = C.at(905, 750);
+    const p1 = C.at(907, 753);
     E.tw(i01, .45, { o: [0, 1], y: [30, 0] }, 'back', .2); E.sfx('notify', { delay: .2, gain: .6 });
     P.circle(g, { x: p1.x, y: p1.y, w: 60, h: 60, color: P.I_ORANGE, dur: .35, delay: .5 });
     E.say('hat', '3月7日、引け後。会社は、時間貸し駐車場の事業を始めると発表した。', { delay: .3, yomi: '3月7日、ひけご。会社は、じかんがし、ちゅうしゃじょうの事業を始めると発表した。' });
@@ -190,7 +190,7 @@ E.chapter('k01');
     E.tw(i01, .3, { o: 0, y: -20 }, 'in2');
     // I02
     const i02 = P.icard(g, { id: 'I02', when: '2024/3/18 17:00', session: '引け後', title: '提携の報道について説明', text: '事業提携の意向は示されたが、<br>決定した事実はない', note: '報道・提案と、会社の正式決定を区別する', x: 120, y: 190, w: 760 });
-    const p2 = C.at(1042, 750);
+    const p2 = C.at(1045, 753);
     E.tw(i02, .45, { o: [0, 1], y: [30, 0] }, 'back', .2); E.sfx('notify', { delay: .2, gain: .6 });
     P.circle(g, { x: p2.x, y: p2.y, w: 60, h: 60, color: P.I_ORANGE, dur: .35, delay: .5 });
     E.say('hat', '3月18日には、提携の報道について、説明を出している。', { delay: .3 });
@@ -199,7 +199,7 @@ E.chapter('k01');
     E.say('hat', 'そうだ。提案や報道と、会社の正式な決定を、分けて読め。');
     E.tw(i02, .3, { o: 0, y: -20 }, 'in2');
     // 5/27 安値
-    const lowPt = C.at(1935, 515);
+    const lowPt = C.at(1945.5, 516);
     P.circle(g, { x: lowPt.x, y: lowPt.y, w: 90, h: 90, dur: .45, delay: .2 });
     P.look(sc.cam, { s: 1.35, cx: lowPt.x - 100, cy: lowPt.y - 120, dur: 1.2, delay: .1 });
     E.say('hat', '5月27日には、安値540円まで下げている。そこから、また上がった。', { delay: .3, yomi: '5月27日には、安値、ごひゃくよんじゅうえんまで下げている。そこから、また上がった。' });
@@ -233,7 +233,7 @@ E.chapter('k01');
     P.slate(g);
     const C = P.chart(g, CHART('02'), { x: 110, y: 196, w: 1700 });
     E.div(g, { left: 80, top: 82, font: '900 40px/1.2 Zen', color: '#f3e6c8', whiteSpace: 'nowrap' }, '上昇は、投稿より前に始まっていた');
-    const a = C.at(185, 590), b = C.at(2238, 290), t = C.at(2251, 264);
+    const a = C.at(182.5, 595), b = C.at(2239, 287), t = C.at(2259, 264);
     const dot = P.dot(g, { x: t.x, y: t.y, kind: 'T', label: 'T01 6/18 13:00', size: 30 });
     // 195 → 1,550 の区間（投稿の前）
     const span = E.div(g, { left: a.x, top: 170, width: b.x - a.x, height: 8, borderRadius: 4, background: '#ffd84a', transformOrigin: '0 50%', boxShadow: '0 0 12px rgba(255,216,74,.8)' }).ini({ sx: 0 });
@@ -246,7 +246,7 @@ E.chapter('k01');
     L = E.say('hat', '195円から1,550円までは、投稿の前だ。この投稿を、上昇の出発点としては、読めない。', { wait: false, yomi: 'ひゃくきゅうじゅうごえんから、せんごひゃくごじゅうえんまでは、投稿の前だ。この投稿を、上昇の出発点としては、読めない。' });
     E.show(spanLab, .4, .2);
     P.circle(g, { x: a.x, y: a.y, w: 70, h: 70, color: '#2b68d8', dur: .35, delay: .4 });
-    P.circle(g, { x: b.x - 6, y: b.y + 10, w: 70, h: 70, color: '#c62828', dur: .35, delay: L.dur * .3 });
+    P.circle(g, { x: b.x, y: b.y, w: 70, h: 70, color: '#c62828', dur: .35, delay: L.dur * .3 });
     E.at(L.end);
     E.say('eve', '投稿で上がったって、思っちゃいそう〜……。', { yomi: '投稿で上がったって、思っちゃいそうー。' });
     E.wait(.4);
