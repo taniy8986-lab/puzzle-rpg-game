@@ -1,5 +1,7 @@
 # 受け取ったキャラクター画像の切り出しと書き出し結果（公開リポジトリには置かない）
 assets/chara/
+# 完全版の元資料（受け取ったPDF）から切り出したチャート画像
+assets/charts_k/
 out/
 build/
 __pycache__/

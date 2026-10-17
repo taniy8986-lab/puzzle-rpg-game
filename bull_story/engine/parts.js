@@ -759,7 +759,7 @@ const P = (() => {
       E.wait(dur);
     });
   };
-  P.chapterCard = ({ n = 1, title = '', sub = '', dur = 3.6 } = {}) => {
+  P.chapterCard = ({ n = 1, title = '', sub = '', dur = 3.6, subTop = false } = {}) => {
     E.scene({ name: 'chapter', bg: '#f6efe2' }, sc => {
       const g = sc.cam;
       E.div(g, { left: 0, top: 0, width: W, height: H, background: 'repeating-linear-gradient(90deg,#f8f1e5 0 66px,#f2e7d6 66px 132px)' });
@@ -770,10 +770,117 @@ const P = (() => {
       E.tw(num, .45, { o: [0, 1], x: [-60, 0] }, 'out', .45);
       const tt_ = E.chars(g, title, { left: 200, top: 510, font: '900 120px/1.2 Zen', color: '#fff' });
       tt_.spans.forEach((sp, i) => E.tw(sp, .45, { o: [0, 1], y: [40, 0] }, 'back', .7 + i * .06));
-      if (sub) { const s = E.div(g, { left: 1100, top: 620, font: '800 38px/1.2 Round', color: 'rgba(255,255,255,.8)', whiteSpace: 'nowrap' }, sub).ini({ o: 0 }); E.show(s, .5, 1.2); }
+      if (sub) { const s = E.div(g, subTop ? { left: 0, top: 432, width: W - 200, textAlign: 'right', font: '800 38px/1.2 Round', color: 'rgba(255,255,255,.8)', whiteSpace: 'nowrap' } : { left: 1100, top: 620, font: '800 38px/1.2 Round', color: 'rgba(255,255,255,.8)', whiteSpace: 'nowrap' }, sub).ini({ o: 0 }); E.show(s, .5, 1.2); }
       E.sfx('dun', { delay: .45, gain: .7 });
       E.wait(dur);
     });
+  };
+
+
+  /* ================================================================ 完全版：投稿・IR・時刻・チャート */
+  const T_BLUE = '#2b68d8', I_ORANGE = '#d9822b';
+  P.T_BLUE = T_BLUE; P.I_ORANGE = I_ORANGE;
+  const pill = (t, bg, ink) => `<span style="flex:none;padding:2px 14px 3px;border-radius:999px;background:${bg};color:${ink};font:800 20px/1.4 Round;white-space:nowrap">${t}</span>`;
+
+  // 有名投資家の投稿カード（青 T）。本文は元資料の要約。名前・アカウントは出さない
+  P.tcard = (parent, { id, when = '', kind = '', session = '', text = '', note = '', x, y, w = 820, size = 30 } = {}) => E.div(parent, {
+    left: x, top: y, width: w, borderRadius: 20, background: '#fbfcff', overflow: 'hidden',
+    boxShadow: '0 14px 30px rgba(0,0,0,.38)', borderLeft: `14px solid ${T_BLUE}`,
+  }, `<div style="display:flex;align-items:center;gap:12px;padding:16px 22px 4px">
+        <span style="flex:none;padding:3px 14px 4px;border-radius:10px;background:${T_BLUE};color:#fff;font:900 30px/1.2 Noto">${id}</span>
+        <span style="flex:none;width:44px;height:44px;border-radius:50%;background:#5a6474;color:#fff;font:900 24px/44px Zen;text-align:center">？</span>
+        <span style="font:900 24px/1.2 Zen;color:#22252b;white-space:nowrap">ある有名投資家</span>
+        <span style="margin-left:auto;font:800 25px/1.2 Noto;color:${T_BLUE};white-space:nowrap">${when}</span></div>
+      <div style="display:flex;gap:8px;padding:6px 22px 0">${[kind, session, '要約'].filter(Boolean).map(t => pill(t, '#e5eefc', '#1b4ea8')).join('')}</div>
+      <div style="padding:10px 22px 16px;font:800 ${size}px/1.5 Round;color:#22252b">${text}</div>
+      ${note ? `<div style="padding:12px 22px 16px;background:#eef2f8;font:800 23px/1.5 Round;color:#4a5466"><b style="color:${T_BLUE}">検証メモ</b>　${note}</div>` : ''}`).ini({ o: 0 });
+
+  // 会社のIRカード（橙 I）
+  P.icard = (parent, { id, when = '', session = '', title = '', text = '', note = '', x, y, w = 820, size = 28 } = {}) => E.div(parent, {
+    left: x, top: y, width: w, borderRadius: 20, background: '#fffcf7', overflow: 'hidden',
+    boxShadow: '0 14px 30px rgba(0,0,0,.38)', borderLeft: `14px solid ${I_ORANGE}`,
+  }, `<div style="display:flex;align-items:center;gap:12px;padding:16px 22px 4px">
+        <span style="flex:none;padding:3px 14px 4px;border-radius:10px;background:${I_ORANGE};color:#fff;font:900 30px/1.2 Noto">${id}</span>
+        <span style="font:900 24px/1.2 Zen;color:#6b5a40;white-space:nowrap">エスポア　適時開示</span>
+        <span style="margin-left:auto;font:800 25px/1.2 Noto;color:#b8651a;white-space:nowrap">${when}</span></div>
+      <div style="display:flex;gap:8px;padding:6px 22px 0">${[session, '要約'].filter(Boolean).map(t => pill(t, '#fbeedd', '#9a5414')).join('')}</div>
+      <div style="padding:10px 22px 2px;font:900 ${size + 4}px/1.4 Zen;color:#2a2230">${title}</div>
+      <div style="padding:4px 22px 16px;font:800 ${size}px/1.5 Round;color:#3d3540">${text}</div>
+      ${note ? `<div style="padding:12px 22px 16px;background:#f7efe3;font:800 23px/1.5 Round;color:#5c4a33"><b style="color:${I_ORANGE}">読み方</b>　${note}</div>` : ''}`).ini({ o: 0 });
+
+  // 時刻を並べる帯：[I13 15:10] ──1分後──▶ [T11 15:11]
+  P.timeLink = (parent, { x, y, w = 1300, a, b, label = '', ink = '#f3e6c8' } = {}) => {
+    const chip = (c, left) => E.div(parent, { left, top: y, width: 420, height: 104, borderRadius: 20, background: '#fff', display: 'flex', alignItems: 'center', boxShadow: '0 10px 22px rgba(0,0,0,.35)', borderLeft: `12px solid ${c.color}` },
+      `<span style="flex:none;margin-left:18px;padding:3px 12px 4px;border-radius:10px;background:${c.color};color:#fff;font:900 28px/1.2 Noto">${c.id}</span>
+       <div style="margin-left:16px"><div style="font:900 40px/1.1 Noto;color:#22252b;white-space:nowrap">${c.time}</div><div style="font:800 21px/1.3 Round;color:#6a6066;white-space:nowrap">${c.sub || ''}</div></div>`).ini({ o: 0 });
+    const A = chip(a, x), B = chip(b, x + w - 420);
+    const ax = x + 430, aw = w - 860;
+    const line = E.div(parent, { left: ax, top: y + 50, width: aw, height: 6, borderRadius: 3, background: ink, transformOrigin: '0 50%' }).ini({ sx: 0 });
+    const head = E.div(parent, { left: ax + aw - 26, top: y + 34, font: '900 38px/1 Zen', color: ink }, '▶').ini({ o: 0 });
+    const lab = E.div(parent, { left: ax, top: y - 4, width: aw, textAlign: 'center', font: '900 30px/1.2 Zen', color: '#ffd84a', whiteSpace: 'nowrap' }, label).ini({ o: 0 });
+    const R = { A, B, line, head, lab };
+    R.in = (delay = 0) => {
+      E.tw(A, .35, { o: [0, 1], x: [-30, 0] }, 'back', delay); E.sfx('pop', { delay, gain: .5 });
+      E.tw(line, .45, { sx: [0, 1] }, 'out', delay + .35); E.show(head, .2, delay + .7); E.show(lab, .3, delay + .5);
+      E.tw(B, .35, { o: [0, 1], x: [30, 0] }, 'back', delay + .8); E.sfx('pop', { delay: delay + .8, gain: .5 });
+    };
+    return R;
+  };
+
+  // 時計（min＝0:00 からの分。E.tw(clock, 1, { min: [0, 780] }) で 13:00 まで針を回す）
+  P.clock = (parent, { x, y, size = 220, min = 0, face = '#fffdf8', ink = '#262230', label = '' } = {}) => {
+    const n = E.div(parent, { left: x, top: y, width: size, height: size }).ini({ min });
+    let ticks = '';
+    for (let i = 0; i < 12; i++) { const a = i * 30 * Math.PI / 180; ticks += `<line x1="${50 + Math.sin(a) * 40}" y1="${50 - Math.cos(a) * 40}" x2="${50 + Math.sin(a) * 45}" y2="${50 - Math.cos(a) * 45}" stroke="${ink}" stroke-width="${i % 3 ? 1.6 : 3}" stroke-linecap="round"/>`; }
+    const sv = E.svg(n, { left: 0, top: 0, width: size, height: size }, '0 0 100 100',
+      `<circle cx="50" cy="50" r="48" fill="${face}" stroke="${ink}" stroke-width="3"/>${ticks}
+       <line class="hh" x1="50" y1="50" x2="50" y2="26" stroke="${ink}" stroke-width="4.5" stroke-linecap="round"/>
+       <line class="mm" x1="50" y1="50" x2="50" y2="13" stroke="#d42a2a" stroke-width="3" stroke-linecap="round"/>
+       <circle cx="50" cy="50" r="4" fill="${ink}"/>`);
+    const hh = sv.el.querySelector('.hh'), mm = sv.el.querySelector('.mm');
+    if (label) E.div(n, { left: -60, top: size + 10, width: size + 120, textAlign: 'center', font: '900 34px/1.2 Noto', color: '#f3e6c8', whiteSpace: 'nowrap' }, label);
+    n.hook(p => { const m = p.min; if (n.c.min === m) return; n.c.min = m; hh.setAttribute('transform', `rotate(${((m / 720) * 360).toFixed(2)} 50 50)`); mm.setAttribute('transform', `rotate(${((m % 60) * 6).toFixed(2)} 50 50)`); });
+    return n;
+  };
+
+  // 元資料のチャート画像（2508×1026）を枠に入れる。crop は元画像の [x, y, 幅, 高さ]
+  // n.at(px, py) で元画像の座標 → 親の座標、n.draw() で左から描き出す
+  P.CHART_W = 2508; P.CHART_H = 1026;
+  P.chart = (parent, src, { x = 0, y = 0, w = 1600, crop = [0, 0, 2508, 1026], bg = '#fff', radius = 18, shadow = true } = {}) => {
+    const [cx, cy, cw, chh] = crop;
+    const k = w / cw, h = chh * k;
+    const n = E.div(parent, { left: x, top: y, width: w, height: h, borderRadius: radius, background: bg, overflow: 'hidden', boxShadow: shadow ? '0 20px 44px rgba(0,0,0,.45)' : 'none' });
+    const inner = E.div(n, { left: 0, top: 0, width: w, height: h, overflow: 'hidden' }).ini({ reveal: 1 });
+    E.img(inner, src, { left: -cx * k, top: -cy * k, width: P.CHART_W * k, height: P.CHART_H * k });
+    inner.hook(p => { const r = Math.max(0, Math.min(1, p.reveal)); if (inner.c.reveal === r) return; inner.c.reveal = r; inner.el.style.clipPath = r >= 1 ? 'none' : `inset(0 ${((1 - r) * 100).toFixed(2)}% 0 0)`; });
+    n.inner = inner; n.k = k; n.w = w; n.h = h;
+    n.at = (px, py) => ({ x: x + (px - cx) * k, y: y + (py - cy) * k });
+    n.draw = (dur = 2.5, delay = 0) => { inner.ini({ reveal: 0 }); E.tw(inner, dur, { reveal: [0, 1] }, 'inOut', delay); E.sfx('slide', { delay, gain: .4 }); };
+    return n;
+  };
+
+  // 板（売数量・値段・買数量）。book は [['sell'|'buy', 値段, 数量], ...] を上から
+  P.orderBook = (parent, { x, y, w = 800, book, last = null, rh = 52 } = {}) => {
+    const hh = 70;
+    const panel = E.div(parent, { left: x, top: y, width: w, height: hh + 20 + book.length * rh, borderRadius: 24, background: '#0f1a2e', boxShadow: '0 20px 40px rgba(0,0,0,.45)', overflow: 'hidden' }).ini({ o: 0 });
+    const cw = w * .375, pw = w - cw * 2;
+    E.div(panel, { left: 0, top: 0, width: w, height: hh, background: '#1b7a3a' },
+      `<div style="display:flex;height:${hh}px;align-items:center;font:900 28px/1 Zen;color:#fff"><div style="width:${cw}px;text-align:center">売数量</div><div style="width:${pw}px;text-align:center">値段</div><div style="width:${cw}px;text-align:center">買数量</div></div>`);
+    const rows = book.map(([side, p, v], i) => E.div(panel, { left: 0, top: hh + 10 + i * rh, width: w, height: rh, display: 'flex', alignItems: 'center', background: p === last ? 'rgba(255,216,74,.2)' : 'transparent', font: '800 32px/1 Noto' },
+      `<div style="width:${cw}px;text-align:right;padding-right:40px;color:#ff8a8a">${side === 'sell' ? v.toLocaleString('en-US') : ''}</div>
+       <div style="width:${pw}px;text-align:center;font-weight:900;color:${p === last ? '#ffd84a' : '#f3e6c8'}">${p}</div>
+       <div style="width:${cw}px;text-align:left;padding-left:40px;color:#8ec5ff">${side === 'buy' ? v.toLocaleString('en-US') : ''}</div>`).ini({ o: 0 }));
+    panel.rows = rows;
+    panel.rowY = i => y + hh + 10 + i * rh + rh / 2;
+    panel.in = (delay = 0) => { E.tw(panel, .45, { o: [0, 1], s: [.94, 1] }, 'back', delay); E.sfx('whoosh', { delay, gain: .6 }); rows.forEach((r, i) => E.tw(r, .3, { o: [0, 1], x: [-30, 0] }, 'out', delay + .4 + i * .07)); };
+    return panel;
+  };
+
+  // 番号つきの小さな丸印（チャートの上に置く T・I の印）
+  P.dot = (parent, { x, y, kind = 'T', label = '', size = 30 } = {}) => {
+    const c = kind === 'T' ? T_BLUE : I_ORANGE;
+    return E.div(parent, { left: x - size / 2, top: y - size / 2, width: size, height: size, borderRadius: '50%', background: c, boxShadow: `0 0 0 5px rgba(255,255,255,.9), 0 0 18px ${c}` },
+      label ? `<div style="position:absolute;left:${size + 8}px;top:-6px;padding:2px 10px;border-radius:8px;background:${c};color:#fff;font:900 24px/1.3 Noto;white-space:nowrap">${label}</div>` : '').ini({ o: 0 });
   };
 
   return P;

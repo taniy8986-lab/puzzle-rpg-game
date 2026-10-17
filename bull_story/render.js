@@ -25,8 +25,8 @@ const OUT_DIR = path.join(__dirname, 'out');
 const BUILD = path.join(__dirname, 'build');
 
 const ch = process.argv[2];
-if (!ch || !/^\d+$/.test(ch)) {
-  console.error('使い方: node render.js <章番号 例 01> [--stills t1,t2] [--cues] [--from s --to s]');
+if (!ch || !/^[a-z]?\d+$/.test(ch)) {
+  console.error('使い方: node render.js <章番号 例 01・完全版は k01> [--stills t1,t2] [--cues] [--from s --to s]');
   process.exit(1);
 }
 const opt = name => { const i = process.argv.indexOf(name); return i >= 0 ? process.argv[i + 1] : null; };
