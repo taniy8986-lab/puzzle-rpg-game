@@ -375,7 +375,7 @@ E.chapter('k16');
       const n = E.div(g, { left: 260 + i * 380, top: 260, width: 300, height: 300, borderRadius: '50%', background: c, display: 'flex', alignItems: 'center', justifyContent: 'center', font: '900 150px/1 Noto', color: '#fff', boxShadow: '0 16px 32px rgba(0,0,0,.4)' }, t).ini({ o: 0 });
       E.pop(n, .4, .4 + i * .3, .5); E.sfx('pop', { delay: .4 + i * .3 }); E.float(n, 8, 1.4, i);
     });
-    const st = P.sticky(g, '第17章<br>海帆と、他の銘柄の投稿', { x: 1260, y: 120, w: 580, h: 250, rot: 5, size: 40 });
+    const st = P.sticky(g, '第17章<br>海帆との比較', { x: 1260, y: 120, w: 580, h: 250, rot: 5, size: 40 });
     P.slap(st, 1.6);
     const pig = E.actor(g, 'pig', { x: 1760, y: 1130, h: 560, pose: 'front', shadow: false }).ini({ x: 420 });
     E.tw(pig, .7, { x: [420, 0] }, 'back', 2.2);
