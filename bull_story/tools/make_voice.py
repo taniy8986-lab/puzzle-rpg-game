@@ -60,7 +60,6 @@ def normalize(text):
     s = s.replace("海帆", "かいはん")                   # 「みほ」と読まれるため
     s = s.replace("七飯町", "ななえちょう")
     s = s.replace("二番底", "にばんぞこ")
-    s = s.replace("始値", "はじまりね")                 # 「はじめね」と読まれるため
     s = re.sub(r"、+", "、", s).strip("、 ")
     return s
 
