@@ -573,12 +573,12 @@ const P = (() => {
     return { time: tm };
   };
   // 通知カード（最初は隠れている。P.notifyIn で出す）
-  P.notice = (ph, { app = '適時開示アラート', title = '', body = '', y = 300, icon = '開', iconBg = '#e04848' } = {}) => {
+  P.notice = (ph, { app = '適時開示アラート', title = '', body = '', y = 300, icon = '開', iconBg = '#e04848', ago = '今' } = {}) => {
     const sw = ph.sw;
     const n = E.div(ph.screen, { left: 16, top: y, width: sw - 32, borderRadius: 26, background: 'rgba(255,255,255,.93)', boxShadow: '0 10px 24px rgba(60,30,30,.18)', padding: '18px 20px 20px' },
       `<div style="display:flex;align-items:center;gap:12px;font:800 20px/1.2 Round;color:#7a6f6f">
          <span style="display:inline-block;width:36px;height:36px;border-radius:9px;background:${iconBg};color:#fff;font:900 22px/36px Zen;text-align:center">${icon}</span>
-         <span style="flex:1">${app}</span><span>今</span></div>
+         <span style="flex:1">${app}</span><span>${ago}</span></div>
        <div style="margin-top:12px;font:900 26px/1.35 Zen;color:#2a2228">${title}</div>
        <div style="margin-top:6px;font:800 24px/1.45 Round;color:#3d3438">${body}</div>`).ini({ o: 0 });
     return n;
