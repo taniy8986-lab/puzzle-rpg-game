@@ -1,5 +1,5 @@
 // 完全版 第5章「増資の決議と払込」（2026年1〜2月）
-// 台本: story/k/k05_増資の決議と払込.md　元資料 p6・p11・p12・p19・p20・p27・p28・p39
+// 台本: story/k/k05_増資の決議と払込.md　元資料 p6・p11・p12・p18・p19・p20・p27・p28・p39
 // 投稿は元資料の要約（本人の見解）。有名投資家の名前・アカウントは出さない。割当先は「個人1名」。
 // 増資（I24→I28）と成功報酬契約（I25・I26）は別の場面にし、比べたり矢印で結んだりしない
 'use strict';
@@ -105,7 +105,7 @@ E.chapter('k05');
     E.say('hat', '通期の予想は、出していない。');
     const call = P.eveCall(g, ['normal', 'anxious'], { x: 1600, y: 600, w: 290, h: 230 });
     E.pop(call, .4, 0, .6);
-    E.say('eve', '改善期間の終わりまで、あと1か月半なんだね〜。', { talk: call, talkAmp: 3, delay: .3, yomi: '改善期間の終わりまで、あと、いっかげつはんなんだねー。' });
+    E.say('eve', '改善期間の終わりまで、あと1か月半なんだね〜。', { talk: call, talkAmp: 3, delay: .3, yomi: '改善期間の終わりまで、あと、1か月半なんだねー。' });
     E.wait(.3);
   });
 
@@ -144,7 +144,7 @@ E.chapter('k05');
     L = E.say('hat', '割り当てる相手は、個人1名。発行済みの株の、1.59％にあたる。', { wait: false, yomi: '割り当てる相手は、こじん、いちめい。発行済みの株の、いってんごきゅうパーセントにあたる。' });
     rise(who, .2); rise(pct, L.dur * .5);
     E.at(L.end);
-    const other = E.div(g, { left: 460, top: 670, width: 1000, height: 90, borderRadius: 18, border: '3px dashed rgba(243,230,200,.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '900 30px/1.2 Zen', color: '#f3e6c8', whiteSpace: 'nowrap' }, '同じ 18:10 に、別の開示（I25）→ 別の場面で見る').ini({ o: 0 });
+    const other = E.div(g, { left: 460, top: 670, width: 1000, height: 90, borderRadius: 18, border: '3px dashed rgba(243,230,200,.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', font: '900 30px/1.2 Zen', color: '#f3e6c8', whiteSpace: 'nowrap' }, '同じ 18:10 に、別の開示（I25）も出ていた。別の場面で見る').ini({ o: 0 });
     L = E.say('hat', '同じ18時10分には、別の開示も出ていた。それは、別の場面で見る。', { wait: false });
     E.show(other, .4, .3);
     E.at(L.end + .4);
@@ -157,7 +157,7 @@ E.chapter('k05');
     bar(g, [2, 12], [2, 13]);
     const tl = P.timeLink(g, { x: 260, y: 150, w: 1400, a: { id: 'I24', time: '2/12 18:10', sub: '会社の開示（引け後）', color: P.I_ORANGE }, b: { id: 'T15', time: '2/13 8:06', sub: '投稿（寄り前）', color: P.T_BLUE }, label: '翌朝' });
     tl.in(.2);
-    const t15 = P.tcard(g, { id: 'T15', when: '2026/2/13 8:06', kind: '財務', session: '寄り前', text: '5,000万円の引受けで債務超過解消を見込む', note: '投稿は2月13日8時06分。解消確定の監査意見ではない', x: 300, y: 330, w: 1320, size: 40 });
+    const t15 = P.tcard(g, { id: 'T15', when: '2026/2/13 8:06', kind: '財務', session: '寄り前', text: '5,000万円の引受けで債務超過解消を見込む', note: 'サムライカーボンへの言及。投稿は2月13日8時06分。解消確定の監査意見ではない', x: 300, y: 330, w: 1320, size: 40 });
     E.tw(t15, .45, { o: [0, 1], y: [30, 0] }, 'back', 1.3); E.sfx('notify', { delay: 1.3 });
     E.wait(1.7);
     E.narr('翌朝、8時06分。5,000万円の引受けで、債務超過の解消を見込む投稿があった。', { yomi: '翌朝、8時6分。ごせんまんえんの、ひきうけで、債務超過の解消を見込む投稿があった。' });
@@ -184,7 +184,7 @@ E.chapter('k05');
     });
     const note = E.div(g, { left: 0, top: 600, width: W, textAlign: 'center', font: '800 28px/1.5 Round', color: 'rgba(243,230,200,.85)' }, '損益がマイナスなら、増資の分は、それだけ減る').ini({ o: 0 });
     E.wait(.3);
-    const L = E.say('hat', '期末の純資産は、増資だけでは決まらない。その期の損益も、足し引きされる。', { wait: false });
+    const L = E.say('hat', '期末の純資産は、増資だけでは決まらない。その期の損益も、足し引きされる。', { wait: false, yomi: '期末の純資産は、増資だけでは決まらない。その期の損益も、たしひきされる。' });
     nodes.forEach((n, i) => { E.tw(n, .35, { o: [0, 1], y: [20, 0] }, 'back', .2 + i * L.dur * .11); E.sfx('pop', { delay: .2 + i * L.dur * .11, gain: .35 }); });
     E.show(note, .4, L.dur * .9);
     E.at(L.end + .6);
@@ -201,7 +201,7 @@ E.chapter('k05');
     E.tw(t16, .45, { o: [0, 1], y: [30, 0] }, 'back', .8); E.sfx('notify', { delay: .8 });
     E.wait(1.2);
     E.narr('2月19日、15時22分。エスポアの株を売ることに、否定的な投稿があった。');
-    E.say('hat', 'その根拠は、この短い投稿には、書かれていない。');
+    E.say('hat', '独立した根拠は、この短い投稿には、書かれていない。');
     E.tw(t16, .35, { o: 0, x: -60 }, 'in2');
     ch.in(1, .2);
     const t17 = P.tcard(g, { id: 'T17', when: '2026/2/19 15:24', kind: '財務', session: '取引時間内', text: '資金調達から少なくとも1.5億円の利益を推測', note: '直前のエスポア投稿と一連の内容。資金調達額だけでは利益は確定しない', x: 300, y: 330, w: 1320, size: 40 });
@@ -217,32 +217,11 @@ E.chapter('k05');
     E.at(L.end + .5);
   });
 
-  /* ============================================================ S7 別の場面：成功報酬の契約 */
-  E.trans('stripes', { dur: .7 });
-  E.scene({ name: 'fee' }, sc => {
-    const g = sc.cam;
-    E.bgm('lesson', { fadeIn: .5, gain: .8 });
-    P.slate(g);
-    const hd = E.div(g, { left: 0, top: 40, width: W, textAlign: 'center' }, '<span style="padding:8px 30px;border-radius:999px;border:3px solid #f3e6c8;font:900 40px/1.3 Zen;color:#f3e6c8">別の開示：成功報酬の契約</span>').ini({ o: 0 });
-    E.show(hd, .4, .2);
-    const i25 = P.icard(g, { id: 'I25', when: '2026/2/12 18:10', session: '引け後', title: '成功報酬5,000万円の契約', text: '不動産の販売協力・支援について<br>税込5,000万円の成功報酬契約を決議', note: '報酬は進捗・条件成就を前提に発生すると会社が説明', x: 260, y: 160, w: 1400, size: 32 });
-    E.tw(i25, .45, { o: [0, 1], y: [30, 0] }, 'back', .6); E.sfx('notify', { delay: .6 });
-    E.wait(1.0);
-    E.say('hat', 'ここからは、増資とは別の開示だ。');
-    E.say('hat', '2月12日、会社は、不動産の販売の協力と支援について、成功報酬の契約を決議した。');
-    E.say('hat', '報酬は、進み具合や、条件がそろうことを前提に発生する、と会社は説明している。');
-    E.tw(i25, .35, { o: 0, x: -60 }, 'in2');
-    const i26 = P.icard(g, { id: 'I26', when: '2026/2/19 16:20', session: '引け後', title: '成功報酬1.21億円の契約', text: '不動産の販売協力・支援について<br>税込1.21億円の成功報酬契約を締結', note: '後の監査・調査対象となった期末収益認識とのつながりを確認する材料', x: 260, y: 160, w: 1400, size: 32 });
-    E.tw(i26, .45, { o: [0, 1], x: [60, 0] }, 'back', .4); E.sfx('notify', { delay: .4 });
-    E.say('hat', '2月19日の引け後には、同じ種類の契約を、もう1件結んだ。', { delay: .6, yomi: '2月19日の、ひけごには、同じ種類の契約を、もう1件結んだ。' });
-    E.say('hat', '元資料は、のちに監査や調査の対象になった、期末の収益の計上とのつながりを、確かめる材料としている。');
-    E.wait(.4);
-  });
-
   /* ============================================================ S8 I27　2月26日 */
   E.trans('stripes', { dur: .7 });
   E.scene({ name: 'i27' }, sc => {
     const g = sc.cam;
+    E.bgm('lesson', { fadeIn: .5, gain: .8 });
     P.slate(g);
     bar(g, [2, 19], [2, 26]);
     const i27 = P.icard(g, { id: 'I27', when: '2026/2/26 17:10', session: '引け後', title: '岡山・完成後引渡し案件', text: '岡山県矢掛町の蓄電所売却を決議。<br>完成・引渡しは7月予定、収益は引渡し完了時に計上予定', note: '開示タイトルの「完成案件」を、当日完成・引渡済みと読み違えない', x: 260, y: 120, w: 1400, size: 32 });
@@ -299,11 +278,32 @@ E.chapter('k05');
     let L = E.say('hat', 'もう一つ。2月25日の安値は、520円だった。', { wait: false, yomi: 'もう一つ。2月25日の安値は、ごひゃくにじゅうえんだった。' });
     P.circle(g, { x: lo.x, y: lo.y - 4, w: 30, h: 30, sw: 4, delay: L.dur * .5, dur: .3 }); E.pop(lab, .3, L.dur * .6);
     E.at(L.end);
-    const memo = E.div(sc.root, { left: 460, top: 790, width: 1000, height: 100, borderRadius: 22, background: 'rgba(255,255,255,.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '30px', font: '900 36px/1.2 Zen', color: '#262236', boxShadow: '0 12px 24px rgba(0,0,0,.35)', whiteSpace: 'nowrap' },
-      '<span style="color:#6a6066">2024/5/27</span><span>540円</span><span style="color:#ffd84a">≒</span><span style="color:#6a6066">2026/2/25</span><span style="color:#c62828">520円</span>').ini({ o: 0 });
-    L = E.say('hat', '2024年5月の540円に、近い値段だ。この値段は、あとで、また出てくる。', { wait: false, yomi: '2024年5月の、ごひゃくよんじゅうえんに、近い値段だ。この値段は、あとで、また出てくる。' });
+    const memo = E.div(sc.root, { left: 210, top: 790, width: 1500, height: 100, borderRadius: 22, background: 'rgba(255,255,255,.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '30px', font: '900 36px/1.2 Zen', color: '#262236', boxShadow: '0 12px 24px rgba(0,0,0,.35)', whiteSpace: 'nowrap' },
+      '<span style="color:#6a6066">2024/5/27</span><span>540円</span><span style="color:#ffd84a">／</span><span style="color:#6a6066">2026/2/25</span><span style="color:#c62828">520円</span><span style="font:800 24px Round;color:#6a6066">近い安値圏（同じ価格ではない）</span>').ini({ o: 0 });
+    L = E.say('hat', '2024年5月の540円に、近い安値だ。この値段は、あとで、また出てくる。', { wait: false, yomi: '2024年5月の、ごひゃくよんじゅうえんに、近い、やすねだ。この値段は、あとで、また出てくる。' });
     E.tw(memo, .4, { o: [0, 1], y: [20, 0] }, 'back', .2); E.sfx('ding', { delay: .2, gain: .5 });
     E.at(L.end + .5);
+  });
+
+  /* ============================================================ S10b 別の場面：成功報酬の契約 */
+  E.trans('stripes', { dur: .7 });
+  E.scene({ name: 'fee' }, sc => {
+    const g = sc.cam;
+    P.slate(g);
+    const hd = E.div(g, { left: 0, top: 40, width: W, textAlign: 'center' }, '<span style="padding:8px 30px;border-radius:999px;border:3px solid #f3e6c8;font:900 40px/1.3 Zen;color:#f3e6c8">別の開示：成功報酬の契約</span>').ini({ o: 0 });
+    E.show(hd, .4, .2);
+    const i25 = P.icard(g, { id: 'I25', when: '2026/2/12 18:10', session: '引け後', title: '成功報酬5,000万円の契約', text: '不動産の販売協力・支援について<br>税込5,000万円の成功報酬契約を決議', note: '報酬は進捗・条件成就を前提に発生すると会社が説明', x: 260, y: 160, w: 1400, size: 32 });
+    E.tw(i25, .45, { o: [0, 1], y: [30, 0] }, 'back', .6); E.sfx('notify', { delay: .6 });
+    E.wait(1.0);
+    E.say('hat', 'ここからは、増資とは別の開示だ。');
+    E.say('hat', '2月12日、会社は、不動産の販売の協力と支援について、成功報酬の契約を決議した。');
+    E.say('hat', '報酬は、進み具合や、条件がそろうことを前提に発生する、と会社は説明している。');
+    E.tw(i25, .35, { o: 0, x: -60 }, 'in2');
+    const i26 = P.icard(g, { id: 'I26', when: '2026/2/19 16:20', session: '引け後', title: '成功報酬1.21億円の契約', text: '不動産の販売協力・支援について<br>税込1.21億円の成功報酬契約を締結', note: '元資料の分析：後の監査・調査対象となった期末収益認識とのつながりを確認する材料', x: 260, y: 160, w: 1400, size: 32 });
+    E.tw(i26, .45, { o: [0, 1], x: [60, 0] }, 'back', .4); E.sfx('notify', { delay: .4 });
+    E.say('hat', '2月19日の引け後には、同じ種類の契約を、もう1件結んだ。', { delay: .6, yomi: '2月19日の、ひけごには、同じ種類の契約を、もう1件結んだ。' });
+    E.say('hat', '元資料は、のちに監査や調査の対象になった、期末の収益の計上とのつながりを、確かめる材料としている。');
+    E.wait(.4);
   });
 
   /* ============================================================ S11 ブルちゃんの部屋 */
@@ -360,7 +360,7 @@ E.chapter('k05');
     E.wait(.5);
     E.say('baron', 'お金が入ると、人は、もう大丈夫だと思いたがる。', { talk: C.img, talkAmp: 2 });
     C.swap(CH('baron_e_scheme'));
-    E.say('baron', 'だが、足りたかどうかは、決算が決める。', { talk: C.img, talkAmp: 2 });
+    E.say('baron', 'だが、足りたかどうかは、決算と監査が決める。', { talk: C.img, talkAmp: 2 });
     E.wait(.5);
   });
 
