@@ -923,14 +923,17 @@ const P = (() => {
     return R;
   };
 
-  // 1日の時間の軸（m＝0:00 からの分 → x）。band＝[始, 終] で取引時間の帯
+  // 1日の時間の軸（m＝0:00 からの分 → x）。band＝[始, 終] で取引時間の帯、[[始, 終, 名前], ...] で前場・後場
   P.dayAxis = (g, { x = 160, y = 330, w = 1600, from = 420, to = 960, open = null, band = null, ink = '#f3e6c8' } = {}) => {
     const tx = m => x + (m - from) / (to - from) * w;
     const root = E.div(g, { left: 0, top: 0, width: W, height: H }).ini({ o: 0 });
-    if (band) {
-      E.div(root, { left: tx(band[0]), top: y - 60, width: tx(band[1]) - tx(band[0]), height: 120, borderRadius: 14, background: 'rgba(255,216,74,.13)', border: '2px dashed rgba(255,216,74,.55)' });
-      E.div(root, { left: tx(band[0]), top: y - 98, width: tx(band[1]) - tx(band[0]), textAlign: 'center', font: '900 28px/1.2 Zen', color: '#ffd84a' }, '取引時間');
-    }
+    const bands = !band ? [] : Array.isArray(band[0]) ? band : [[band[0], band[1], '取引時間']];
+    bands.forEach(([b0, b1, name], i) => {
+      E.div(root, { left: tx(b0), top: y - 60, width: tx(b1) - tx(b0), height: 120, borderRadius: 14, background: 'rgba(255,216,74,.13)', border: '2px dashed rgba(255,216,74,.55)' });
+      E.div(root, { left: tx(b0), top: y - 98, width: tx(b1) - tx(b0), textAlign: 'center', font: '900 28px/1.2 Zen', color: '#ffd84a', whiteSpace: 'nowrap' }, name);
+      const nx = bands[i + 1];
+      if (nx) E.div(root, { left: tx(b1), top: y - 92, width: tx(nx[0]) - tx(b1), textAlign: 'center', font: '800 20px/1.2 Round', color: 'rgba(243,230,200,.7)', whiteSpace: 'nowrap' }, '昼休み');
+    });
     E.div(root, { left: x, top: y - 3, width: w, height: 6, borderRadius: 3, background: ink });
     for (let m = Math.ceil(from / 60) * 60; m <= to; m += 60) {
       E.div(root, { left: tx(m) - 2, top: y - 14, width: 4, height: 28, background: ink });
