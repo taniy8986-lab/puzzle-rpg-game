@@ -97,7 +97,7 @@ E.chapter('k14');
     E.tw(i48, .4, { y: -20, s: .9 }, 'inOut');
     const bx = (x, t, s, c, dashed) => E.div(g, { left: x, top: 470, width: 480, height: 220, borderRadius: 24, background: 'rgba(255,255,255,.95)', border: dashed ? '4px dashed #a09070' : `5px solid ${c}`, textAlign: 'center', boxShadow: '0 12px 24px rgba(0,0,0,.35)' },
       `<div style="font:900 34px/1.3 Zen;color:#6a6066;padding-top:34px">${t}</div><div style="font:900 38px/1.35 Zen;color:${c};margin-top:10px">${s}</div>`).ini({ o: 0 });
-    const b1 = bx(180, '取引1', '実在性が<br>認められない', '#c62828'), b2 = bx(720, '取引2', '当期の収益計上が<br>認められない', '#b8651a'), b3 = bx(1260, '取引3', '—', '#a09070', true);
+    const b1 = bx(180, '1件', '実在性が<br>認められない', '#c62828'), b2 = bx(720, 'もう1件', '当期の収益計上が<br>認められない', '#b8651a'), b3 = bx(1260, '残りの1件', '—', '#a09070', true);
     let L = E.say('hat', '対象の3つの取引のうち、1件は、実在性が認められなかった。', { wait: false, yomi: '対象の、みっつの取引のうち、いっけんは、じつざいせいが、認められなかった。' });
     rise(b1, L.dur * .5);
     E.at(L.end);
