@@ -53,6 +53,7 @@ E.chapter('k16');
     E.wait(1.2);
     E.narr('9月18日の朝。上場廃止が決まって、2日がたっていた。', { yomi: '9月18日の朝。上場廃止が決まって、ふつかが、たっていた。' });
     E.narr('2日続けて、私の売りの注文は、成立しなかった。', { yomi: 'ふつか続けて、私の売りの注文は、成立しなかった。' });
+    E.narr('注文は、9月16日に出した値段のまま、残っていた。', { yomi: '注文は、9月16日に出した、値段のまま、残っていた。' });
   }, { name: 'avant_phone', wait: .4 });
 
   /* ============================================================ S1 タイトル・章扉 */
@@ -89,24 +90,6 @@ E.chapter('k16');
     E.say('hat', '元資料は、この投稿を、エスポアの株を持ち続けていることの根拠としては、使っていない。', { yomi: 'もとしりょうは、この投稿を、エスポアの株を、持ち続けていることの、根拠としては、使っていない。' });
     E.wait(.4);
   });
-
-  /* ============================================================ S3 ブルちゃん（9月18日の朝・注文の状況） */
-  E.trans('fade', { dur: .6, color: '#fff' });
-  P.phoneScene((ph, sc) => {
-    E.bgm('memory', { fadeIn: .8, gain: .75 });
-    fiction(sc);
-    const scr = ph.screen, sw = ph.sw;
-    E.div(scr, { left: 0, top: 0, width: sw, height: 1000, background: '#f4f6f9' });
-    E.div(scr, { left: 0, top: 70, width: sw, textAlign: 'center', font: '900 30px/1.4 Zen', color: '#22252b' }, '注文の状況');
-    const cd = E.div(scr, { left: 24, top: 150, width: sw - 48, height: 260, borderRadius: 18, background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,.08)' });
-    E.div(cd, { left: 24, top: 20, font: '900 30px/1.4 Zen', color: '#22252b' }, 'エスポア（3260）');
-    E.div(cd, { left: 24, top: 80, font: '900 34px/1.4 Zen', color: '#1b8a5a' }, '売り　9/16');
-    E.div(cd, { left: 24, top: 150, padding: '6px 18px', borderRadius: 12, background: '#eef0f4', font: '900 32px/1.4 Zen', color: '#6a6066' }, '未約定');
-    E.wait(1.0);
-    E.narr('大株主が売らないなら、値段は、戻るかもしれない。私は、そう読みたかった。', { yomi: 'だいかぶぬしが、うらないなら、値段は、戻るかもしれない。私は、そう読みたかった。' });
-    E.narr('私の売りの注文は、9月16日に出した値段のまま、残っていた。', { yomi: '私の売りの注文は、9月16日に出した、値段のまま、残っていた。' });
-    E.wait(.3);
-  }, { name: 'bull_order', wait: .4 });
 
   /* ============================================================ S4 9月18日の取引 */
   E.trans('fade', { dur: .6, color: '#000' });
@@ -319,14 +302,14 @@ E.chapter('k16');
     const g = sc.cam;
     E.bgm('memory', { fadeIn: .8, gain: .75 });
     const R = P.room(g, { night: true });
-    P.watchlist(R.screen, [['エスポア', '3260 ｜ 名証'], ['・・・', ''], ['・・・', '']], { title: 'ウォッチ', hi: 0 });
+    P.watchlist(R.screen, [['エスポア', '3260 ｜ 名証'], ['・・・', ''], ['・・・', '']], { title: 'ウォッチリスト', hi: 0 });
     const bull = E.actor(g, 'bull', { x: 770, y: 1012, h: 690, pose: 'side' }).ini({ sx: -1 });
     E.breathe(bull, .01, 2.2);
     fiction(sc);
     P.look(sc.cam, { s: 1.2, cx: 1150, cy: 430, dur: 4, delay: .3 });
     E.wait(.6);
     E.narr('10月16日。最後の日の終値は、3円だった。', { yomi: '10月16日。最後の日の、おわりねは、さんえんだった。' });
-    E.narr('売らない、という言葉を、私は、買う人がいる、という意味に、読み替えていた。', { yomi: 'うらない、という言葉を、私は、かう人がいる、という意味に、読み替えていた。' });
+    E.narr('私の値段で、買う人は、いなかった。私は、値段を決め直すのが、遅かった。', { yomi: 'わたしの値段で、かう人は、いなかった。私は、値段を、決め直すのが、遅かった。' });
     E.wait(.3);
   });
 

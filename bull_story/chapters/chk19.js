@@ -62,7 +62,7 @@ E.chapter('k19');
     E.show(tt, .3);
     // 6枚とも同じ大きさ・同じ色（同じ重さで並べる）
     const cardT = (i, id, t, lab, body) => E.div(g, { left: 70 + (i % 3) * 600, top: 130 + Math.floor(i / 3) * 380, width: 570, height: 350, borderRadius: 22, background: '#fbfcff', borderLeft: `12px solid ${P.T_BLUE}`, boxShadow: '0 12px 24px rgba(0,0,0,.35)', boxSizing: 'border-box', padding: '20px 24px' },
-      `<div style="display:flex;align-items:center;gap:12px"><span style="flex:none;padding:3px 12px 4px;border-radius:10px;background:${P.T_BLUE};color:#fff;font:900 26px/1.2 Noto">${id}</span><span style="font:900 25px/1.3 Zen;color:#22252b;white-space:nowrap">${t}</span></div>
+      `<div style="display:flex;align-items:center;gap:12px"><span style="flex:none;padding:3px 12px 4px;border-radius:10px;background:${P.T_BLUE};color:#fff;font:900 26px/1.2 Noto">${id}</span><span style="font:900 25px/1.3 Zen;color:#22252b;white-space:nowrap">${t}</span><span style="flex:none;margin-left:auto;padding:2px 14px 3px;border-radius:999px;background:#e5eefc;color:#1b4ea8;font:800 20px/1.4 Round;white-space:nowrap">要約</span></div>
        <div style="display:inline-block;margin-top:16px;padding:6px 18px;border-radius:12px;background:#3a4560;color:#fff;font:900 30px/1.3 Zen">${lab}</div>
        <div style="margin-top:14px;font:800 22px/1.55 Round;color:#3d3540">${body}</div>`).ini({ o: 0 });
     const cs = [
@@ -115,10 +115,10 @@ E.chapter('k19');
       row(0, '2025/4/17', `15:10 ${I('I13')} 役員交代　▶　15:11 ${T('T11')}`, '公表の1分後'),
       row(1, '2025/11/13〜14', `16:30 ${I('I22')} 包括合意　▶　翌日 11:36 ${T('T14')}`, '翌日'),
       row(2, '2026/4/13', `10:22 ${T('T24')} GC　▶　16:30 ${I('I31')} 決算延期`, '投稿の時点で延期は未公表'),
-      row(3, '2026/4/24', `17:45 ${I('I33')} 会社法監査の不表明　▶　18:45 ${T('T34')}`, '公表の60分後'),
+      row(3, '2026/4/24', `17:45 ${I('I33')} 会社法監査の不表明　▶　18:45 ${T('T34')}`, '公表の1時間後'),
       row(4, '2026/5/27', `18:10 ${I('I37')} 有報監査の不表明・辞任　▶　18:28 ${T('T40')}`, '公表の18分後'),
-      row(5, '2026/6/30', `17:45 ${I('I41')}${I('I42')} 調査中断・事業IR　▶　18:44 ${T('T46')}`, '公表の59分後'),
-      row(6, '2026/9/16', `01:15 調査結果　▶　16:00 報告書　▶　17:00 廃止IR`, '一括りにしない'),
+      row(5, '2026/6/30', `17:45 ${I('I42')} 事業IR　▶　18:44 ${T('T46')}（同時刻 ${I('I41')} 調査中断）`, '公表の59分後'),
+      row(6, '2026/9/16', `01:15 ${I('I48')}　▶　16:00 ${I('I49')}　▶　17:00 ${I('I50')} 廃止決定`, '一括りにしない'),
     ];
     const slide = (n, d = .2) => { E.tw(n, .35, { o: [0, 1], x: [-40, 0] }, 'back', d); E.sfx('slide', { delay: d, gain: .4 }); };
     E.wait(.3);
@@ -133,7 +133,7 @@ E.chapter('k19');
     slide(rs[2]);
     E.at(L.end);
     E.say('hat', '延期の開示は、16時30分。引けのあとだった。', { yomi: 'えんきの開示は、16時30分。ひけのあとだった。' });
-    L = E.say('hat', '4月24日は、公表の60分後。5月27日は、18分後。6月30日は、59分後。', { wait: false, yomi: '4月24日は、公表の、ろくじっぷんご。5月27日は、じゅうはっぷんご。6月30日は、ごじゅうきゅうふんご。' });
+    L = E.say('hat', '4月24日は、公表の1時間後。5月27日は、18分後。6月30日は、59分後。', { wait: false, yomi: '4月24日は、公表の、いちじかんご。5月27日は、じゅうはっぷんご。6月30日は、ごじゅうきゅうふんご。' });
     slide(rs[3], .2); slide(rs[4], L.dur * .45); slide(rs[5], L.dur * .75);
     E.at(L.end);
     L = E.say('hat', '9月16日は、1時15分、16時、17時。三つの時刻を、一括りにしない。', { wait: false, yomi: '9月16日は、1時15分、16時、17時。みっつの時刻を、ひとくくりにしない。' });
@@ -184,7 +184,7 @@ E.chapter('k19');
     const g = sc.cam;
     E.bgm('memory', { fadeIn: .8, gain: .75 });
     const R = P.room(g, { night: false });
-    P.watchlist(R.screen, [['エスポア', '10/17 上場廃止'], ['・・・', ''], ['・・・', '']], { title: 'ウォッチ', hi: 0 });
+    P.watchlist(R.screen, [['エスポア', '10/17 上場廃止'], ['・・・', ''], ['・・・', '']], { title: 'ウォッチリスト', hi: 0 });
     const back = E.div(g, { left: 0, top: 0, width: W, height: H, background: 'rgba(20,16,30,.55)' });
     fiction(sc);
     const steps = [['3/24', '買う　700円', '自分の判断', '#d22d68'], ['4/24', '会社法監査の<br>意見不表明', '監査人の判断', '#b8651a'], ['5/27', '有報監査の<br>意見不表明', '監査人の判断', '#b8651a'], ['9/16', '上場廃止決定', '名証の判断', '#b8651a'], ['9/25', '売る　55円', '', '#1b8a5a'], ['10/16', '終値　3円', '最終売買日', '#c62828']];
