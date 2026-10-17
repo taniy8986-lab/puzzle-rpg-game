@@ -882,6 +882,72 @@ const P = (() => {
       label ? `<div style="position:absolute;left:${size + 8}px;top:-6px;padding:2px 10px;border-radius:8px;background:${c};color:#fff;font:900 24px/1.3 Noto;white-space:nowrap">${label}</div>` : '').ini({ o: 0 });
   };
 
+  // 上の月の帯と「いまここ」の印。from/to は [月, 日]（start より小さい月は翌年）
+  P.monthBar = (g, { year = 2024, start = 7, months = 6, from, to, x = 260, w = 1400, y = 52, delay = .2 } = {}) => {
+    const ym = m => (m >= start ? [year, m] : [year + 1, m]);
+    const idx = m => (m - start + 12) % 12;
+    const dim = m => { const [yy, mm] = ym(m); return new Date(yy, mm, 0).getDate(); };
+    const dayX = ([m, d]) => x + (idx(m) + (d - 1) / dim(m)) * (w / months);
+    E.div(g, { left: x, top: y, width: w, height: 8, borderRadius: 4, background: 'rgba(243,230,200,.35)' });
+    for (let i = 0; i < months; i++) {
+      const m = (start - 1 + i) % 12 + 1;
+      E.div(g, { left: x + i * w / months, top: y - 6, width: 3, height: 20, background: 'rgba(243,230,200,.55)' });
+      E.div(g, { left: x + i * w / months, top: y + 16, width: w / months, textAlign: 'center', font: '800 22px/1.2 Round', color: 'rgba(243,230,200,.75)' }, `${m}月`);
+    }
+    const x0 = dayX(from), x1 = dayX(to);
+    const fill = E.div(g, { left: x, top: y, width: Math.max(1, x1 - x), height: 8, borderRadius: 4, background: '#ffd84a', transformOrigin: '0 50%' }).ini({ sx: Math.max(.001, Math.min(1, (x0 - x) / Math.max(1, x1 - x))) });
+    const ptr = E.div(g, { left: x0 - 60, top: y - 48, width: 120, textAlign: 'center', font: '900 26px/1.2 Noto', color: '#ffd84a', whiteSpace: 'nowrap' }, `${to[0]}/${to[1]}<div style="font-size:20px;line-height:16px">▼</div>`);
+    E.tw(ptr, .8, { x: [0, x1 - x0] }, 'inOut', delay);
+    E.tw(fill, .8, { sx: 1 }, 'inOut', delay);
+    return ptr;
+  };
+
+  // 時刻のチップを矢印でつなぐ（3つ以上も並べられる）。R.in(i, delay) で i 番目を出す
+  P.chain = (g, { x = 80, y = 150, w = 1760, items, gaps = [], cw = 420, ink = '#f3e6c8' }) => {
+    const n = items.length, gap = (w - cw * n) / Math.max(1, n - 1);
+    const chips = items.map((c, i) => E.div(g, { left: x + i * (cw + gap), top: y, width: cw, height: 104, borderRadius: 20, background: '#fff', display: 'flex', alignItems: 'center', boxShadow: '0 10px 22px rgba(0,0,0,.35)', borderLeft: `12px solid ${c.color}` },
+      `<span style="flex:none;margin-left:18px;padding:3px 12px 4px;border-radius:10px;background:${c.color};color:#fff;font:900 28px/1.2 Noto">${c.id}</span>
+       <div style="margin-left:16px"><div style="font:900 40px/1.1 Noto;color:#22252b;white-space:nowrap">${c.time}</div><div style="font:800 21px/1.3 Round;color:#6a6066;white-space:nowrap">${c.sub || ''}</div></div>`).ini({ o: 0 }));
+    const arrows = items.slice(1).map((_, i) => {
+      const ax = x + i * (cw + gap) + cw + 10, aw = gap - 20;
+      const line = E.div(g, { left: ax, top: y + 50, width: aw, height: 6, borderRadius: 3, background: ink, transformOrigin: '0 50%' }).ini({ sx: 0 });
+      const head = E.div(g, { left: ax + aw - 26, top: y + 34, font: '900 38px/1 Zen', color: ink }, '▶').ini({ o: 0 });
+      const tx = E.div(g, { left: ax - 40, top: y - 6, width: aw + 80, textAlign: 'center', font: '900 28px/1.2 Zen', color: '#ffd84a', whiteSpace: 'nowrap' }, gaps[i] || '').ini({ o: 0 });
+      return { line, head, tx };
+    });
+    const R = { chips, arrows };
+    R.in = (i, delay = 0) => {
+      if (i > 0) { const a = arrows[i - 1]; E.tw(a.line, .45, { sx: [0, 1] }, 'out', delay); E.show(a.head, .2, delay + .35); E.show(a.tx, .3, delay + .15); delay += .45; }
+      E.tw(chips[i], .35, { o: [0, 1], x: [i ? 30 : -30, 0] }, 'back', delay); E.sfx('pop', { delay, gain: .5 });
+    };
+    return R;
+  };
+
+  // 1日の時間の軸（m＝0:00 からの分 → x）。band＝[始, 終] で取引時間の帯
+  P.dayAxis = (g, { x = 160, y = 330, w = 1600, from = 420, to = 960, open = null, band = null, ink = '#f3e6c8' } = {}) => {
+    const tx = m => x + (m - from) / (to - from) * w;
+    const root = E.div(g, { left: 0, top: 0, width: W, height: H }).ini({ o: 0 });
+    if (band) {
+      E.div(root, { left: tx(band[0]), top: y - 60, width: tx(band[1]) - tx(band[0]), height: 120, borderRadius: 14, background: 'rgba(255,216,74,.13)', border: '2px dashed rgba(255,216,74,.55)' });
+      E.div(root, { left: tx(band[0]), top: y - 98, width: tx(band[1]) - tx(band[0]), textAlign: 'center', font: '900 28px/1.2 Zen', color: '#ffd84a' }, '取引時間');
+    }
+    E.div(root, { left: x, top: y - 3, width: w, height: 6, borderRadius: 3, background: ink });
+    for (let m = Math.ceil(from / 60) * 60; m <= to; m += 60) {
+      E.div(root, { left: tx(m) - 2, top: y - 14, width: 4, height: 28, background: ink });
+      E.div(root, { left: tx(m) - 60, top: y + 22, width: 120, textAlign: 'center', font: '800 26px/1.2 Noto', color: 'rgba(243,230,200,.85)' }, `${m / 60}:00`);
+    }
+    if (open != null) E.div(root, { left: tx(open) - 90, top: y + 56, width: 180, textAlign: 'center', font: '900 24px/1.2 Zen', color: '#ffd84a' }, '取引開始');
+    return { root, tx };
+  };
+  // 時間の軸の上の T・I の印（lift で名札を上へずらす）
+  P.axisDot = (g, ax, { m, y, kind, label, up = true, lift = 0 }) => {
+    const c = kind === 'T' ? T_BLUE : I_ORANGE;
+    return E.div(g, { left: ax.tx(m) - 15, top: y - 15, width: 30, height: 30, borderRadius: '50%', background: c, boxShadow: `0 0 0 5px rgba(255,255,255,.9), 0 0 18px ${c}` },
+      `<div style="position:absolute;left:50%;transform:translateX(-50%);${up ? `bottom:${44 + lift}px` : 'top:44px'};padding:3px 12px;border-radius:10px;background:${c};color:#fff;font:900 26px/1.3 Noto;white-space:nowrap">${label}</div>`).ini({ o: 0 });
+  };
+  // 小さなビデオ通話の窓（イブ）。最初は隠れている
+  P.eveCall = (g, faces = ['normal'], { x = 1540, y = 560, w = 340, h = 270 } = {}) => P.call(g, { x, y, w, h, faces }).ini({ o: 0 });
+
   // 完全版の注意書き（各章の最初と最後）
   P.K_NOTICE = ['ブルちゃん・空売り軍団とその売買・会話はフィクションで、実在の人物・団体とは関係ありません。',
     'エスポアの出来事・数値・投稿の要約は元資料（会社・名証の公表資料など）に基づきます。',
