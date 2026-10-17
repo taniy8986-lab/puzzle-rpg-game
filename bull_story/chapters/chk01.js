@@ -7,17 +7,25 @@ E.chapter('k01');
   const { W, H } = E;
   const CH = n => `assets/chara/${n}.png`;
   const CHART = n => `assets/charts_k/p${n}.png`;
-  const DISCLAIMER = 'この物語はフィクションです　｜　エスポア（3260）の事実関係は公開資料に基づきます　｜　投資助言ではありません';
   // 10/16 15:30 の板（証券会社アプリの表示）
   const BOOK = [['sell', 11, 11700], ['sell', 10, 20400], ['sell', 9, 3200], ['sell', 8, 21000], ['sell', 7, 1300], ['sell', 6, 11000], ['sell', 5, 32100], ['sell', 4, 12700], ['buy', 3, 52300], ['buy', 2, 210000], ['buy', 1, 376000]];
+
+  /* ============================================================ 注意書き */
+  E.scene({ name: 'notice', bg: '#0b1022' }, sc => {
+    const g = sc.cam;
+    E.div(g, { left: 0, top: 0, width: W, height: H, background: 'radial-gradient(ellipse at 50% 45%, #1d2a4a 0%, #0b1022 75%)' });
+    const n = P.kNotice(g, { x: 100, y: 330, w: 1720, size: 32 });
+    E.show(n, .6, .2);
+    E.wait(6.0);
+    E.hide(n, .5);
+    E.wait(.5);
+  });
 
   /* ============================================================ S0 アバン：最後の板 */
   E.scene({ name: 'avant_board' }, sc => {
     const g = sc.cam;
     E.bgm('dark', { fadeIn: 1.2, gain: .7 });
     P.slate(g);
-    const note = P.note(sc.root, DISCLAIMER, { x: 40, y: 30, size: 22 }).ini({ o: 0 });
-    E.show(note, .6, .3);
     const tt = E.div(g, { left: 0, top: 80, width: W, textAlign: 'center', font: '900 44px/1.2 Zen', color: '#f3e6c8' }, '2026年10月16日 15:30　最後の板').ini({ o: 0 });
     E.show(tt, .5, .5);
     const bd = P.orderBook(g, { x: 560, y: 160, book: BOOK, last: 3, rh: 50 });
@@ -27,7 +35,6 @@ E.chapter('k01');
     E.tw(pill, .4, { o: [0, 1], y: [30, 0] }, 'back', 1.6); E.sfx('dun', { delay: 1.6, gain: .6 });
     E.wait(2.2);
     E.narr('2026年10月16日。エスポアの、最後の値段は、3円だった。');
-    E.hide(note, .5);
     E.wait(.3);
   });
 
@@ -74,7 +81,7 @@ E.chapter('k01');
     E.div(bd, { left: 0, top: 26, width: 1020, textAlign: 'center', font: '900 40px/1.2 Zen', color: '#2a2430' }, '三つを、時刻で並べて読む');
     const rowT = E.div(bd, { left: 40, top: 100, width: 940, height: 150, borderRadius: 18, background: '#eef3fc', display: 'flex', alignItems: 'center' },
       `<span style="flex:none;margin-left:24px;width:96px;height:96px;border-radius:50%;background:${P.T_BLUE};color:#fff;font:900 56px/96px Noto;text-align:center">T</span>
-       <div style="margin-left:26px"><div style="font:900 36px/1.3 Zen;color:${P.T_BLUE}">ある有名投資家の投稿</div><div style="font:800 25px/1.45 Round;color:#3d4757">元資料の要約。中身は本人の見方</div></div>`).ini({ o: 0 });
+       <div style="margin-left:26px"><div style="font:900 36px/1.3 Zen;color:${P.T_BLUE}">ある有名投資家の投稿</div><div style="font:800 25px/1.45 Round;color:#3d4757">元資料の要約（本人の見解）。チャートの印は、<br>投稿を含む日の終値の位置で、投稿した瞬間の値段ではない</div></div>`).ini({ o: 0 });
     const rowI = E.div(bd, { left: 40, top: 270, width: 940, height: 150, borderRadius: 18, background: '#fdf3e6', display: 'flex', alignItems: 'center' },
       `<span style="flex:none;margin-left:24px;width:96px;height:96px;border-radius:50%;background:${P.I_ORANGE};color:#fff;font:900 56px/96px Noto;text-align:center">I</span>
        <div style="margin-left:26px"><div style="font:900 36px/1.3 Zen;color:#b8651a">会社のIR（適時開示）</div><div style="font:800 25px/1.45 Round;color:#5c4a33">発表した時刻つき。引け後なら、反応は次の取引日から</div></div>`).ini({ o: 0 });
@@ -87,12 +94,14 @@ E.chapter('k01');
       '前後の値動きは、投稿が原因だった証明ではない').ini({ o: 0 });
     E.wait(.5);
     E.say('hat', '今回は、三つを並べて読む。', { talk: hat, talkAmp: 2, yomi: '今回は、みっつを、ならべて読む。' });
-    let L = E.say('hat', '青いTは、ある有名投資家の投稿。中身は要約で、本人の見方だ。', { talk: hat, talkAmp: 2, wait: false });
+    let L = E.say('hat', '青いTは、ある有名投資家の投稿。中身は要約で、本人の見方だ。', { talk: hat, talkAmp: 2, wait: false, yomi: '青いティーは、ある有名投資家の投稿。中身は要約で、本人の見方だ。' });
     E.tw(rowT, .4, { o: [0, 1], x: [-40, 0] }, 'back', .2); E.sfx('slide', { delay: .2 });
     E.at(L.end);
+    E.say('hat', 'チャートのTの印は、投稿を含む日の終値の位置だ。投稿した瞬間の値段じゃない。', { talk: hat, talkAmp: 2, yomi: 'チャートの、ティーのしるしは、投稿を含む日の、おわりねの位置だ。投稿した瞬間の値段じゃない。' });
     L = E.say('hat', '橙のIは、会社のIR。発表した時刻つきだ。', { talk: hat, talkAmp: 2, wait: false, yomi: 'だいだいのアイは、会社のアイアール。発表した、じこくつきだ。' });
     E.tw(rowI, .4, { o: [0, 1], x: [-40, 0] }, 'back', .2); E.sfx('slide', { delay: .2 });
     E.at(L.end);
+    E.say('hat', 'Iの印は公表日。引け後の発表なら、値動きは次の取引日から比べる。', { talk: hat, talkAmp: 2, yomi: 'アイのしるしは、公表日。ひけごの発表なら、値動きは、次の取引日から比べる。' });
     L = E.say('hat', 'そして、ローソク足。赤は、終値が始値と同じか上。緑は、終値が始値より下。', { talk: hat, talkAmp: 2, wait: false, yomi: 'そして、ローソクあし。赤は、おわりねが、はじめねと同じか上。緑は、おわりねが、はじめねより下。' });
     E.tw(rowC, .4, { o: [0, 1], x: [-40, 0] }, 'back', .2); E.sfx('slide', { delay: .2 });
     E.at(L.end);
@@ -120,7 +129,7 @@ E.chapter('k01');
     const arrow = E.div(g, { left: 760, top: 420, font: '900 90px/1 Zen', color: '#ffd84a' }, '→').ini({ o: 0 });
     const rule = E.div(g, { left: 200, top: 700, width: 1280, height: 110, borderRadius: 20, background: 'rgba(255,255,255,.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '60px', font: '900 40px/1 Zen', color: '#262236', boxShadow: '0 12px 24px rgba(0,0,0,.35)' },
       '<span>分割前の値段 <b style="color:#c62828">÷ 3</b></span><span>出来高 <b style="color:#2b68d8">× 3</b></span>').ini({ o: 0 });
-    const ex = E.div(g, { left: 200, top: 830, width: 1280, textAlign: 'center', font: '800 26px/1.3 Round', color: '#e8dcc0' }, '例：2024年6月18日の終値　当時 4,955円 ÷ 3 ＝ 1,651.67円（元資料 p2・p5）').ini({ o: 0 });
+    const ex = E.div(g, { left: 200, top: 826, width: 1280, textAlign: 'center', font: '800 26px/1.45 Round', color: '#e8dcc0' }, '権利落ち 2025/10/22（効力発生 10/24）<br>例：2024年6月18日の終値　当時 4,955円 ÷ 3 ＝ 1,651.67円').ini({ o: 0 });
     E.wait(.4);
     let L = E.say('hat', 'もう一つ。エスポアは、2025年10月に、1株を3株に分けた。', { wait: false, yomi: 'もう一つ。エスポアは、2025年10月に、いっかぶを、さんかぶに分けた。' });
     E.pop(big, .45, .3); E.sfx('pop', { delay: .3 });
@@ -205,12 +214,12 @@ E.chapter('k01');
     P.slate(g);
     const clk = P.clock(g, { x: 180, y: 250, size: 300, min: 0, label: '2024/6/18 13:00' });
     E.tw(clk, 1.4, { min: [540, 780] }, 'inOut', .3); E.sfx('tick', { delay: .3, gain: .6 }); E.sfx('tick', { delay: .9, gain: .6 });
-    const t01 = P.tcard(g, { id: 'T01', when: '2024/6/18 13:00', kind: '関与', session: '取引時間内', text: 'JPIWとの助言契約を公表', note: '添付は、投資運用方針・株主提案・議決権行使などの助言契約の書面。<br>本人の保有株数や買付日は示されていない', x: 620, y: 200, w: 1160, size: 40 });
+    const t01 = P.tcard(g, { id: 'T01', when: '2024/6/18 13:00', kind: '助言契約・株主提案', session: '取引時間内', text: 'JPIWとの助言契約を公表', note: '添付は、投資運用方針・株主提案・議決権行使などの助言契約の書面。<br>本人の保有株数や買付日は示されていない', x: 620, y: 200, w: 1160, size: 40 });
     E.tw(t01, .5, { o: [0, 1], x: [60, 0] }, 'back', 1.6); E.sfx('notify', { delay: 1.6 });
     const close = E.div(g, { left: 620, top: 690, width: 1160, height: 110, borderRadius: 20, background: 'rgba(255,255,255,.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '40px', font: '900 38px/1 Noto', color: '#262236', boxShadow: '0 12px 24px rgba(0,0,0,.35)' },
       '<span style="font:800 28px/1 Round;color:#6a6066">その日の終値</span><span>1,651.67円</span><span style="font:800 28px/1 Round;color:#6a6066">（当時 4,955円）</span>').ini({ o: 0 });
     E.wait(1.8);
-    E.say('eve', 'ねえねえ、6月18日の13時。あの有名投資家さんが、投稿してるよ〜。', { yomi: 'ねえねえ、6月18日の13時。あの有名投資家さんが、投稿してるよー。' });
+    E.narr('6月18日、13時。ある有名投資家が、投稿した。');
     E.say('hat', '中身は、JPIWという会社との、助言契約だ。');
     E.say('hat', '運用の方針や、株主提案、議決権の使い方について、助言をする契約だ。');
     E.say('hat', 'この投稿には、本人が何株持っているか、いつ買ったかは、書いてない。');
@@ -270,10 +279,10 @@ E.chapter('k01');
     E.tw(e3, .35, { o: [0, 1], y: [20, 0] }, 'back', L.dur * .7); E.sfx('pop', { delay: L.dur * .7, gain: .5 });
     E.at(L.end);
     E.say('hat', '出来事の日と、公表された日を、分けて置く。それが、この完全版のルールだ。');
-    const t02 = P.tcard(g, { id: 'T02', when: '2024/6/28 21:13', kind: '関与', session: '引け後', text: 'JPIWの臨時総会招集請求の資料を案内', x: 1080, y: 750, w: 760, size: 26 });
+    const t02 = P.tcard(g, { id: 'T02', when: '2024/6/28 21:13', kind: '助言契約・株主提案', session: '引け後', text: 'JPIWの臨時総会招集請求の資料を案内', x: 1080, y: 750, w: 760, size: 26 });
     E.tw(t02, .4, { o: [0, 1], x: [40, 0] }, 'back', .2); E.sfx('notify', { delay: .2, gain: .6 });
     E.hide(e3, .2, .1);
-    E.say('eve', '6月28日の夜には、その請求の資料も、案内してたよ〜。', { delay: .3, yomi: '6月28日の夜には、その請求の資料も、案内してたよー。' });
+    E.narr('6月28日の夜には、その請求の資料も、投稿で案内されていた。', { delay: .3 });
     E.wait(.4);
   });
 
@@ -289,7 +298,7 @@ E.chapter('k01');
     P.look(sc.cam, { s: 1.3, cx: 1300, cy: 470, dur: 3.5, delay: .3 });
     E.wait(.8);
     E.narr('その頃、私はエスポアを、ウォッチリストに入れた。');
-    E.narr('有名な人が関わるなら、きっと何か起きる。……そう思ったから。', { yomi: '有名な人が関わるなら、きっと何か起きる。そう思ったから。' });
+    E.narr('株主が、経営に意見する会社。何か起きるかもしれない。……そう思ったから。', { yomi: '株主が、経営に意見する会社。何か起きるかもしれない。そう思ったから。' });
     E.wait(.3);
   });
   E.scene({ name: 'note' }, sc => {
@@ -342,9 +351,9 @@ E.chapter('k01');
     E.wait(2.8);
     E.say('pig', 'ブヒッ。次は、総会と、6,300円だブー。', { talk: pig, talkAmp: 5, yomi: 'ブヒッ。次は、総会と、ろくせんさんびゃくえんだブー。' });
     E.unsub(.4);
-    const end = E.div(g, { left: 0, top: 870, width: 1720, textAlign: 'center', font: '800 24px/1 Round' }, `<span style="display:inline-block;padding:10px 26px;border-radius:999px;background:rgba(10,14,30,.6);color:#f0e4cd">${DISCLAIMER}</span>`).ini({ o: 0 });
+    const end = E.div(g, { left: 0, top: 820, width: 1640, textAlign: 'center', font: '800 22px/1.6 Round' }, `<span style="display:inline-block;padding:12px 30px;border-radius:24px;background:rgba(10,14,30,.7);color:#f0e4cd">${P.K_NOTICE.join('<br>')}</span>`).ini({ o: 0 });
     E.show(end, .8, .5);
-    const tsu = E.div(g, { left: 0, top: 700, width: W, textAlign: 'center', font: '900 64px/1.2 Zen', color: '#f3e6c8', letterSpacing: '.3em' }, 'つづく').ini({ o: 0 });
+    const tsu = E.div(g, { left: 0, top: 660, width: W, textAlign: 'center', font: '900 64px/1.2 Zen', color: '#f3e6c8', letterSpacing: '.3em' }, 'つづく').ini({ o: 0 });
     E.show(tsu, .8, .9);
     E.wait(4.2);
   });

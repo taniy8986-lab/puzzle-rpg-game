@@ -788,8 +788,7 @@ const P = (() => {
     boxShadow: '0 14px 30px rgba(0,0,0,.38)', borderLeft: `14px solid ${T_BLUE}`,
   }, `<div style="display:flex;align-items:center;gap:12px;padding:16px 22px 4px">
         <span style="flex:none;padding:3px 14px 4px;border-radius:10px;background:${T_BLUE};color:#fff;font:900 30px/1.2 Noto">${id}</span>
-        <span style="flex:none;width:44px;height:44px;border-radius:50%;background:#5a6474;color:#fff;font:900 24px/44px Zen;text-align:center">？</span>
-        <span style="font:900 24px/1.2 Zen;color:#22252b;white-space:nowrap">ある有名投資家</span>
+        <span style="font:900 24px/1.2 Zen;color:#22252b;white-space:nowrap">ある有名投資家の投稿</span>
         <span style="margin-left:auto;font:800 25px/1.2 Noto;color:${T_BLUE};white-space:nowrap">${when}</span></div>
       <div style="display:flex;gap:8px;padding:6px 22px 0">${[kind, session, '要約'].filter(Boolean).map(t => pill(t, '#e5eefc', '#1b4ea8')).join('')}</div>
       <div style="padding:10px 22px 16px;font:800 ${size}px/1.5 Round;color:#22252b">${text}</div>
@@ -882,6 +881,15 @@ const P = (() => {
     return E.div(parent, { left: x - size / 2, top: y - size / 2, width: size, height: size, borderRadius: '50%', background: c, boxShadow: `0 0 0 5px rgba(255,255,255,.9), 0 0 18px ${c}` },
       label ? `<div style="position:absolute;left:${size + 8}px;top:-6px;padding:2px 10px;border-radius:8px;background:${c};color:#fff;font:900 24px/1.3 Noto;white-space:nowrap">${label}</div>` : '').ini({ o: 0 });
   };
+
+  // 完全版の注意書き（各章の最初と最後）
+  P.K_NOTICE = ['ブルちゃん・空売り軍団とその売買・会話はフィクションで、実在の人物・団体とは関係ありません。',
+    'エスポアの出来事・数値・投稿の要約は元資料（会社・名証の公表資料など）に基づきます。',
+    '投稿の要約は投稿者本人の見解の要約です。投資助言ではありません。'];
+  P.kNotice = (parent, { x = 160, y = 330, w = 1600, size = 34, dark = true } = {}) => E.div(parent, {
+    left: x, top: y, width: w, padding: '40px 50px', borderRadius: 28, background: dark ? 'rgba(10,14,30,.82)' : 'rgba(255,255,255,.92)',
+    border: '3px solid rgba(255,216,74,.7)', textAlign: 'center', font: `800 ${size}px/1.7 Round`, color: dark ? '#f3e6c8' : '#262230',
+  }, P.K_NOTICE.join('<br>')).ini({ o: 0 });
 
   return P;
 })();
