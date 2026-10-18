@@ -1,6 +1,7 @@
 // 完全版 第7章「決算延期」（2026年4月13日〜4月23日）
-// 台本: story/k/k07_決算延期.md　元資料 p6・p7・p10・p13・p15・p21・p29・p30・p37
-// 投稿は元資料の要約（本人の見解）。有名投資家の名前・アカウントは出さない。ブルちゃんの保有はフィクション
+// 台本: story/k/k07_決算延期.md　元資料 p6・p7・p10・p13・p15・p21・p29・p30・p37／ユーザー提供の投稿スクリーンショット（2026/10/18）
+// 投稿は元資料の要約（本人の見解）。4/15（一覧外）と T27 は投稿の画面（P.postShot）と本文の字幕（E.cap・声なし）。
+// 有名投資家の名前・アカウント・アイコンは出さない。ブルちゃんの保有はフィクション
 'use strict';
 E.chapter('k07');
 {
@@ -19,7 +20,7 @@ E.chapter('k07');
   E.scene({ name: 'notice', bg: '#0b1022' }, sc => {
     const g = sc.cam;
     E.div(g, { left: 0, top: 0, width: W, height: H, background: 'radial-gradient(ellipse at 50% 45%, #1d2a4a 0%, #0b1022 75%)' });
-    const n = P.kNotice(g, { x: 100, y: 330, w: 1720, size: 32 });
+    const n = P.kNotice(g, { x: 60, y: 330, w: 1800, size: 30, posts: true });
     E.show(n, .6, .2);
     E.wait(6.0);
     E.hide(n, .5);
@@ -123,7 +124,7 @@ E.chapter('k07');
     E.at(L.end + .4);
   });
 
-  /* ============================================================ S3 4月14日・17日 */
+  /* ============================================================ S3 4月14日・15日・17日 */
   E.scene({ name: 't25' }, sc => {
     const g = sc.cam;
     E.bgm('lesson', { fadeIn: .5, gain: .85 });
@@ -134,16 +135,56 @@ E.chapter('k07');
     E.wait(1.0);
     E.narr('4月14日。総会で賛成した株主が、長く持ち続けて、市場に出る株が減る、と推測する投稿。');
     E.say('hat', '賛成の割合から、本当に持ち続けているのか、誰が売り買いしているのかは、確かめられない。');
+    E.wait(.2);
+  });
+
+  // 4月15日：元資料の一覧にない投稿（ユーザー提供の画面）。投稿の時刻は画面にない（添付画像は 14:39）
+  E.scene({ name: 'p08' }, sc => {
+    const g = sc.cam;
+    P.slate(g);
+    bar(g, [4, 14], [4, 15]);
+    const card = P.postShot(g, {
+      id: '一覧外', listed: false, when: '2026/4/15（画像 14:39）', text: 'p08_text', imgs: ['p08_img'], x: 322, y: 108, h: 736,
+      rows: [
+        { label: '確認メモ', text: '投稿の時刻は画面に出ていない。14:39の画像では989円、この時点の安値は970円', color: '#5a6b88' },
+        { label: '確認メモ', text: '4/15の日足の下ヒゲは元資料の日足（p7）でも確認できる。指値の買いが待っているかは、全日の板データがなく確認できない', color: '#5a6b88', show: false },
+      ],
+    });
+    E.tw(card, .45, { o: [0, 1], y: [30, 0] }, 'back', .4); E.sfx('notify', { delay: .4 });
+    E.wait(1.2);
+    E.narr('4月15日。元資料の一覧には載っていない、投稿がある。');
+    E.narr('投稿の時刻は、画面に出ていない。');
+    E.cap('3260 エスポア\n日々、下髭つけてるけど');
+    E.cap('買いは指値で投げ物待ってる状態');
+    let L = E.say('hat', '14時39分の画像では、989円。その時点の安値は、970円だった。', { wait: false, yomi: '14時39分の画像では、きゅうひゃくはちじゅうきゅうえん。その時点の安値は、きゅうひゃくななじゅうえんだった。' });
+    const now = card.at(0, 285, 280), lo = card.at(0, 362, 573);
+    P.circle(g, { x: now.x, y: now.y, w: 320, h: 70, color: '#ffd84a', delay: .3, dur: .4 });
+    P.circle(g, { x: lo.x, y: lo.y, w: 130, h: 40, color: '#ffd84a', delay: L.dur * .6, dur: .35, seed: 3 });
+    E.at(L.end);
+    L = E.say('hat', '4月15日の足にも、下ヒゲがある。元資料の日足でも、確かめられる。', { wait: false, yomi: '4月15日の足にも、したヒゲがある。もとしりょうの日足でも、確かめられる。' });
+    const wk = card.at(0, 690, 735);
+    P.circle(g, { x: wk.x, y: wk.y, w: 50, h: 80, color: '#ffd84a', delay: .3, dur: .35, seed: 5 });
+    E.show(card.rows[1], .3, L.dur * .5);
+    E.at(L.end);
+    E.say('hat', 'ただ、指値の買いが待っているかどうかは、一日全部の板のデータがなく、確かめられない。', { yomi: 'ただ、さしねの買いが待っているかどうかは、一日全部の、いたのデータがなく、確かめられない。' });
+    E.wait(.3);
+  });
+
+  E.scene({ name: 't26' }, sc => {
+    const g = sc.cam;
+    P.slate(g);
+    bar(g, [4, 15], [4, 17]);
     const t26 = P.tcard(g, { id: 'T26', when: '2026/4/17 9:16', kind: '需給', session: '取引時間内', text: '買い戻しとみられる買いに売りが出ないと発言', note: '実際の買い戻しか、新規買いかは日足・出来高だけでは識別できない', x: 260, y: 140, w: 1400, size: 40 });
-    swap(t25, t26);
-    E.narr('4月17日の朝には、買い戻しとみられる買いに、売りが出ない、という投稿。', { delay: .8 });
+    tIn(t26);
+    E.wait(1.0);
+    E.narr('4月17日の朝には、買い戻しとみられる買いに、売りが出ない、という投稿。');
     E.wait(.2);
   });
 
   E.scene({ name: 'buyback' }, sc => {
     const g = sc.cam;
     P.slate(g);
-    bar(g, [4, 14], [4, 17]);
+    bar(g, [4, 17], [4, 17]);
     const tt = P.heading(g, '「買い戻し」か「新しい買い」か', 110);
     E.show(tt, .3);
     const box = (x, t, sub, c) => E.div(g, { left: x, top: 250, width: 620, height: 300, borderRadius: 26, background: 'rgba(255,255,255,.95)', textAlign: 'center', boxShadow: '0 12px 24px rgba(0,0,0,.35)' },
@@ -158,14 +199,32 @@ E.chapter('k07');
     E.tw(b2, .4, { o: [0, 1], y: [20, 0] }, 'back', .2); E.sfx('pop', { delay: .2 });
     E.tw(same, .4, { o: [0, 1], y: [20, 0] }, 'back', L.dur * .55); E.sfx('ding', { delay: L.dur * .55, gain: .5 });
     E.at(L.end + .3);
-    [b1, b2, same, tt].forEach(n => E.hide(n, .3));
-    const t27 = P.tcard(g, { id: 'T27', when: '2026/4/17 9:52', kind: '需給', session: '取引時間内', text: '売り方が急いでいるとの見方', note: '売買主体の動機は本人の推測', x: 260, y: 160, w: 1400, size: 40 });
-    tIn(t27, .4);
-    E.narr('9時52分には、売り方が急いでいる、という見方。', { delay: .8 });
-    const m = P.mark(g, '本人の推測', { x: 760, y: 520, color: P.T_BLUE, size: .8, rot: -5 });
-    const L2 = E.say('hat', '売り買いしている人の動機は、本人の推測だ。', { wait: false });
-    P.stampIn(m, L2.dur * .5);
-    E.at(L2.end + .3);
+  });
+
+  // T27：投稿の画面（添付画像なし）。元資料の要約と検証メモを並べる
+  E.scene({ name: 't27' }, sc => {
+    const g = sc.cam;
+    P.slate(g);
+    bar(g, [4, 17], [4, 17]);
+    const card = P.postShot(g, {
+      id: 'T27', when: '2026/4/17 9:52', text: 'p09_text', imgs: [], x: 388, y: 108, h: 720, textW: 1100,
+      rows: [
+        { label: '元資料の要約', text: '売り方が急いでいるとの見方' },
+        { label: '検証メモ', text: '売買主体の動機は本人の推測。', show: false },
+      ],
+    });
+    E.tw(card, .45, { o: [0, 1], y: [30, 0] }, 'back', .4); E.sfx('notify', { delay: .4 });
+    E.wait(1.2);
+    E.narr('同じ日の、9時52分の投稿。');
+    E.cap('3260 エスポア\n売り方のバタバタ具合見てたら何か知らんけど急いでるんやろ');
+    E.cap('まあどっちにしても\n無茶してたらしんどなるわな');
+    const m = P.mark(g, '本人の推測', { x: 1180, y: 600, color: P.T_BLUE, size: .8, rot: -5 });
+    let L = E.say('hat', '売り買いしている人の動機は、本人の推測だ。', { wait: false });
+    E.show(card.rows[1], .3, .2);
+    P.stampIn(m, L.dur * .5);
+    E.at(L.end);
+    E.say('hat', 'どのデータを見て、そう書いたのかも、本文には書かれていない。');
+    E.wait(.3);
   });
 
   /* ============================================================ S4 週足：1,000円 */
@@ -390,7 +449,7 @@ E.chapter('k07');
   E.scene({ name: 'notice_end', bg: '#0b1022' }, sc => {
     const g = sc.cam;
     E.div(g, { left: 0, top: 0, width: W, height: H, background: 'radial-gradient(ellipse at 50% 45%, #1d2a4a 0%, #0b1022 75%)' });
-    const n = P.kNotice(g, { x: 100, y: 330, w: 1720, size: 32 });
+    const n = P.kNotice(g, { x: 60, y: 330, w: 1800, size: 30, posts: true });
     E.show(n, .6, .2);
     E.wait(6.0);
   });
