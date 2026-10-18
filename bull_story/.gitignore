@@ -5,3 +5,5 @@ assets/charts_k/
 out/
 build/
 __pycache__/
+# ユーザー提供の投稿スクリーンショットからの切り出し（公開リポジトリには置かない）
+assets/posts/

@@ -524,6 +524,8 @@ const E = (() => {
     eve: { chip: 'イブ', color: '#e0609a', voice: 'eve' },
     pig: { chip: 'ブタ', color: '#d0596a', voice: 'pig' },
     crowd: { chip: 'SNS', color: '#6b7a90', voice: 'crowd' },
+    // 投稿の本文（原文）。声は付けない（E.cap で出す）
+    post: { chip: '投稿の本文', color: '#2b68d8', voice: null },
   };
   E.CAST = CAST;
   let CHAP = '00';
@@ -592,6 +594,19 @@ const E = (() => {
     return { t0, end, dur };
   };
   E.narr = (src, o = {}) => E.say('narr', src, o);
+  // 声のない字幕（投稿の本文をそのまま出す時など）。o.dur 秒だけ出す。台本・声の一覧には入れない
+  let CAPN = 0;
+  E.cap = (src, o = {}) => {
+    const t0 = E.T + (o.delay || 0);
+    const n = [...src.replace(/\n/g, '')].length;
+    const dur = o.dur != null ? o.dur : Math.max(2.6, .6 + n * .14);
+    const key = `cap_${++CAPN}`;
+    act(t0, t0, () => { SUB.p.line = { who: o.who || 'post', text: src, key, chip: o.chip, chipColor: o.chipColor }; }, false, G);
+    act(t0, t0 + .16, k => { SUB.p.o = Math.min(SUB.p.o, EASE.out(k)); SUB.p.y += (1 - EASE.out(k)) * 10; }, true, G);
+    const end = t0 + dur + (o.gap != null ? o.gap : .3);
+    if (o.wait !== false) E.T = end;
+    return { t0, end, dur };
+  };
   E.unsub = (delay = 0) => { const t = E.T + delay; act(t, t, () => { SUB.p.line = null; }, false, G); };
   CUES.voices = [];
 

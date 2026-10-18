@@ -951,14 +951,67 @@ const P = (() => {
   // 小さなビデオ通話の窓（イブ）。最初は隠れている
   P.eveCall = (g, faces = ['normal'], { x = 1540, y = 560, w = 340, h = 270 } = {}) => P.call(g, { x, y, w, h, faces }).ini({ o: 0 });
 
+  /* ================================================================ 投稿の画面（ユーザー提供のスクリーンショット） */
+  // assets/posts/ の切り出し（名前・ハンドル・アイコン・表示回数・他の人の返信は切り出しの外）。大きさは切り出した画像のもの
+  P.POST_SIZES = {"p01_img": [853, 1386], "p01_text": [1170, 378], "p02_img": [947, 1386], "p02_text": [1170, 177], "p03_img": [1114, 868], "p03_text": [1170, 601], "p04_img": [889, 1326], "p04_text": [1170, 234], "p05_img": [1114, 651], "p05_text": [1170, 234], "p06_img": [1114, 865], "p06_text": [1170, 297], "p07_img": [795, 1387], "p07_text": [1170, 70], "p08_img": [1063, 1248], "p08_text": [1170, 297], "p09_text": [1170, 449], "p10_img": [1170, 1779], "p10_text": [1170, 247], "p11_img": [1170, 2032], "p11_text": [1170, 373], "p12_img": [814, 1386], "p12_text": [1170, 298], "p13_img": [1170, 1728], "p13_text": [1170, 292], "p14_img": [1170, 1703], "p14_img2": [1170, 1741], "p14_text": [1170, 221], "p15_img": [1114, 1001], "p15_text": [1170, 228], "p16_img": [798, 1386], "p16_text": [1170, 76]};
+  // 投稿の画面のカード。左に本文の画面、右に添付画像（そのまま）。
+  //   id: 'T20' や '一覧外'、when: '2026/3/25 13:33' など、imgs: ['p01_img'] など
+  P.postShot = (parent, { id = '', when = '', text = null, imgs = [], x = 80, y = 100, h = 780, textW = 620, maxW = 1760, listed = true, rows = [] } = {}) => {
+    const SZ = P.POST_SIZES;
+    const pad = 22, head = 64, foot = 40;
+    const ih = h - pad * 2;
+    let iw = imgs.map(k => SZ[k][0] * ih / SZ[k][1]);
+    const tw = text ? textW : 0;
+    const room = maxW - tw - pad * (imgs.length + (text ? 2 : 1));
+    const sumw = iw.reduce((a, b) => a + b, 0);
+    const k = sumw > room ? room / sumw : 1;
+    iw = iw.map(w => w * k);
+    const ihh = ih * k;
+    const W = tw + iw.reduce((a, b) => a + b, 0) + pad * (imgs.length + (text ? 2 : 1));
+    const card = E.div(parent, { left: x, top: y, width: W, height: h, borderRadius: 22, background: '#fbfcff', overflow: 'hidden', boxShadow: '0 16px 34px rgba(0,0,0,.42)', borderLeft: `12px solid ${T_BLUE}` }).ini({ o: 0 });
+    let cx = pad;
+    if (text) {
+      const hd = E.div(card, { left: pad, top: pad, width: tw, height: head - 10, display: 'flex', alignItems: 'center', gap: '10px' },
+        `<span style="flex:none;padding:3px 12px 4px;border-radius:10px;background:${listed ? T_BLUE : '#5a6b88'};color:#fff;font:900 24px/1.2 Noto">${id}</span>
+         <span style="font:900 21px/1.2 Zen;color:#22252b;white-space:nowrap">ある有名投資家の投稿（画面）</span>`);
+      E.div(card, { left: pad, top: pad + head - 8, width: tw, font: '800 22px/1.2 Noto', color: T_BLUE, whiteSpace: 'nowrap' }, when);
+      const th = SZ[text][1] * tw / SZ[text][0];
+      card.textImg = E.img(card, `assets/posts/${text}.png`, { left: pad, top: pad + head + 26, width: tw, height: th, borderRadius: 10, border: '2px solid #e3e8f0' });
+      // 本文の下の札（元資料の要約・検証メモ、この動画の確認メモなど）。rows: [{ label, text, color }]
+      const box = E.div(card, { left: pad, top: pad + head + 26 + th + 14, width: tw, display: 'flex', flexDirection: 'column', gap: '10px' });
+      card.rows = rows.map(r => {
+        const n = E.div(box, { position: 'relative', borderRadius: 12, background: r.bg || '#eef2f8', padding: '10px 16px 12px', boxSizing: 'border-box', font: '800 21px/1.5 Round', color: '#3d4556' },
+          `<b style="color:${r.color || T_BLUE}">${r.label}</b>　${r.text}`).ini({ o: r.show === false ? 0 : 1 });
+        return n;
+      });
+      E.div(card, { left: pad, top: h - foot - 6, width: tw, font: '800 15px/1.35 Round', color: '#6a7488' }, 'ユーザー提供のスクリーンショット。名前・アイコン・表示回数は隠しています');
+      cx += tw + pad;
+    }
+    const lefts = [];
+    card.imgs = imgs.map((kk, i) => {
+      lefts.push(cx);
+      const n = E.img(card, `assets/posts/${kk}.png`, { left: cx, top: pad + (ih - ihh) / 2, width: iw[i], height: ihh, borderRadius: 10, boxShadow: '0 4px 12px rgba(0,0,0,.25)' });
+      cx += iw[i] + pad;
+      return n;
+    });
+    card.W = W; card.H = h;
+    // 添付画像の中の位置（切り出し画像の画素 px,py）→ 親の座標
+    card.at = (i, px, py) => { const kk = imgs[i], sc = iw[i] / SZ[kk][0]; return { x: x + lefts[i] + px * sc, y: y + pad + (ih - ihh) / 2 + py * sc }; };
+    return card;
+  };
+
   // 完全版の注意書き（各章の最初と最後）
   P.K_NOTICE = ['ブルちゃん・空売り軍団とその売買・会話はフィクションで、実在の人物・団体とは関係ありません。',
     'エスポアの出来事・数値・投稿の要約は元資料（会社・名証の公表資料など）に基づきます。',
     '投稿の要約は投稿者本人の見解の要約です。投資助言ではありません。'];
-  P.kNotice = (parent, { x = 160, y = 330, w = 1600, size = 34, dark = true } = {}) => E.div(parent, {
+  // 投稿の画面（ユーザー提供のスクリーンショット）を使う章の注意書き
+  P.K_NOTICE_POSTS = ['ブルちゃん・空売り軍団とその売買・会話はフィクションで、実在の人物・団体とは関係ありません。',
+    'エスポアの出来事・数値は元資料（会社・名証の公表資料など）に基づきます。投稿の画面はユーザー提供のスクリーンショットで、',
+    '名前・アイコンは隠しています（元資料の一覧にない投稿を含む）。投稿の本文と要約は投稿者本人の見解です。投資助言ではありません。'];
+  P.kNotice = (parent, { x = 160, y = 330, w = 1600, size = 34, dark = true, posts = false } = {}) => E.div(parent, {
     left: x, top: y, width: w, padding: '40px 50px', borderRadius: 28, background: dark ? 'rgba(10,14,30,.82)' : 'rgba(255,255,255,.92)',
     border: '3px solid rgba(255,216,74,.7)', textAlign: 'center', font: `800 ${size}px/1.7 Round`, color: dark ? '#f3e6c8' : '#262230',
-  }, P.K_NOTICE.join('<br>')).ini({ o: 0 });
+  }, (posts ? P.K_NOTICE_POSTS : P.K_NOTICE).join('<br>')).ini({ o: 0 });
 
   return P;
 })();
