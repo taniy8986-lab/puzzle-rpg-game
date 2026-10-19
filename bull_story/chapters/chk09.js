@@ -1,6 +1,7 @@
 // 完全版 第9章「二番底」（2026年4月27日〜5月18日）
-// 台本: story/k/k09_二番底.md　元資料 p7・p13・p21・p31・p32・p37
-// 投稿は元資料の要約（本人の見解）。有名投資家の名前・アカウントは出さない。ブルちゃんの保有はフィクション
+// 台本: story/k/k09_二番底.md　元資料 p7・p13・p14・p21・p31・p32・p35・p37・ユーザー提供の投稿スクリーンショット（2026/10/18）
+// 投稿は元資料の要約（本人の見解）。5/1（一覧外）と T37 は投稿の画面（P.postShot）と本文の字幕（E.cap・声なし）。
+// 有名投資家の名前・アカウント・アイコンは出さない。ブルちゃんの保有はフィクション
 // T38（保有者の重複は未確認）は、監査法人や他社の話と線で結ばない
 'use strict';
 E.chapter('k09');
@@ -27,11 +28,28 @@ E.chapter('k09');
     return C;
   };
 
+  // 投稿の画面（ユーザー提供のスクリーンショット）。上に月の帯があるので y 110 から、字幕の帯（850）より上に収める
+  const MEMO = '#5a6b88';
+  const shot = (g, o) => P.postShot(g, Object.assign({ x: 80, y: 110, h: 730 }, o));
+  const enter = (card, d = .4) => { E.tw(card, .45, { o: [0, 1], y: [30, 0] }, 'back', d); E.sfx('notify', { delay: d }); };
+  // 添付画像の中の位置（切り出し画像の画素）→ 親の座標。card.at はカードの左の太線 12px の分を含まないので足す
+  const atImg = (card, i, px, py) => { const q = card.at(i, px, py); return { x: q.x + 12, y: q.y }; };
+  // 添付画像の中の場所を示す黄色い四角の枠（投稿者の手書きの丸と区別するため四角にする）。[x0, y0, x1, y1] は切り出し画像の画素
+  const frame = (g, card, i, [x0, y0, x1, y1], d = 0) => {
+    const a = atImg(card, i, x0, y0), b = atImg(card, i, x1, y1);
+    const n = E.div(g, { left: a.x - 6, top: a.y - 6, width: b.x - a.x + 12, height: b.y - a.y + 12, borderRadius: 8, border: '4px solid #ffd84a', boxShadow: '0 0 14px rgba(255,216,74,.85)', boxSizing: 'border-box' }).ini({ o: 0 });
+    E.show(n, .25, d); E.sfx('pop', { delay: d, gain: .35 });
+    return n;
+  };
+  // 右の余白に置く説明の札
+  const fact = (g, { x, y, w, html, size = 28 }) => E.div(g, { left: x, top: y, width: w, padding: '12px 20px 14px', borderRadius: 16, background: 'rgba(255,255,255,.95)', font: `900 ${size}px/1.4 Zen`, color: '#262236', boxShadow: '0 8px 18px rgba(0,0,0,.3)', boxSizing: 'border-box' }, html).ini({ o: 0 });
+  const small = t => `<div style="font:800 21px/1.4 Round;color:#5a6476;margin-top:4px">${t}</div>`;
+
   /* ============================================================ 注意書き */
   E.scene({ name: 'notice', bg: '#0b1022' }, sc => {
     const g = sc.cam;
     E.div(g, { left: 0, top: 0, width: W, height: H, background: 'radial-gradient(ellipse at 50% 45%, #1d2a4a 0%, #0b1022 75%)' });
-    const n = P.kNotice(g, { x: 100, y: 330, w: 1720, size: 32 });
+    const n = P.kNotice(g, { x: 40, y: 340, w: 1840, size: 26, posts: true });
     E.show(n, .6, .2);
     E.wait(6.0);
     E.hide(n, .5);
@@ -172,11 +190,95 @@ E.chapter('k09');
     E.at(L.end + .4);
   });
 
-  /* ============================================================ S6 I35　5月1日 */
-  E.scene({ name: 'i35' }, sc => {
+  /* ============================================================ S6 5月1日の投稿（元資料の一覧外・P12） */
+  // 投稿の時刻は画面にない（添付画像は 11:21）。同じ日の I35（15:30）とは、時刻の帯で前後を並べない
+  E.trans('fade', { dur: .6, color: '#000' });
+  E.scene({ name: 'p12' }, sc => {
     const g = sc.cam;
     P.slate(g);
     bar(g, [4, 30], [5, 1]);
+    const card = shot(g, { id: '一覧外', listed: false, when: '2026/5/1（画像 11:21）', text: 'p12_text', imgs: ['p12_img'],
+      rows: [{ label: '確認メモ', color: MEMO, text: '元資料の投稿の一覧（50件）にない投稿。投稿の時刻は画面に出ていない。添付画像の時刻は11:21。' },
+        { label: '確認メモ', color: MEMO, show: false, text: '11:21の画像では860円で、前日比は−8円。下の段の棒は出来高で、売り買いされた株の数。株主がどれだけ入れ替わったかは、出来高からは確認できない。' }] });
+    enter(card);
+    const FX = 1222, FW = 640;
+    const f1 = fact(g, { x: FX, y: 150, w: FW, html: '11:21の画像の値段は、860円' + small('前日比は−8円。高値・安値・終値の欄も11:21の時点の値で、終値の欄には、その時点の値段が入っている') });
+    const f2 = fact(g, { x: FX, y: 340, w: FW, html: '下の段の黄色い棒が、出来高' + small('その日に売り買いされた株の数。同じ株が何度も売り買いされると、その分も足される') });
+    E.wait(1.0);
+    E.narr('5月1日の投稿。これは、元資料の投稿の一覧には、載っていない。', { yomi: '5月1日の投稿。これは、もとしりょうの、投稿の一覧には、載っていない。' });
+    E.cap('3260 エスポア\n出来高みても');
+    E.cap('この一週間ほどでダイブン株主が入れ替わったかな', { dur: 4.0 });
+    E.say('hat', 'この投稿は、日足のチャートの画面を、1枚付けている。', { yomi: 'この投稿は、ひあしのチャートの画面を、いちまい付けている。' });
+    E.say('hat', '出来高を見て、この1週間ほどで、株主がだいぶ入れ替わったのでは、という見方を書いている。', { yomi: 'できだかを見て、この、いっしゅうかんほどで、株主が、だいぶ入れ替わったのでは、という見方を書いている。' });
+    E.say('hat', '投稿の時刻は、画面に出ていない。');
+    let L = E.say('hat', '添付の画像に出ている時刻は、11時21分だ。', { wait: false });
+    frame(g, card, 0, [10, 190, 124, 266], .4);
+    E.at(L.end);
+    L = E.say('hat', '11時21分の画像では、860円。前の日の終値より、8円安かった。', { wait: false, yomi: '11時21分の画像では、はっぴゃくろくじゅうえん。前の日の、おわりねより、はちえん、やすかった。' });
+    frame(g, card, 0, [245, 188, 802, 268], .3); E.tw(f1, .4, { o: [0, 1], y: [20, 0] }, 'back', L.dur * .4); E.sfx('pop', { delay: L.dur * .4, gain: .5 });
+    E.at(L.end);
+    L = E.say('hat', '高値や終値の欄も、11時21分の時点のもので、この日の終値ではない。', { wait: false, yomi: 'たかねや、おわりねの欄も、11時21分の時点のもので、この日の、おわりねではない。' });
+    frame(g, card, 0, [6, 436, 808, 472], .3);
+    E.at(L.end);
+    E.show(card.rows[1], .3, .1);
+    L = E.say('hat', '画面の下の段の、黄色い棒が、出来高だ。', { wait: false, delay: .2, yomi: '画面の下の段の、黄色い棒が、できだかだ。' });
+    frame(g, card, 0, [0, 1192, 676, 1382], .3); E.tw(f2, .4, { o: [0, 1], y: [20, 0] }, 'back', L.dur * .5); E.sfx('pop', { delay: L.dur * .5, gain: .5 });
+    E.at(L.end);
+    E.say('hat', '出来高は、その日に売り買いされた、株の数のことだ。', { yomi: 'できだかは、その日に売り買いされた、株の数のことだ。' });
+    E.say('hat', '高い棒が、何本かある。どの日の棒かを、元資料の日足で、確かめる。', { yomi: '高い棒が、何本かある。どの日の棒かを、もとしりょうの、ひあしで、確かめる。' });
+    E.wait(.3);
+  });
+
+  // 元資料の日足（p7）の出来高の段で、4/21・4/27・4/28 の棒を指す（棒の高さの数字は読み上げない）
+  E.scene({ name: 'p12_vol' }, sc => {
+    const g = sc.cam;
+    P.slate(g);
+    const C = dailyChart(sc, '日足と出来高　2026年4月13日〜5月1日');
+    P.look(sc.cam, { s: 1.8, cx: C.at(1000, 0).x, cy: C.at(0, 690).y, dur: 1.4, delay: .2 });
+    // 出来高の棒（p07 の画素：左端・上端・右端。下の段の 0 は y=921）
+    const vbar = (x0, top, x1, label, d) => {
+      const a = C.at(x0, top), b = C.at(x1, 921);
+      const n = E.div(g, { left: a.x - 3, top: a.y - 3, width: b.x - a.x + 6, height: b.y - a.y + 6, borderRadius: 4, border: '2px solid #ffd84a', boxShadow: '0 0 8px rgba(255,216,74,.9)', boxSizing: 'border-box' }).ini({ o: 0 });
+      const t = E.div(g, { left: (a.x + b.x) / 2 - 40, top: a.y - 22, width: 80, textAlign: 'center', font: '900 15px/1.2 Noto', color: '#262236', whiteSpace: 'nowrap' }, `<span style="padding:1px 6px;border-radius:6px;background:#ffd84a">${label}</span>`).ini({ o: 0 });
+      E.show(n, .25, d); E.show(t, .25, d); E.sfx('pop', { delay: d, gain: .35 });
+    };
+    E.wait(1.6);
+    E.say('hat', '元資料の日足の、下の段が、出来高だ。', { yomi: 'もとしりょうの、ひあしの、下の段が、できだかだ。' });
+    const L = E.say('hat', '4月21日と、4月27日、28日は、出来高の棒が高い。', { wait: false, yomi: '4月21日と、4月27日、28日は、できだかの棒が高い。' });
+    vbar(882, 813, 915, '4/21', .3); vbar(1078, 857, 1112, '4/27', L.dur * .5); vbar(1127, 797, 1161, '4/28', L.dur * .7);
+    E.at(L.end);
+    E.say('hat', '出来高が多い日があったことは、元資料の日足でも、確かめられる。', { yomi: 'できだかが多い日があったことは、もとしりょうの、ひあしでも、確かめられる。' });
+    // ここから、出来高から分からないこと（元資料 p14・p35）
+    const ov = E.div(sc.root, { left: 0, top: 0, width: W, height: H, background: 'rgba(8,10,20,.72)' }).ini({ o: 0 });
+    const p1 = E.div(sc.root, { left: 210, top: 150, width: 1500, padding: '26px 40px 30px', borderRadius: 24, background: 'rgba(255,255,255,.96)', boxShadow: '0 12px 24px rgba(0,0,0,.35)', boxSizing: 'border-box', textAlign: 'center' },
+      '<div style="font:900 40px/1.4 Zen;color:#262236">出来高は、売り買いされた株の数を、足したもの</div><div style="font:800 28px/1.5 Round;color:#4a4552;margin-top:8px">同じ株が、同じ日のうちに何度も売り買いされると、その分も足される</div>').ini({ o: 0 });
+    const p2 = E.div(sc.root, { left: 210, top: 380, width: 1500, padding: '22px 40px 26px', borderRadius: 24, background: '#2a2430', border: '3px solid #ffd84a', boxShadow: '0 12px 24px rgba(0,0,0,.35)', boxSizing: 'border-box', textAlign: 'center' },
+      '<div style="font:800 26px/1.4 Round;color:#f3e6c8">元資料（p35・p14）の書き方</div><div style="font:900 34px/1.5 Zen;color:#ffd84a;margin-top:6px">累計出来高は「回転売買を含み、実保有株数ではない」</div><div style="font:800 22px/1.5 Round;color:#f3e6c8;margin-top:6px">「同じ株が何度も売買されるため、累計株数を固定された現物株数・空売り残・特定人物の保有株数に読み替えることはできない」</div>').ini({ o: 0 });
+    let L2 = E.say('hat', 'でも、出来高は、売り買いされた株の数を、全部足したものだ。', { wait: false, yomi: 'でも、できだかは、売り買いされた株の数を、全部足したものだ。' });
+    E.show(ov, .4, .1); E.tw(p1, .4, { o: [0, 1], y: [20, 0] }, 'back', .3); E.sfx('pop', { delay: .3, gain: .5 });
+    E.at(L2.end);
+    E.say('hat', '同じ株が、同じ日のうちに、何度も売り買いされることもある。その分も、足される。');
+    L2 = E.say('hat', '元資料も、出来高には、同じ株を何度も売り買いした分が、含まれる、としている。', { wait: false, yomi: 'もとしりょうも、できだかには、同じ株を、何度も売り買いした分が、含まれる、としている。' });
+    E.tw(p2, .4, { o: [0, 1], y: [20, 0] }, 'back', .3); E.sfx('ding', { delay: .3, gain: .5 });
+    E.at(L2.end);
+    E.say('hat', 'だから、出来高を、誰かが持っている株の数に、読み替えることはできない。', { yomi: 'だから、できだかを、誰かが持っている株の数に、読み替えることはできない。' });
+    const m = P.mark(sc.root, '出来高からは確認できない', { x: 640, y: 640, color: '#c62828', size: .8, rot: -4, w: 640 });
+    L2 = E.say('hat', '出来高が多くても、株主がどれだけ入れ替わったかは、出来高からは、確かめられない。', { wait: false, yomi: 'できだかが多くても、株主が、どれだけ入れ替わったかは、できだかからは、確かめられない。' });
+    P.stampIn(m, L2.dur * .5);
+    E.at(L2.end);
+    E.say('hat', '誰が株を手放して、誰が新しく持ったのかも、出来高にも、投稿の画面にも、出ていない。', { yomi: '誰が株を手放して、誰が新しく持ったのかも、できだかにも、投稿の画面にも、出ていない。' });
+    const call = P.eveCall(sc.root, ['normal', 'surprise'], { x: 1560, y: 580, w: 300, h: 240 });
+    E.pop(call, .4, 0, .6);
+    E.say('eve', '出来高が多い日は確かめられるけど、株主の入れ替わりまでは、分からないんだね〜。', { talk: call, talkAmp: 3, delay: .3, yomi: 'できだかが多い日は、確かめられるけど、株主の入れ替わりまでは、分からないんだねー。' });
+    E.wait(.3);
+  });
+
+  /* ============================================================ S6b I35　5月1日 15:30 */
+  E.trans('fade', { dur: .6, color: '#000' });
+  E.scene({ name: 'i35' }, sc => {
+    const g = sc.cam;
+    P.slate(g);
+    bar(g, [5, 1], [5, 1]);
     const i35 = P.icard(g, { id: 'I35', when: '2026/5/1 15:30', session: '引け後', title: '北海道七飯町・用地取得', text: '七飯町上軍川の蓄電池用地・系統権利等の取得を決議。<br>用地・権利の売却を目的とする', x: 260, y: 140, w: 1400, size: 34 });
     E.tw(i35, .45, { o: [0, 1], y: [30, 0] }, 'back', .5); E.sfx('notify', { delay: .5 });
     E.wait(1.0);
@@ -185,29 +287,72 @@ E.chapter('k09');
     const ex = panel(g, { x: 260, y: 520, w: 1400, h: 110, size: 34, html: '<span style="color:#b8651a">系統の権利</span><span style="font:800 30px Round;color:#4a4552">＝ 蓄電所などを、電力の網につなぐための権利</span>' });
     const L = E.say('hat', '系統の権利は、蓄電所などを、電力の網につなぐための権利だ。', { wait: false, yomi: 'けいとうの権利は、ちくでんしょなどを、電力の網につなぐための権利だ。' });
     rise(ex, .2);
-    E.at(L.end + .3);
+    E.at(L.end);
+    E.say('hat', 'さっきの5月1日の投稿は、時刻が画面に出ていない。', { yomi: 'さっきの、5月1日の投稿は、時刻が画面に出ていない。' });
+    E.say('hat', 'だから、このIRと、どちらが先かは、分からない。', { yomi: 'だから、このアイアールと、どちらが先かは、分からない。' });
+    E.wait(.3);
   });
 
-  /* ============================================================ S7 T37　5月13日 */
+  /* ============================================================ S7 T37（P13）　5月13日 15:01 */
   E.trans('fade', { dur: .6, color: '#000' });
   E.scene({ name: 't37' }, sc => {
     const g = sc.cam;
     P.slate(g);
     bar(g, [5, 1], [5, 13]);
-    const t37 = P.tcard(g, { id: 'T37', when: '2026/5/13 15:01', kind: 'チャート', session: '取引時間内', text: 'ダブルボトムと長い下ヒゲに言及', note: '4月28日安値625円、5月13日安値630円。下ヒゲは確認できるが、その後5月29日に625円を割った', x: 260, y: 140, w: 1400, size: 40 });
-    tIn(t37);
+    const card = shot(g, { id: 'T37', when: '2026/5/13 15:01（画像 15:00）', text: 'p13_text', imgs: ['p13_img'],
+      rows: [{ label: '元資料の要約', text: 'ダブルボトムと長い下ヒゲに言及' },
+        { label: '確認メモ', color: MEMO, show: false, text: '画面には投稿の時刻が出ていない。15:01は元資料の一覧の時刻。添付画像の時刻は15:00で、高値・安値・終値の欄も15:00の時点の値。' },
+        { label: '検証メモ', text: '4月28日安値625円、5月13日安値630円。下ヒゲは確認できるが、その後5月29日に625円を割った。', show: false }] });
+    enter(card);
+    const FX = 1272, FW = 600;
+    const f1 = fact(g, { x: FX, y: 150, w: FW, html: '15:00の画像の値段は、765円' + small('前日比は−15円。この時点の高値は769円、安値は630円') });
+    const f2 = fact(g, { x: FX, y: 320, w: FW, html: '「終値 765.0」は、15:00の時点の値段' + small('名証の取引は15:30まで。この日の終値は、元資料では795円') });
+    const f3 = fact(g, { x: FX, y: 490, w: FW, html: '白い丸は、添付画像の書き込み' + small('左の丸は、4/28の長い下ヒゲのあたり。右の丸は、5/13の足のあたり') });
     E.wait(1.0);
-    E.narr('5月13日の15時01分。ダブルボトムと、長い下ヒゲに触れる投稿があった。', { yomi: '5月13日の15時1分。ダブルボトムと、長い下ヒゲに触れる投稿があった。' });
-    E.tw(t37, .4, { y: -30, s: .9 }, 'inOut');
-    // ダブルボトムの形（しくみの図）
+    E.narr('5月13日の、15時01分の投稿。この投稿は、画面で見ることができる。', { yomi: '5月13日の、15時1分の投稿。この投稿は、画面で見ることができる。' });
+    E.cap('3260 エスポア\nダブルボトム');
+    E.cap('超絶下髭');
+    E.say('hat', 'この投稿は、日足のチャートの画面を付けて、ダブルボトムと、下ヒゲについて、書いたものだ。', { yomi: 'この投稿は、ひあしのチャートの画面を付けて、ダブルボトムと、したヒゲについて、書いたものだ。' });
+    E.say('hat', '元資料の要約では、ダブルボトムと、長い下ヒゲに、触れた投稿だ。', { yomi: 'もとしりょうの要約では、ダブルボトムと、長い、したヒゲに、触れた投稿だ。' });
+    E.show(card.rows[1], .3, .1);
+    E.say('hat', '画面には、投稿の時刻は出ていない。15時01分は、元資料の一覧にある時刻だ。', { delay: .2, yomi: '画面には、投稿の時刻は出ていない。15時1分は、もとしりょうの一覧にある、じこくだ。' });
+    let L = E.say('hat', '添付の画像に出ている時刻は、15時00分。値段は、765円だった。', { wait: false, yomi: '添付の画像に出ている時刻は、15時。値段は、ななひゃくろくじゅうごえんだった。' });
+    frame(g, card, 0, [20, 210, 172, 318], .3); frame(g, card, 0, [355, 214, 1152, 316], L.dur * .55);
+    E.tw(f1, .4, { o: [0, 1], y: [20, 0] }, 'back', L.dur * .6); E.sfx('pop', { delay: L.dur * .6, gain: .5 });
+    E.at(L.end);
+    L = E.say('hat', '前の日の終値より、15円安い。この時点の高値は769円、安値は630円だ。', { wait: false, yomi: '前の日の、おわりねより、じゅうごえん、やすい。この時点の、たかねは、ななひゃくろくじゅうきゅうえん、やすねは、ろっぴゃくさんじゅうえんだ。' });
+    frame(g, card, 0, [12, 560, 502, 614], L.dur * .3);
+    E.at(L.end);
+    L = E.say('hat', '終値の欄にも765円とあるが、取引の途中なので、その時点の値段が入っている。', { wait: false, yomi: 'おわりねの欄にも、ななひゃくろくじゅうごえんとあるが、取引の途中なので、その時点の値段が入っている。' });
+    frame(g, card, 0, [858, 560, 1068, 614], .3); E.tw(f2, .4, { o: [0, 1], y: [20, 0] }, 'back', L.dur * .5); E.sfx('pop', { delay: L.dur * .5, gain: .5 });
+    E.at(L.end);
+    E.say('hat', '名証の取引は、15時30分まで。この日の終値は、元資料では、795円だ。', { yomi: 'めいしょうの取引は、15時30分まで。この日の、おわりねは、もとしりょうでは、ななひゃくきゅうじゅうごえんだ。' });
+    L = E.say('hat', '白い丸は、添付の画像に、書き込まれていたものだ。', { wait: false });
+    E.tw(f3, .4, { o: [0, 1], y: [20, 0] }, 'back', L.dur * .4); E.sfx('pop', { delay: L.dur * .4, gain: .5 });
+    E.at(L.end);
+    E.say('hat', '左の丸は、4月28日の、長い下ヒゲのあたり。右の丸は、この日、5月13日の足のあたりだ。', { yomi: 'ひだりの丸は、4月28日の、長い、したヒゲのあたり。みぎの丸は、この日、5月13日の足のあたりだ。' });
+    E.show(card.rows[2], .3, .1);
+    E.say('hat', '元資料の検証メモは、この2つの日の安値を比べて、そのあとの値動きも、確かめている。', { delay: .2, yomi: 'もとしりょうの、けんしょうメモは、この、ふたつの日の安値を比べて、そのあとの値動きも、確かめている。' });
+    E.wait(.3);
+  });
+
+  // ダブルボトムの形（しくみの図）
+  E.scene({ name: 't37_shape' }, sc => {
+    const g = sc.cam;
+    P.slate(g);
+    const tt = P.heading(g, 'ダブルボトム', 110);
+    E.show(tt, .3);
     const pts = [[0, 40], [180, 250], [330, 110], [480, 255], [700, 0]];
-    const wl = E.polyline(g, pts, { left: 610, top: 470, width: 700, height: 300, color: '#e8a33a', sw: 10 }).ini({ draw: 0 });
-    const lb = E.div(g, { left: 610, top: 790, width: 700, textAlign: 'center', font: '900 32px/1.2 Zen', color: '#f5c46a' }, 'ダブルボトム（しくみの図）').ini({ o: 0 });
+    const wl = E.polyline(g, pts, { left: 610, top: 280, width: 700, height: 300, color: '#e8a33a', sw: 10 }).ini({ draw: 0 });
+    const lb = E.div(g, { left: 610, top: 620, width: 700, textAlign: 'center', font: '900 32px/1.2 Zen', color: '#f5c46a' }, 'しくみの図（実際の値段ではない）').ini({ o: 0 });
+    E.wait(.3);
     const L = E.say('hat', 'ダブルボトムは、同じくらいの安値を、2回つけて、底になる形のことだ。', { wait: false, yomi: 'ダブルボトムは、同じくらいの安値を、にかいつけて、そこになる形のことだ。' });
     E.tw(wl, 1.4, { draw: [0, 1] }, 'inOut', .2); E.show(lb, .3, .4);
-    P.circle(g, { x: 790, y: 720, w: 70, h: 70, delay: L.dur * .5, dur: .35 });
-    P.circle(g, { x: 1090, y: 725, w: 70, h: 70, delay: L.dur * .65, dur: .35 });
-    E.at(L.end + .3);
+    P.circle(g, { x: 790, y: 530, w: 70, h: 70, delay: L.dur * .5, dur: .35 });
+    P.circle(g, { x: 1090, y: 535, w: 70, h: 70, delay: L.dur * .65, dur: .35 });
+    E.at(L.end);
+    E.say('hat', '投稿の画面の2つの丸も、4月28日と5月13日の、安値のあたりを、囲んでいた。', { yomi: '投稿の画面の、ふたつの丸も、4月28日と5月13日の、やすねのあたりを、囲んでいた。' });
+    E.wait(.3);
   });
 
   E.scene({ name: 't37_chart' }, sc => {
@@ -217,11 +362,27 @@ E.chapter('k09');
     P.look(sc.cam, { s: 1.9, cx: C.at(1316, 0).x, cy: C.at(0, 430).y, dur: 1.4, delay: .2 });
     const l1 = C.at(PX['4/28'], PY(625)), l2 = C.at(PX['5/13'], PY(630));
     const a = tag(g, l1, '4/28 安値 625円', -60, 10, '#1b8a5a'), b = tag(g, l2, '5/13 安値 630円', -60, 10, '#1b8a5a');
+    // 元資料のチャートの T37 の青い点（5/13 の終値 795円の位置）
+    const tp = C.at(PX['5/13'], PY(795));
+    const tt = tag(g, tp, 'T37の印は、5/13の終値 795円の位置', 18, -36, P.T_BLUE, 15);
+    const nt = E.div(sc.root, { left: 260, top: 700, width: 1400, padding: '16px 30px 18px', borderRadius: 22, background: '#2a2430', border: '3px solid #ffd84a', boxSizing: 'border-box', textAlign: 'center', font: '900 32px/1.45 Zen', color: '#ffd84a' },
+      'Tの印は、投稿した日の終値の位置に置いてある。<br><span style="font:800 26px/1.5 Round;color:#f3e6c8">投稿した時の値段の位置ではない（元資料 p35）。T37の画面の15:00の値段は765円</span>').ini({ o: 0 });
     E.wait(1.6);
-    const L = E.say('hat', '4月28日の安値は625円。5月13日の安値は630円。', { wait: false, yomi: '4月28日の安値は、ろっぴゃくにじゅうごえん。5月13日の安値は、ろっぴゃくさんじゅうえん。' });
+    let L = E.say('hat', '4月28日の安値は625円。5月13日の安値は630円。', { wait: false, yomi: '4月28日の安値は、ろっぴゃくにじゅうごえん。5月13日の安値は、ろっぴゃくさんじゅうえん。' });
     P.circle(g, { x: l1.x, y: l1.y, w: 26, h: 26, sw: 3, delay: .2, dur: .3 }); E.pop(a, .3, .3);
     P.circle(g, { x: l2.x, y: l2.y, w: 26, h: 26, sw: 3, delay: L.dur * .5, dur: .3 }); E.pop(b, .3, L.dur * .55);
-    E.at(L.end + .4);
+    E.at(L.end);
+    L = E.say('hat', 'このチャートの、5月13日の青い点が、T37の印だ。', { wait: false, yomi: 'このチャートの、5月13日の青い点が、ティーさんじゅうななの、しるしだ。' });
+    P.circle(g, { x: tp.x, y: tp.y, w: 22, h: 22, sw: 3, color: '#2b68d8', delay: L.dur * .4, dur: .3 });
+    E.at(L.end);
+    L = E.say('hat', 'この印は、5月13日の終値、795円の位置に、置いてある。', { wait: false, yomi: 'このしるしは、5月13日の、おわりね、ななひゃくきゅうじゅうごえんの位置に、置いてある。' });
+    E.pop(tt, .3, L.dur * .4);
+    E.at(L.end);
+    L = E.say('hat', '元資料のチャートでは、Tの印は、投稿した日の終値の位置に、置いてある。', { wait: false, yomi: 'もとしりょうのチャートでは、ティーのしるしは、投稿した日の、おわりねの位置に、置いてある。' });
+    E.tw(nt, .4, { o: [0, 1], y: [20, 0] }, 'back', .3); E.sfx('ding', { delay: .3, gain: .5 });
+    E.at(L.end);
+    E.say('hat', '投稿した時の値段の、位置ではない。投稿の画面の、15時00分の値段は、765円だった。', { yomi: '投稿した時の値段の、位置ではない。投稿の画面の、15時の値段は、ななひゃくろくじゅうごえんだった。' });
+    E.wait(.4);
   });
 
   E.scene({ name: 'candle' }, sc => {
@@ -238,6 +399,11 @@ E.chapter('k09');
     const lo = lab(795, '終値 795円', '#ff8a8a'), lop = lab(765, '始値 765円', '#f3e6c8'), lol = lab(630, '安値 630円', '#8ee0b0');
     const br = E.div(g, { left: cx + 110, top: y(765), width: 30, height: y(630) - y(765), borderTop: '4px solid #ffd84a', borderRight: '4px solid #ffd84a', borderBottom: '4px solid #ffd84a' }).ini({ o: 0 });
     const brl = E.div(g, { left: cx + 170, top: (y(765) + y(630)) / 2 - 40, font: '900 54px/1.2 Zen', color: '#ffd84a', whiteSpace: 'nowrap' }, '下ヒゲ 135円<div style="font:800 28px/1.4 Round;color:#f3e6c8">765円 − 630円</div>').ini({ o: 0 });
+    // 投稿の画面の時刻（15:00）の値段と、この日の終値（15:30）を分ける札
+    const tm = E.div(g, { left: 1000, top: 230, width: 880, padding: '18px 26px 20px', borderRadius: 22, background: 'rgba(255,255,255,.96)', boxShadow: '0 12px 24px rgba(0,0,0,.35)', boxSizing: 'border-box' },
+      '<div style="font:900 30px/1.3 Zen;color:#262236;margin-bottom:10px">投稿の画面の値段と、終値は、別の時点</div>' +
+      `<div style="font:900 28px/1.45 Noto;color:${P.T_BLUE}">15:00の画像の値段は、765円</div><div style="font:800 21px/1.4 Round;color:#5a6476">その時点の高値は769円。投稿の添付画像の表示</div>` +
+      '<div style="font:900 28px/1.45 Noto;color:#c62828;margin-top:10px">終値の795円は、15:30の取引の終わりの値段</div><div style="font:800 21px/1.4 Round;color:#5a6476">元資料の日足の値段。<br>15:00から引けまでの値動きは、分足のデータがなく、分からない</div>').ini({ o: 0 });
     E.wait(.4);
     let L = E.say('hat', '5月13日は、始値765円、安値630円、終値795円。', { wait: false, yomi: '5月13日は、はじめね、ななひゃくろくじゅうごえん、安値、ろっぴゃくさんじゅうえん、おわりね、ななひゃくきゅうじゅうごえん。' });
     E.show(body, .3, .2); E.show(lop, .3, .2);
@@ -249,8 +415,16 @@ E.chapter('k09');
     E.show(br, .3, .2); E.pop(brl, .4, .4); E.sfx('ding', { delay: .4, gain: .5 });
     P.stampIn(mk, L.dur * .6);
     E.at(L.end);
-    const nb = panel(g, { x: 1040, y: 680, w: 800, h: 110, size: 32, dark: true, html: 'そのあと 5/29 安値 587円で、625円を割る' });
-    L = E.say('hat', 'ただ、そのあと、5月29日に、625円を割った。', { wait: false, yomi: 'ただ、そのあと、5月29日に、ろっぴゃくにじゅうごえんを割った。' });
+    E.hide(mk, .3);
+    L = E.say('hat', '投稿の画面の、15時00分の値段は、765円。その時点の高値は、769円だった。', { wait: false, yomi: '投稿の画面の、15時の値段は、ななひゃくろくじゅうごえん。その時点の、たかねは、ななひゃくろくじゅうきゅうえんだった。' });
+    E.tw(tm, .4, { o: [0, 1], y: [20, 0] }, 'back', .3); E.sfx('pop', { delay: .3, gain: .5 });
+    E.at(L.end);
+    E.say('hat', '終値の795円は、15時30分に、取引が終わった時の値段だ。', { yomi: 'おわりねの、ななひゃくきゅうじゅうごえんは、15時30分に、取引が終わった時の値段だ。' });
+    E.say('hat', '15時00分から、取引の終わりまでに、値段がどう動いたかは、分からない。', { yomi: '15時から、取引の終わりまでに、値段がどう動いたかは、分からない。' });
+    E.say('hat', '元資料は、分ごとの値段のデータを、補っていない。', { yomi: 'もとしりょうは、ふんごとの値段のデータを、補っていない。' });
+    E.hide(tm, .3);
+    const nb = panel(g, { x: 1000, y: 680, w: 860, h: 110, size: 30, dark: true, html: 'そのあと5/29に安値587円をつけ、4/28の625円を割った' });
+    L = E.say('hat', 'ただ、そのあと、5月29日に、安値587円をつけて、4月28日の625円を割った。', { wait: false, yomi: 'ただ、そのあと、5月29日に、やすね、ごひゃくはちじゅうななえんをつけて、4月28日の、ろっぴゃくにじゅうごえんを割った。' });
     E.tw(nb, .4, { o: [0, 1], y: [20, 0] }, 'back', .3); E.sfx('drop', { delay: .3, gain: .5 });
     E.at(L.end);
     const call = P.eveCall(g, ['normal', 'surprise'], { x: 1560, y: 330, w: 300, h: 240 });
@@ -388,7 +562,7 @@ E.chapter('k09');
   E.scene({ name: 'notice_end', bg: '#0b1022' }, sc => {
     const g = sc.cam;
     E.div(g, { left: 0, top: 0, width: W, height: H, background: 'radial-gradient(ellipse at 50% 45%, #1d2a4a 0%, #0b1022 75%)' });
-    const n = P.kNotice(g, { x: 100, y: 330, w: 1720, size: 32 });
+    const n = P.kNotice(g, { x: 40, y: 340, w: 1840, size: 26, posts: true });
     E.show(n, .6, .2);
     E.wait(6.0);
   });
