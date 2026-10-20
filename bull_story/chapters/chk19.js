@@ -63,7 +63,7 @@ E.chapter('k19');
     const tt = P.heading(g, '主要発言の検証結果（元資料 p13）', 34);
     E.show(tt, .3);
     // 6枚とも同じ大きさ・同じ色（同じ重さで並べる）
-    const cardT = (i, id, t, lab, body, cmp) => E.div(g, { left: 70 + (i % 3) * 600, top: 130 + Math.floor(i / 3) * 380, width: 570, height: 350, borderRadius: 22, background: '#fbfcff', borderLeft: `12px solid ${P.T_BLUE}`, boxShadow: '0 12px 24px rgba(0,0,0,.35)', boxSizing: 'border-box', padding: '20px 24px' },
+    const cardT = (i, id, t, lab, body, cmp) => E.div(g, { left: 70 + (i % 3) * 600, top: 130 + Math.floor(i / 3) * 380, width: 570, height: 340, borderRadius: 22, background: '#fbfcff', borderLeft: `12px solid ${P.T_BLUE}`, boxShadow: '0 12px 24px rgba(0,0,0,.35)', boxSizing: 'border-box', padding: '20px 24px' },
       `<div style="display:flex;align-items:center;gap:12px"><span style="flex:none;padding:3px 12px 4px;border-radius:10px;background:${P.T_BLUE};color:#fff;font:900 26px/1.2 Noto">${id}</span><span style="font:900 25px/1.3 Zen;color:#22252b;white-space:nowrap">${t}</span><span style="flex:none;margin-left:auto;padding:2px 14px 3px;border-radius:999px;background:#e5eefc;color:#1b4ea8;font:800 20px/1.4 Round;white-space:nowrap">要約</span></div>
        <div style="display:inline-block;margin-top:16px;padding:6px 18px;border-radius:12px;background:#3a4560;color:#fff;font:900 30px/1.3 Zen">${lab}</div>
        <div style="margin-top:14px;font:800 22px/1.55 Round;color:#3d3540">${body}</div>
@@ -71,10 +71,10 @@ E.chapter('k19');
     // 下の「比べたもの」は、元資料 p6〜p8・p29〜p33 の数字で、何と何を比べたかを文で書いたもの
     const cs = [
       cardT(0, 'T23', '4/8　930円のしこり', '値動きは整合', '4/10高値935円、4/14高値1,000円。<br>売り圧力の主体や吸収量の裏付けはない', '投稿の見方と、前後の高値。4/3〜9の高値は930〜931円で、そのあと935円、1,000円まで上がった'),
-      cardT(1, 'T24', '4/13　GC', '数値で確認', '25日線803.60円、200日線799.42円。<br>終値で上抜けを確認', '終値で計算した25日線と200日線。4/10は25日線が下で、4/13に上回った'),
-      cardT(2, 'T30', '4/21　短期の窓埋め', '未達', '4/22〜24の高値は885・875・913円。<br>上側969円に届かず、<br>その後最終売買まで未充足', '窓の上側の969円と、そのあとの高値。どの日も969円に届かなかった'),
-      cardT(3, 'T34', '4/24　適正意見を見込む', '結果と不一致', '5/28提出の有報に意見不表明の<br>監査報告書。9/16の名証廃止決定に至る', '投稿の見通しと、そのあとの監査の結果。有報でも、適正意見は得られなかった'),
-      cardT(4, 'T36', '4/30　25MA超え', '場中と終値を区別', '高値910円は到達、終値868円は未到達。<br>15時投稿時点の価格を推測で補わない', 'その日の高値・終値と、25日線905.24円。高値は上で、終値は下だった'),
+      cardT(1, 'T24', '4/13　GC', '数値で確認', '25日線803.60円、200日線799.42円。<br>終値で上抜けを確認', '終値で計算した25日線と200日線。<br>4/10は25日線が下で、4/13に上回った'),
+      cardT(2, 'T30', '4/21　短期の窓埋め', '未達', '4/22〜24の高値は885・875・913円。<br>上側969円に届かず、<br>その後最終売買まで未充足', '窓の上側の969円と、そのあとの高値。<br>どの日も969円に届かなかった'),
+      cardT(3, 'T34', '4/24　適正意見を見込む', '結果と不一致', '5/28提出の有報に意見不表明の<br>監査報告書。9/16の名証廃止決定に至る', '投稿の見通しと、そのあとの監査の結果。<br>有報でも、適正意見は得られなかった'),
+      cardT(4, 'T36', '4/30　25MA超え', '場中と終値を区別', '高値910円は到達、終値868円は未到達。<br>15時投稿時点の価格を推測で補わない', 'その日の高値・終値と、25日線905.24円。<br>高値は上で、終値は下だった'),
       cardT(5, 'T37・T44', '二番底・三番底', '安値圏の反発は確認', '5/13の下ヒゲ、6/5への反発は実在。<br>持続的な底打ちとはならず<br>7/23安値480円', 'そのあとの値動き。5/29は安値587円。6/5は高値854円まで戻り、7/23は安値480円'),
     ];
     const pop = (n, d = .2) => { E.tw(n, .35, { o: [0, 1], y: [20, 0] }, 'back', d); E.sfx('pop', { delay: d, gain: .4 }); };
@@ -149,7 +149,7 @@ E.chapter('k19');
     E.show(tt, .3);
     const chip = (id, c) => `<span style="display:inline-block;padding:2px 10px 3px;border-radius:8px;background:${c};color:#fff;font:900 22px/1.2 Noto;margin:0 6px">${id}</span>`;
     const I = id => chip(id, P.I_ORANGE), T = id => chip(id, P.T_BLUE);
-    const row = (i, d, html, note) => E.div(g, { left: 80, top: 112 + i * 108, width: 1760, height: 94, borderRadius: 18, background: 'rgba(255,255,255,.95)', display: 'flex', alignItems: 'center', boxShadow: '0 8px 18px rgba(0,0,0,.3)' },
+    const row = (i, d, html, note) => E.div(g, { left: 80, top: 110 + i * 106, width: 1760, height: 92, borderRadius: 18, background: 'rgba(255,255,255,.95)', display: 'flex', alignItems: 'center', boxShadow: '0 8px 18px rgba(0,0,0,.3)' },
       `<div style="flex:none;width:250px;text-align:center;font:900 28px/1.2 Noto;color:#6b5a40">${d}</div><div style="flex:1;font:900 28px/1.3 Zen;color:#262236;white-space:nowrap">${html}</div><div style="flex:none;width:420px;padding-right:22px;text-align:right;font:900 24px/1.3 Zen;color:#b8651a;white-space:nowrap">${note}</div>`).ini({ o: 0 });
     const rs = [
       row(0, '2025/4/17', `15:10 ${I('I13')} 役員交代　▶　15:11 ${T('T11')}`, '公表の1分後'),
@@ -167,7 +167,7 @@ E.chapter('k19');
     const open = (i, t, yomi) => { if (i > 0) E.tw(rs[i - 1], .3, { o: .5 }, 'inOut'); const L = E.say('hat', t, { wait: false, yomi }); slide(rs[i]); E.at(L.end); };
     E.say('hat', '時刻の照合も、振り返る。', { yomi: 'じこくの、しょうごうも、振り返る。' });
     hat('会社や名証が公表した時刻と、投稿の時刻を、日ごとに並べた表だ。', '会社や、めいしょうが、公表した時刻と、投稿の時刻を、ひごとに、ならべた、ひょうだ。');
-    // 2025/4/17（p15・p17・p27）
+    // 2025/4/17（p15・p18・p27）
     open(0, '2025年4月17日。15時10分に、会社が、株主提案の可決と、役員の交代を公表した。', '2025年4月17日。15時10分に、会社が、かぶぬしていあんの、かけつと、やくいんの、こうたいを、公表した。');
     hat('その1分後の15時11分に、T11の投稿があった。取引時間の中の公表だった。', 'その、いっぷんごの、15時11分に、ティージューイチの、投稿があった。とりひきじかんの、なかの、公表だった。');
     hat('元資料の要約では、可決と役員の交代を、速報した投稿だ。', 'もとしりょうの要約では、かけつと、やくいんの、こうたいを、そくほうした投稿だ。');
@@ -197,11 +197,12 @@ E.chapter('k19');
     // 2026/9/16（p15・p23・p24）
     open(6, '9月16日は、会社の公表が、三つあった。', '9月16日は、会社の公表が、みっつ、あった。');
     hat('1時15分に、調査の結果。16時に、調査報告書の全文が、公表された。', 'いちじ、じゅうごふんに、ちょうさの、けっか。じゅうろくじに、ちょうさほうこくしょの、ぜんぶんが、公表された。');
-    hat('17時には、上場廃止の決定を、会社が開示した。', 'じゅうしちじには、じょうじょうはいしの、けっていを、会社が、開示した。');
+    hat('17時には、名証が決めた上場廃止を、会社が開示した。', 'じゅうしちじには、めいしょうが、きめた、じょうじょうはいしを、会社が、開示した。');
     hat('1時15分は、取引が始まる前。17時は、取引が終わったあとだ。', 'いちじ、じゅうごふんは、とりひきが、はじまる、まえ。じゅうしちじは、とりひきが、おわった、あとだ。');
     hat('三つの時刻を、一括りにしない。', 'みっつの時刻を、ひとくくりにしない。');
     rs.forEach(r => E.tw(r, .4, { o: .35 }, 'inOut'));
-    const nb = panel(g, { x: 360, y: 860, w: 1200, h: 100, size: 38, dark: true, html: '時刻の帯で分かるのは、順番だけ' });
+    E.hide(tt, .3);
+    const nb = panel(g, { x: 360, y: 10, w: 1200, h: 92, size: 38, dark: true, html: '時刻の帯で分かるのは、順番だけ' });
     let L = E.say('hat', '並べて分かるのは、どちらが先だったか、という、順番だけだ。', { wait: false, yomi: 'ならべて分かるのは、どちらが、さきだったか、という、じゅんばんだけだ。' });
     E.tw(nb, .4, { o: [0, 1], y: [20, 0] }, 'back', .2); E.sfx('dun', { delay: .2, gain: .6 });
     E.at(L.end);
@@ -224,7 +225,7 @@ E.chapter('k19');
     const ls = [
       lim(0, `元資料で確認できた関連投稿は50件（2024/6/18〜2026/8/25）。<br><span style="${SUBT}">削除・非公開・検索未掲載の投稿は漏れ得る</span>`),
       lim(1, `このほか、元資料の一覧にない投稿11件を、ユーザー提供の投稿画面で確かめた。<br><span style="${SUBT}">第6章〜第12章の10件と、第16章の 2026/9/18 8:58 の投稿。この11件は、50件の数に入っていない</span>`, { mark: '#5a6b88', tag: 'この動画で確かめたこと' }),
-      lim(2, `長文の取得範囲外や、分足・全日の板データは補っていない。<br><span style="${SUBT}">一部の時刻の板は、投稿の添付画像（その時刻の一場面）でだけ確かめた</span>`),
+      lim(2, `長文の取得範囲外や、分足・全日の板データは補っていない。<br><span style="${SUBT}">この動画では、一部の時刻の板を、投稿の添付画像（その時刻の一場面）でだけ確かめた</span>`),
       lim(3, `Tの印は、投稿を含む日・週・月の終値の位置。<br><span style="${SUBT}">投稿した瞬間の値段ではない。添付画像の値段も、画像の時刻の値段</span>`),
       lim(4, '<span style="color:#c62828">前後の値動きは、投稿による因果関係の証明ではない</span>'),
     ];
