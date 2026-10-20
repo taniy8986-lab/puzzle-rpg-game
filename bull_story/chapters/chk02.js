@@ -175,12 +175,14 @@ E.chapter('k02');
     E.tw(i04, .4, { y: -40, s: .9 }, 'inOut');
     const bub = (x, txt, sub, solid) => E.div(g, { left: x, top: 560, width: 620, height: 220, borderRadius: 30, background: solid ? '#fffcf7' : 'rgba(255,255,255,.08)', border: solid ? `6px solid ${P.I_ORANGE}` : '5px dashed rgba(243,230,200,.7)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' },
       `<div style="font:900 44px/1.3 Zen;color:${solid ? '#2a2230' : '#f3e6c8'}">${txt}</div><div style="font:800 26px/1.4 Round;color:${solid ? '#8a7050' : 'rgba(243,230,200,.8)'};margin-top:8px">${sub}</div>`).ini({ o: 0 });
-    const b1 = bub(300, '会社の説明', 'この開示（I04）', true), b2 = bub(1000, 'もう一方の説明', '？', false);
+    const b1 = bub(300, '会社の説明', 'この開示（I04）', true), b2 = bub(1000, '株主側の説明', 'この開示からは分からない', false);
     let L = E.say('hat', '経営陣と、株主の、対立について、この開示に書いてあるのは、会社側の説明だ。', { wait: false });
     E.pop(b1, .4, L.dur * .5, .7); E.sfx('pop', { delay: L.dur * .5 });
     E.at(L.end);
-    L = E.say('hat', '片方の説明だけで、どちらが正しいかは、決めない。', { wait: false });
+    L = E.say('hat', '株主側の説明は、この会社の開示からは、分からない。', { wait: false });
     E.pop(b2, .4, .2, .7); E.sfx('pop', { delay: .2 });
+    E.at(L.end);
+    L = E.say('hat', '片方の説明だけで、どちらが正しいかは、決めない。', { wait: false });
     E.at(L.end + .4);
   });
 
@@ -364,8 +366,8 @@ E.chapter('k02');
     E.say('hat', '9月10日、15時20分。会社は、SNS上の提案について、説明を出した。');
     E.say('hat', '会社の説明では、一定の提案は、あった。');
     const L0 = E.say('hat', 'でも、その提案が本当かどうかを、取締役会で確かめた事実も、決めた事実も、ない、とな。', { wait: false });
-    const chips2 = ['真偽の確認', '決定'].map((t, i) => E.div(g, { left: 360 + i * 640, top: 600, width: 560, height: 110, whiteSpace: 'nowrap', borderRadius: 20, background: 'rgba(255,255,255,.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '18px', font: '900 40px/1 Zen', color: '#262236', boxShadow: '0 12px 24px rgba(0,0,0,.35)' },
-      `<span>${t}</span><span style="color:#e0353f">していない</span>`).ini({ o: 0 }));
+    const chips2 = [['真偽の確認も', 'した事実はない'], ['決定も', 'した事実はない']].map(([t, u], i) => E.div(g, { left: 360 + i * 640, top: 600, width: 560, height: 110, whiteSpace: 'nowrap', borderRadius: 20, background: 'rgba(255,255,255,.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', font: '900 36px/1 Zen', color: '#262236', boxShadow: '0 12px 24px rgba(0,0,0,.35)' },
+      `<span>${t}</span><span style="color:#e0353f">${u}</span>`).ini({ o: 0 }));
     chips2.forEach((c, i) => { E.tw(c, .4, { o: [0, 1], y: [20, 0] }, 'back', L0.dur * (.5 + i * .22)); E.sfx('pop', { delay: L0.dur * (.5 + i * .22), gain: .5 }); });
     E.at(L0.end + .2);
     [i07, ...chips2].forEach(n => E.hide(n, .35));
@@ -649,7 +651,7 @@ E.chapter('k02');
     const fly = (c, dx, dy, d) => { E.show(c, .25, d); E.tw(c, .55, { x: [0, dx], y: [0, dy] }, 'inOut', d + .3); E.sfx('whoosh', { delay: d + .3, gain: .4 }); };
     fly(c1, -310, 250, .1);
     E.at(L2.end);
-    L2 = E.narr('招集の許可は、裁判所が決めたこと。中止の合意は、会社が開示したこと。', { wait: false });
+    L2 = E.narr('招集の許可は、裁判所が決めたこと。中止は、10月1日に合意した、と会社が開示した。', { wait: false });
     fly(c2, 300, 230, .1);
     fly(c3, 300, 320, L2.dur * .5);
     E.at(L2.end);
